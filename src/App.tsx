@@ -10,6 +10,7 @@ function App() {
 
   return (
     <>
+        <h1>{JSON.stringify(auth?.user)}</h1>
       <button onClick={() => test()}>HOLAA</button>
     </>
   );

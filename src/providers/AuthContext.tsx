@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         username,
         password,
       });
-      localStorage.setItem("access_token", data);
+      localStorage.setItem("access_token", data.access_token);
       setLoggedIn(true);
     } catch (e) {
       setLoggedIn(false);
