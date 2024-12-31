@@ -1,0 +1,135 @@
+import { FormEvent, useState } from "react";
+import { useAuth } from "../providers/AuthContext.tsx";
+import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button.tsx";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card.tsx";
+import { useToast } from "@/hooks/use-toast";
+
+const RegisterRoute = () => {
+  const [name, setName] = useState<string>("");
+  const [lastname, setLastname] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+
+  const { toast } = useToast();
+  const auth = useAuth();
+
+  const onSubmit = async (e: FormEvent): Promise<void> => {
+    e.preventDefault();
+    try {
+      if (password !== confirmPassword) {
+        throw new Error("Las contraseñas no coinciden");
+      }
+      await auth?.register(email, password, confirmPassword, name, lastname);
+      toast({
+        title: "Registro exitoso",
+        description: "Por favor revisa tu correo para confirmar tu cuenta",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Registro fallido",
+        description: errorMessage,
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center">
+      <Card className="p-4 min-w-96 space-y-4">
+        <h1 className="text-2xl text-center">Registro de usuario</h1>
+        <h4 className="text-xs text-center">
+          Crea una cuenta para acceder al sistema de ajuste de matricula
+        </h4>
+        <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal" htmlFor="email">
+                Nombre
+              </Label>
+              <Input
+                required
+                id="name"
+                autoComplete="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="font-normal" htmlFor="email">
+                Apellido
+              </Label>
+              <Input
+                required
+                id="lastname"
+                autoComplete="lastname"
+                type="text"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="font-normal" htmlFor="email">
+              Correo electrónico
+            </Label>
+            <Input
+              required
+              id="email"
+              autoComplete="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="font-normal" htmlFor="password">
+              Contraseña
+            </Label>
+            <Input
+              required
+              id="password"
+              autoComplete="new-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="font-normal" htmlFor="confirmPassword">
+              Confirmar contraseña
+            </Label>
+            <Input
+              required
+              id="confirmPassword"
+              autoComplete="new-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit">Registrarse</Button>
+        </form>
+        <Link
+          to="/login"
+          className={buttonVariants({ variant: "link" }) + " text-xs"}
+        >
+          ¿Ya tienes una cuenta? Ingresa aquí
+        </Link>
+      </Card>
+    </div>
+  );
+};
+
+export default RegisterRoute;
