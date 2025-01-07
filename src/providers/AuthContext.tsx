@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { useAxios } from "./AxiosContext.tsx";
 import { AxiosInstance } from "axios";
+import UserType from "../types/userTypes.ts";
 
 const AuthContext = createContext<{
   loggedIn: boolean;
-  user: unknown;
+  user: UserType | null;
   register: (
     email: string,
     password: string,
@@ -19,7 +20,7 @@ const AuthContext = createContext<{
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState<unknown | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const axios: AxiosInstance = useAxios();
 
   const register = async (

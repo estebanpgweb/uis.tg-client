@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
 
 const RegisterRoute = () => {
   const [name, setName] = useState<string>("");
@@ -14,6 +15,9 @@ const RegisterRoute = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   const { toast } = useToast();
   const auth = useAuth();
@@ -97,29 +101,52 @@ const RegisterRoute = () => {
             <Label className="font-normal" htmlFor="password">
               Contraseña
             </Label>
-            <Input
-              required
-              id="password"
-              autoComplete="new-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                required
+                id="password"
+                autoComplete="new-password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <Label className="font-normal" htmlFor="confirmPassword">
               Confirmar contraseña
             </Label>
-            <Input
-              required
-              id="confirmPassword"
-              autoComplete="new-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                required
+                id="confirmPassword"
+                autoComplete="new-password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
-          <Button type="submit">Registrarse</Button>
+          <Button type="submit">
+            <UserPlus className="mr-2" size={20} />
+            Registrarse
+          </Button>
         </form>
         <Link
           to="/login"

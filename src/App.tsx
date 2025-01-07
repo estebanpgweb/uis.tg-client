@@ -4,14 +4,14 @@ import { useAuth } from "./providers/AuthContext";
 function App() {
   const auth = useAuth();
 
-  const test = async () => {
-    console.log("HOLAA");
+  const logout = async () => {
+    await auth?.logout();
   };
 
   return (
     <>
-        <h1>{JSON.stringify(auth?.user)}</h1>
-      <button onClick={() => test()}>HOLAA</button>
+      <h1>{JSON.stringify(auth?.user)}</h1>
+      <button onClick={() => logout()}>logout</button>
     </>
   );
 }

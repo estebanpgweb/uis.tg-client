@@ -1,6 +1,8 @@
 import { useAuth } from "../providers/AuthContext.tsx";
 import { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
+import KindGuard from "./KindGuard.tsx";
+import Template from "@/Template.tsx";
 
 const AuthGuard = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
@@ -17,7 +19,11 @@ const AuthGuard = ({ children }: PropsWithChildren) => {
     auth?.me();
   }
 
-  return children;
+  return (
+    <KindGuard>
+      <Template>{children}</Template>
+    </KindGuard>
+  );
 };
 
 export default AuthGuard;

@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button.tsx";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 const LoginRoute = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const { toast } = useToast();
@@ -34,6 +36,10 @@ const LoginRoute = () => {
         description: errorMessage,
       });
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -61,16 +67,29 @@ const LoginRoute = () => {
             <Label className="font-normal" htmlFor="password">
               Contraseña
             </Label>
-            <Input
-              required
-              id="password"
-              autoComplete="current-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                required
+                id="password"
+                autoComplete="current-password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
-          <Button type="submit">Iniciar sesión</Button>
+          <Button type="submit">
+            <LogIn className="mr-2" size={20} />
+            Iniciar sesión
+          </Button>
         </form>
         <Button variant="link" className="text-xs">
           ¿Olvidó su Contraseña?
