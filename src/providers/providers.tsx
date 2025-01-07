@@ -10,7 +10,9 @@ import App from "../App.tsx";
 //student
 import HorarioRoute from "../routes/horario.tsx";
 //root
-import SolicitudRoute from "../routes/Solicitud.tsx";
+import SolicitudRoute from "../routes/solicitudes.tsx";
+import UsuariosRoute from "../routes/usuarios.tsx";
+import EstadisticasRoute from "../routes/estadisticas.tsx";
 //login
 import LoginRoute from "../routes/login.tsx";
 import RegisterRoute from "../routes/register.tsx";
@@ -37,6 +39,22 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <SolicitudRoute />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/usuarios",
+    element: (
+      <AuthGuard>
+        <UsuariosRoute />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/estadisticas",
+    element: (
+      <AuthGuard>
+        <EstadisticasRoute />
       </AuthGuard>
     ),
   },
