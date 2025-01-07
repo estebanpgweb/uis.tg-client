@@ -10,7 +10,7 @@ import App from "../App.tsx";
 //student
 import HorarioRoute from "../routes/horario.tsx";
 //root
-import SolicitudRoute from "../routes/solicitud.tsx";
+import SolicitudRoute from "../routes/Solicitud.tsx";
 //login
 import LoginRoute from "../routes/login.tsx";
 import RegisterRoute from "../routes/register.tsx";
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/solicitud",
+    path: "/solicitudes",
     element: (
       <AuthGuard>
         <SolicitudRoute />

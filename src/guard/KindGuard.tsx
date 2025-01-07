@@ -12,8 +12,8 @@ const KindGuard = ({ children }: PropsWithChildren) => {
 
   // Definir rutas permitidas según el tipo de usuario
   const routesByKind = {
-    STUDENT: ["/horario", "/"],
-    ROOT: ["/solicitud"],
+    STUDENT: ["/horario","/solicitudes", "/"],
+    ROOT: ["/solicitudes", "/estadisticas", "/usuarios"],
   };
 
   const allowedRoutes = routesByKind[kind] || [];
