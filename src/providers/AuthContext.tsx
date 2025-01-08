@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useAxios } from "./AxiosContext.tsx";
 import { AxiosInstance } from "axios";
 import UserType from "../types/userTypes.ts";
 
-const AuthContext = createContext<{
+type AuthContextType = {
   loggedIn: boolean;
   user: UserType | null;
   register: (
@@ -15,8 +15,9 @@ const AuthContext = createContext<{
   ) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  me: () => Promise<void>;
-} | null>(null);
+};
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -30,60 +31,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     name: string,
     lastname: string
   ): Promise<void> => {
-    try {
-      await axios.post("/api/auth/register", {
-        email,
-        password,
-        confirm_password: confirmPassword,
-        name,
-        lastname,
-      });
-      console.log("Waiting for email confirmation");
-    } catch (e) {
-      setLoggedIn(false);
-      throw e;
-    }
+    await axios.post("/api/auth/register", {
+      email,
+      password,
+      confirm_password: confirmPassword,
+      name,
+      lastname,
+    });
   };
 
   const login = async (username: string, password: string): Promise<void> => {
-    try {
-      const { data } = await axios.post("/api/auth/login", {
-        username,
-        password,
-      });
-      localStorage.setItem("access_token", data.access_token);
-      setLoggedIn(true);
-    } catch (e) {
-      setLoggedIn(false);
-      throw e;
-    }
+    const { data } = await axios.post("/api/auth/login", {
+      username,
+      password,
+    });
+    localStorage.setItem("access_token", data.access_token);
+    await me(); // Obtener datos del usuario automáticamente después de iniciar sesión
+    setLoggedIn(true);
   };
 
-  const logout: () => void = (): void => {
+  const logout = () => {
     setLoggedIn(false);
     setUser(null);
     localStorage.removeItem("access_token");
   };
 
-  const me: () => Promise<void> = async (): Promise<void> => {
+  const me = async (): Promise<void> => {
     try {
       const { data } = await axios.get("/api/auth/user");
       setUser(data);
-      setLoggedIn(true);
     } catch {
       logout();
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token && !user) {
+      me(); // Actualizar datos si hay un token válido pero no hay usuario en memoria
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider
-      value={{ loggedIn, user, register, login, logout, me }}
-    >
+    <AuthContext.Provider value={{ loggedIn, user, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
+// Evitar problemas con Fast Refresh exportando la función directamente
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

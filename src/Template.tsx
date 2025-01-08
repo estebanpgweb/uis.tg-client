@@ -8,6 +8,7 @@ import { User } from "lucide-react";
 const Template = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
   const location = useLocation();
+  const kind = auth?.user?.kind || "";
 
   const LogOut = () => {
     auth?.logout();
@@ -19,8 +20,6 @@ const Template = ({ children }: PropsWithChildren) => {
     { path: "/usuarios", label: "Usuarios", kind: "ROOT" },
     { path: "/estadisticas", label: "Estadisticas", kind: "ROOT" },
   ];
-
-  const kind = auth?.user?.kind || "STUDENT";
 
   return (
     <div className="w-full h-full">
