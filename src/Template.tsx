@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthContext.tsx";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { User } from "lucide-react";
 const Template = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
   const location = useLocation();
-  const [kind, setKind] = useState<string>(auth?.user?.kind || "");
+  const kind = auth?.user?.kind || "";
 
   const LogOut = () => {
     auth?.logout();
@@ -20,17 +20,6 @@ const Template = ({ children }: PropsWithChildren) => {
     { path: "/usuarios", label: "Usuarios", kind: "ROOT" },
     { path: "/estadisticas", label: "Estadisticas", kind: "ROOT" },
   ];
-
-  useEffect(() => {
-    const getKind = async () => {
-      await auth?.me();
-      const userKind = (await auth?.user?.kind) || "";
-      setKind(userKind);
-    };
-
-    getKind();
-    console.log("kind", kind);
-  }, [auth?.user?.kind, kind]);
 
   return (
     <div className="w-full h-full">
