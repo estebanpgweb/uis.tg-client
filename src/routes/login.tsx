@@ -22,7 +22,7 @@ const LoginRoute = () => {
     e.preventDefault();
     try {
       await auth?.login(username, password);
-      navigate("/");
+      navigate("/solicitudes");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
