@@ -23,7 +23,7 @@ import { Eye } from "lucide-react";
 import {
   Solicitud,
   getStatusLabel,
-  getBadgeVariant,
+  getBadgeColor,
 } from "../types/solicitudesTypes";
 
 const SolicitudRoute = () => {
@@ -69,7 +69,7 @@ const SolicitudRoute = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto">
       <h1 className="text-2xl font-bold mb-4">
         Solicitudes de Ajuste de Matrícula
       </h1>
@@ -89,7 +89,9 @@ const SolicitudRoute = () => {
                 <TableCell>{solicitud._id}</TableCell>
                 <TableCell>{solicitud.studentId}</TableCell>
                 <TableCell>
-                  <Badge variant={getBadgeVariant(solicitud.status)}>
+                  <Badge
+                    className={getBadgeColor(solicitud.status) + " text-white"}
+                  >
                     {getStatusLabel(solicitud.status)}
                   </Badge>
                 </TableCell>

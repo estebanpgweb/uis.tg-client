@@ -29,17 +29,12 @@ export const getStatusLabel = (status: string): string => {
 };
 
 // Función para obtener el color del estado
-export const getBadgeVariant = (
-  status: string
-): "default" | "secondary" | "destructive" | "outline" | undefined => {
-  const statusVariants: Record<
-    string,
-    "default" | "secondary" | "destructive" | "outline"
-  > = {
-    PENDING: "default",
-    REVIEWING: "secondary",
-    FAILED: "destructive",
-    COMPLETED: "outline",
+export const getBadgeColor = (status: string): string => {
+  const statusVariants: Record<string, string> = {
+    PENDING: "bg-yellow-500",
+    PARTIAL_REJECTED: "bg-blue-500",
+    REJECTED: "bg-red-500",
+    APPROVED: "bg-green-500",
   };
   return statusVariants[status];
 };

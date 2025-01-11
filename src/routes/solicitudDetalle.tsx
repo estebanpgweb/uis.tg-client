@@ -32,23 +32,23 @@ const SolicitudDetalleRoute = () => {
   }, [axios, id]);
 
   if (isLoading) {
-    return <div className="text-center p-4">Cargando solicitud...</div>;
+    return <div className="text-center">Cargando solicitud...</div>;
   }
 
   if (error) {
-    return <div className="text-center p-4 text-red-500">{error}</div>;
+    return <div className="text-center text-red-500">{error}</div>;
   }
 
   if (!solicitud) {
     return (
-      <div className="text-center p-4">
+      <div className="text-center">
         No se encontraron datos para la solicitud especificada.
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto">
       <div className="flex items-center justify-between">
         <Link
           to="/solicitudes"
@@ -58,7 +58,7 @@ const SolicitudDetalleRoute = () => {
         </Link>
         <h1 className="text-2xl font-bold mb-4">Detalles de la Solicitud</h1>
       </div>
-      <div className="p-4 rounded shadow">
+      <div>
         <p>
           <strong>ID de la solicitud:</strong> {solicitud._id}
         </p>
