@@ -22,8 +22,8 @@ const Template = ({ children }: PropsWithChildren) => {
   ];
 
   return (
-    <div className="w-full h-full">
-      <nav className="w-full flex justify-between items-center p-4">
+    <div className="flex flex-col h-screen">
+      <nav className="w-full flex justify-between items-center p-4 fixed top-0 left-0 right-0 z-10 bg-white shadow-md">
         <img src={UIS} alt="logo uis" className="w-1/12" />
         <ul className="flex gap-x-8 items-center">
           {navLinks
@@ -33,8 +33,7 @@ const Template = ({ children }: PropsWithChildren) => {
                 <Link
                   className={`${
                     location.pathname === link.path && "!font-extrabold"
-                  } ${buttonVariants({ variant: "link" })} !text-lg
-                    `}
+                  } ${buttonVariants({ variant: "link" })} !text-lg`}
                   to={link.path}
                 >
                   {link.label}
@@ -50,7 +49,7 @@ const Template = ({ children }: PropsWithChildren) => {
           </li>
         </ul>
       </nav>
-      <main className="h-full py-4 px-8 bg-template">{children}</main>
+      <main className="flex-1 py-4 px-8 bg-template mt-16">{children}</main>
     </div>
   );
 };

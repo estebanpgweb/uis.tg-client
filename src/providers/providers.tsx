@@ -11,6 +11,7 @@ import App from "../App.tsx";
 import HorarioRoute from "../routes/horario.tsx";
 //root
 import SolicitudRoute from "../routes/solicitudes.tsx";
+import SolicitudDetalleRoute from "@/routes/solicitudDetalle.tsx";
 import UsuariosRoute from "../routes/usuarios.tsx";
 import EstadisticasRoute from "../routes/estadisticas.tsx";
 //login
@@ -31,6 +32,14 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <HorarioRoute />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/solicitudes/:id",
+    element: (
+      <AuthGuard>
+        <SolicitudDetalleRoute />
       </AuthGuard>
     ),
   },
