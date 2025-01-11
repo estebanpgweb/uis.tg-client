@@ -12,7 +12,7 @@ export interface Solicitud {
       sku: string;
     };
   };
-  status: string;
+  status: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
   createdAt: string;
   updatedAt: string;
 }
