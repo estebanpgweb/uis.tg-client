@@ -1,7 +1,7 @@
 // Tipos de datos
 export interface Solicitud {
-  _id: string;
-  studentId: string;
+  _id?: string;
+  studentId?: string;
   requests: {
     from?: {
       group: string;
@@ -11,11 +11,14 @@ export interface Solicitud {
       group: string;
       sku: string;
     };
-  };
-  status: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
-  createdAt: string;
-  updatedAt: string;
+    status?: RequestStatus;
+  }[];
+  status?: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 // Función para obtener el texto del estado
 export const getStatusLabel = (status: string): string => {
