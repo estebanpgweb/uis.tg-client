@@ -1,14 +1,12 @@
-import * as React from "react";
+import { useState } from "react";
 import {
   ColumnDef,
-  SortingState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
   useReactTable,
-  FilterFn,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -27,73 +25,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
-import { X, Search } from "lucide-react";
+import { X, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
+
+type SortingState = { field: string | null; sort: "asc" | "desc" };
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  rows: number;
+  page: number;
+  setPage: (page: number) => void;
+  filter: string;
+  setFilter: (filter: string) => void;
+  selectedStatuses: string[];
+  setSelectedStatuses: (statuses: string[]) => void;
+  sorting: SortingState;
+  setSorting: (sorting: SortingState) => void;
 }
-
-// Mejoramos el tipado del FilterFn
-const globalFilterFn: FilterFn<any> = (
-  row,
-  _,
-  filterValue: string | string[]
-) => {
-  // Si el valor del filtro es un string, hacemos la búsqueda global
-  if (typeof filterValue === "string") {
-    const searchValue = filterValue.toLowerCase();
-    return Object.values(row.original)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchValue);
-  }
-  return true;
-};
 
 export function DataTable<TData extends { status?: string }, TValue>({
   columns,
   data,
+  rows,
+  page,
+  setPage,
+  filter,
+  setFilter,
+  selectedStatuses,
+  setSelectedStatuses,
+  sorting,
+  setSorting,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState("");
-  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([]);
+  const [filterInput, setFilterInput] = useState<string>(filter || "");
   const statusOptions = ["REJECTED", "PENDING", "PARTIAL_REJECTED", "APPROVED"];
 
-  // Filtrado combinado
-  const filteredData = React.useMemo(() => {
-    return data.filter((item) => {
-      // Aplicar filtro global
-      const matchesSearch = Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(globalFilter.toLowerCase());
-
-      // Aplicar filtro de estados
-      const matchesStatus =
-        selectedStatuses.length === 0 ||
-        (item.status && selectedStatuses.includes(item.status));
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [data, globalFilter, selectedStatuses]);
-
   const table = useReactTable({
-    data: filteredData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
+    manualSorting: true,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      globalFilter,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn,
   });
 
   const handleStatusChange = (status: string) => {
@@ -108,19 +91,28 @@ export function DataTable<TData extends { status?: string }, TValue>({
     );
   };
 
+  const handleSearch = () => {
+    setFilter(filterInput);
+    setPage(0); // Reset to first page when searching
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between py-6">
-        <div className="relative">
+        <div className="relative min-w-[250px]">
           <Input
             id="buscar"
             placeholder="Buscar"
-            value={globalFilter}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            value={filterInput}
+            onChange={(e) => setFilterInput(e.target.value)}
+            onClick={() => {
+              handleSearch();
+            }}
           />
           <Search
             size={20}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            onClick={handleSearch}
+            className="absolute right-3 top-1/2 -translate-y-1/2 hover:cursor-pointer"
           />
         </div>
         <Select onValueChange={handleStatusChange} name="estados">
@@ -129,15 +121,19 @@ export function DataTable<TData extends { status?: string }, TValue>({
           </SelectTrigger>
           <SelectContent>
             {statusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
+              <SelectItem
+                key={status}
+                value={status}
+                disabled={selectedStatuses.includes(status)}
+              >
                 {getStatusLabel(status)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <p className="text-gray-500">Mostrando 10 de {rows} solicitudes</p>
       </div>
 
-      {/* Mostrar estados seleccionados */}
       {selectedStatuses.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {selectedStatuses.map((status) => (
@@ -151,16 +147,17 @@ export function DataTable<TData extends { status?: string }, TValue>({
               </button>
             </Badge>
           ))}
-          {selectedStatuses.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedStatuses([])}
-              className="h-7"
-            >
-              Limpiar filtros
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedStatuses([]);
+              setPage(0); // Reset to first page when clearing filters
+            }}
+            className="h-7"
+          >
+            Limpiar filtros
+          </Button>
         </div>
       )}
 
@@ -170,12 +167,36 @@ export function DataTable<TData extends { status?: string }, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <Button
+                      variant={
+                        header.id === sorting.field ? "secondary" : "ghost"
+                      }
+                      className={
+                        header.id === sorting.field ? "font-semibold" : ""
+                      }
+                      onClick={() => {
+                        if (header.id === "accion") return;
+                        setSorting({
+                          field: header.id,
+                          sort: sorting.sort === "asc" ? "desc" : "asc",
+                        });
+                      }}
+                    >
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
+                      {header.id === "accion" ? null : header.id !==
+                        sorting.field ? (
+                        <ArrowUpDown size={20} />
+                      ) : sorting.sort === "asc" ? (
+                        <ArrowUp size={20} />
+                      ) : (
+                        <ArrowDown size={20} />
+                      )}
+                    </Button>
+                  )}
                 </TableHead>
               ))}
             </TableRow>
@@ -206,22 +227,36 @@ export function DataTable<TData extends { status?: string }, TValue>({
       </Table>
 
       <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        {/* Paginación usando shadcdn */}
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => setPage(page - 1)}
+                className={page === 0 ? "hidden" : ""}
+              />
+            </PaginationItem>
+            {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  href="#"
+                  onClick={() => setPage(index)}
+                  isActive={index === page}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() => setPage(page + 1)}
+                className={page === Math.ceil(rows / 10) - 1 ? "hidden" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

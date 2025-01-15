@@ -1,53 +1,24 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Solicitud, getBadgeColor, getStatusLabel } from "./solicitudesTypes";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, ArrowUpDown } from "lucide-react";
+import { Eye } from "lucide-react";
+import SolicitudTiempoEspera from "@/utils/tiempoEspera";
 
 // Columnas de la tabla de solicitudes
 export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
   {
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          N° Solicitud
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
     accessorKey: "_id",
+    header: "ID",
   },
   {
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Código Estudiante
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Código Estudiante",
     accessorKey: "student.identification",
+    id: "student.identification",
   },
   {
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Estado
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Estado",
     accessorKey: "status",
     cell: ({ row }) => {
       const status = row.original.status;
@@ -57,6 +28,12 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
         </Badge>
       );
     },
+  },
+  {
+    header: "Tiempo Total",
+    accessorKey: "createdAt",
+    cell: ({ row }) =>
+      SolicitudTiempoEspera({ createdAt: row.original.createdAt ?? "" }),
   },
   {
     header: "Acciones",
