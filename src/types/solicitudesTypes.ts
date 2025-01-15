@@ -1,17 +1,25 @@
 // Tipos de datos
 export interface Solicitud {
   _id?: string;
-  studentId?: string;
+  student?: {
+    name: string;
+    lastname: string;
+    username: string;
+    identification: string;
+  };
   requests: {
     from?: {
       group: string;
       sku: string;
+      name: string;
     };
     to?: {
       group: string;
       sku: string;
+      name: string;
     };
     status?: RequestStatus;
+    reason?: string | null;
   }[];
   status?: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
   createdAt?: string;

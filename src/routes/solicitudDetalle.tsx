@@ -4,12 +4,28 @@ import { useParams } from "react-router-dom";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { Solicitud, RequestStatus } from "../types/solicitudesTypes";
-import { ArrowLeft, User, ClipboardList, Send, Check, X } from "lucide-react";
+import {
+  ArrowLeft,
+  User,
+  ClipboardList,
+  Send,
+  Check,
+  X,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +44,7 @@ const SolicitudDetalleRoute = () => {
   const axios: AxiosInstance = useAxios();
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [observaciones, setObservaciones] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,6 +79,18 @@ const SolicitudDetalleRoute = () => {
         index + 1
       } ha sido actualizada correctamente`,
     });
+  };
+
+  const handlePeticionReason = async (index: number, reason: string) => {
+    const newSolicitud: Solicitud = {
+      ...solicitud,
+      requests:
+        solicitud?.requests?.map((request, i) =>
+          i === index ? { ...request, reason } : request
+        ) || [],
+    };
+
+    setSolicitud(newSolicitud);
   };
 
   const validateRequests = () => {
@@ -123,6 +152,7 @@ const SolicitudDetalleRoute = () => {
 
   return (
     <div className="container mx-auto">
+      {/* Titulo de la vista */}
       <div className="flex items-center justify-between mb-4">
         <Link
           to="/solicitudes"
@@ -138,6 +168,7 @@ const SolicitudDetalleRoute = () => {
         ID de la solicitud: {solicitud._id}
       </Label>
       <div className="flex mx-8 my-4 gap-x-8 justify-between">
+        {/* Información del estudiante */}
         <Card className="flex flex-col gap-6 flex-1 px-6 py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <User size={28} />
@@ -145,11 +176,15 @@ const SolicitudDetalleRoute = () => {
           </div>
           <div className="flex flex-col gap-2 mx-4">
             <Label className="text-gray-500">Código del estudiante</Label>
-            <Label className="font-medium text-lg">{solicitud._id}</Label>
+            <Label className="font-medium text-lg">
+              {solicitud.student?.identification}
+            </Label>
           </div>
           <div className="flex flex-col gap-2 mx-4">
             <Label className="text-gray-500">Nombre del estudiante</Label>
-            <Label className="font-medium text-lg">{solicitud._id}</Label>
+            <Label className="font-medium text-lg">
+              {solicitud.student?.name + " " + solicitud.student?.lastname}
+            </Label>
           </div>
           <div className="flex flex-col gap-2 mx-4">
             <Label className="text-gray-500">
@@ -161,31 +196,75 @@ const SolicitudDetalleRoute = () => {
             </Label>
           </div>
         </Card>
+        {/* Lista de peticiones */}
         <Card className="flex flex-col gap-6 flex-1 px-6 py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <ClipboardList size={28} />
             <h2 className="text-xl font-medium">Lista de peticiones</h2>
           </div>
           {Array.isArray(solicitud.requests) &&
-            solicitud.requests.map((_, index) => (
+            solicitud.requests.map((petición, index) => (
               <div className="flex items-center justify-between" key={index}>
                 <div className="flex flex-col gap-1 mx-4">
                   <Label className="text-lg">Petición #{index + 1}</Label>
                   <Label className="text-gray-500">
                     {peticionMessage(index)}
                   </Label>
+                  <div hidden={petición.status !== "REJECTED"}>
+                    <Select
+                      value={petición.reason || ""}
+                      onValueChange={(value) =>
+                        handlePeticionReason(index, value)
+                      }
+                      name="motivo"
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un motivo de rechazo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="interferencia">
+                          Interferencia Horaria
+                        </SelectItem>
+                        <SelectItem value="cursada">
+                          Asignatura Cursada
+                        </SelectItem>
+                        <SelectItem value="requisito">
+                          No cumple requisitos
+                        </SelectItem>
+                        <SelectItem value="capacidad">
+                          Capacidad de grupo
+                        </SelectItem>
+                        <SelectItem value="semestre">
+                          Semestre superior
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="flex gap-x-2">
                   <Button
                     onClick={() => handlePeticion(index, "APPROVED")}
-                    className="bg-green-500 text-white"
+                    disabled={solicitud?.status !== "PENDING"}
+                    className={`${
+                      petición.status !== "REJECTED" &&
+                      "bg-green-500 text-white"
+                    }`}
+                    variant={`${
+                      petición.status !== "REJECTED" ? "default" : "outline"
+                    }`}
                     size={"sm"}
                   >
                     <Check />
                   </Button>
                   <Button
                     onClick={() => handlePeticion(index, "REJECTED")}
-                    className="bg-red-500 text-white"
+                    disabled={solicitud?.status !== "PENDING"}
+                    className={` ${
+                      petición.status !== "APPROVED" && "bg-red-500 text-white"
+                    } `}
+                    variant={`${
+                      petición.status !== "APPROVED" ? "default" : "outline"
+                    }`}
                     size={"sm"}
                   >
                     <X />
@@ -195,6 +274,19 @@ const SolicitudDetalleRoute = () => {
             ))}
         </Card>
       </div>
+      {/* Observaciones adicionales */}
+      <Card className="flex flex-col gap-6 flex-1 px-6 py-4 mx-8 my-4">
+        <div className="flex items-center gap-x-4 mb-2">
+          <FileText />
+          <h2 className="text-xl font-medium">Observaciones adicionales</h2>
+        </div>
+        <Textarea
+          value={observaciones}
+          onChange={(e) => setObservaciones(e.target.value)}
+          placeholder="Ingrese observaciones adicionales para la solicitud del estudiante."
+        />
+      </Card>
+      {/* Botones de acción */}
       <div className="flex justify-around mt-8">
         <AlertDialog>
           <AlertDialogTrigger asChild>
