@@ -53,15 +53,25 @@ const SolicitudDetalleRoute = () => {
         setIsLoading(true);
         const { data } = await axios.get(`/api/appeal/${id}`);
         setSolicitud(data);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Solicitud fallida",
+          description: errorMessage,
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchSolicitud();
-  }, [axios, id]);
+  }, [axios, id, toast]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {
@@ -73,12 +83,6 @@ const SolicitudDetalleRoute = () => {
     };
 
     setSolicitud(newSolicitud);
-    toast({
-      title: "Peticion actualizada",
-      description: `La petición #${
-        index + 1
-      } ha sido actualizada correctamente`,
-    });
   };
 
   const handlePeticionReason = async (index: number, reason: string) => {
@@ -101,7 +105,6 @@ const SolicitudDetalleRoute = () => {
   };
 
   const handleDirector = async () => {
-    console.log("Enviar al director");
     toast({
       title: "Solicitud enviada",
       description: "La solicitud ha sido enviada al director de escuela",
@@ -114,7 +117,6 @@ const SolicitudDetalleRoute = () => {
   };
 
   const handleCompletada = async () => {
-    console.log("Marcar como completada");
     toast({
       title: "Solicitud completada",
       description: "La solicitud ha sido marcada como completada",

@@ -34,7 +34,7 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
         </Button>
       );
     },
-    accessorKey: "studentId",
+    accessorKey: "student.identification",
   },
   {
     header: ({ column }) => {
