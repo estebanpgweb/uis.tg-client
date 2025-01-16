@@ -228,35 +228,37 @@ export function DataTable<TData extends { status?: string }, TValue>({
 
       <div className="flex items-center justify-end space-x-2 py-4">
         {/* Paginación usando shadcdn */}
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={() => setPage(page - 1)}
-                className={page === 0 ? "hidden" : ""}
-              />
-            </PaginationItem>
-            {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
-              <PaginationItem key={index}>
-                <PaginationLink
+        {rows > 0 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
                   href="#"
-                  onClick={() => setPage(index)}
-                  isActive={index === page}
-                >
-                  {index + 1}
-                </PaginationLink>
+                  onClick={() => setPage(page - 1)}
+                  className={page === 0 ? "hidden" : ""}
+                />
               </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() => setPage(page + 1)}
-                className={page === Math.ceil(rows / 10) - 1 ? "hidden" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    href="#"
+                    onClick={() => setPage(index)}
+                    isActive={index === page}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() => setPage(page + 1)}
+                  className={page === Math.ceil(rows / 10) - 1 ? "hidden" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </div>
     </div>
   );

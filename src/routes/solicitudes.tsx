@@ -72,7 +72,11 @@ const SolicitudRoute = () => {
 
       const { data } =
         kind === "STUDENT"
-          ? await axios.get(`/api/student/appeal?${params}`)
+          ? await axios.get(
+              `/api/student/appeal?$filter=${JSON.stringify(
+                buildFilterQuery(filter, statuses)
+              )}`
+            )
           : await axios.get(`/api/appeal?${params}`);
       return data;
     } catch (error) {
