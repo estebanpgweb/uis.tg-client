@@ -111,15 +111,32 @@ const SolicitudDetalleRoute = () => {
   };
 
   const handleDirector = async () => {
-    toast({
-      title: "Solicitud enviada",
-      description: "La solicitud ha sido enviada al director de escuela",
-    });
-    // try {
-    //   await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
-    // } catch (err) {
-    //   console.error(err);
-    // }
+    const newStatus = solicitudStatus();
+    const newSolicitud: Solicitud = {
+      ...solicitud,
+      status: newStatus,
+      requests: solicitud?.requests || [],
+      observations: observaciones,
+    };
+    try {
+      await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
+      toast({
+        title: "Solicitud enviada",
+        description: "La solicitud ha sido enviada al director de escuela",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Solicitud fallida",
+        description: errorMessage,
+      });
+    }
   };
 
   const solicitudStatus = () => {
@@ -143,7 +160,7 @@ const SolicitudDetalleRoute = () => {
       requests: solicitud?.requests || [],
       observations: observaciones,
     };
-    console.log(newSolicitud);
+
     try {
       await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
       toast({
