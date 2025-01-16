@@ -261,6 +261,7 @@ const SolicitudDetalleRoute = () => {
                   </Label>
                   <div hidden={petición.status !== "REJECTED"}>
                     <Select
+                      disabled={solicitud?.status !== "PENDING"}
                       value={petición.reason || ""}
                       onValueChange={(value) =>
                         handlePeticionReason(index, value)
@@ -330,6 +331,7 @@ const SolicitudDetalleRoute = () => {
           <h2 className="text-xl font-medium">Observaciones adicionales</h2>
         </div>
         <Textarea
+          disabled={solicitud?.status !== "PENDING"}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Ingrese observaciones adicionales para la solicitud del estudiante."
