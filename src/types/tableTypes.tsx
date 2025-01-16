@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Solicitud, getBadgeColor, getStatusLabel } from "./solicitudesTypes";
-import { UserType } from "./userTypes";
+import { UserType, getUserColor } from "./userTypes";
 import { Link } from "react-router-dom";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +78,18 @@ export const UsuariosColumns: ColumnDef<UserType>[] = [
   {
     header: "Email",
     accessorKey: "username",
+  },
+  {
+    header: "Tipo",
+    accessorKey: "kind",
+    cell: ({ row }) => (
+      <Badge
+        variant="secondary"
+        className={getUserColor(row.original.kind) + " px-3 py-1"}
+      >
+        {row.original.kind}
+      </Badge>
+    ),
   },
   {
     header: "Acciones",

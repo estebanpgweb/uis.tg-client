@@ -1,14 +1,18 @@
-// Función para construir el filtro basado en MongoDB
-export const buildFilterQuery = (search: string, statuses?: string[]) => {
+export const buildFilterQuery = (
+  search: string,
+  params: string[],
+  statuses?: string[]
+) => {
   const conditions = [];
 
   // Añadir condiciones de búsqueda si existe un término
   if (search && search !== "") {
+    const searchConditions = params.map((param) => ({
+      [param]: { $regex: search, $options: "i" },
+    }));
+
     conditions.push({
-      $or: [
-        { _id: { $regex: search, $options: "i" } },
-        { "student.identification": { $regex: search, $options: "i" } },
-      ],
+      $or: searchConditions,
     });
   }
 

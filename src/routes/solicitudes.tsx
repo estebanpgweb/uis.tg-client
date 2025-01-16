@@ -22,11 +22,13 @@ const SolicitudRoute = () => {
     field: null,
     sort: "asc",
   });
-  const pageLimit = 10;
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const { toast } = useToast();
+
+  const pageLimit = 10;
+  const paramsFilter = ["student.identification"];
 
   const fetchSolicitudes = async (
     page: number,
@@ -38,7 +40,9 @@ const SolicitudRoute = () => {
       setIsLoading(true);
       const kind = auth?.user?.kind || "STUDENT";
       const params = new URLSearchParams({
-        filter: JSON.stringify(buildFilterQuery(filter, statuses)),
+        filter: JSON.stringify(
+          buildFilterQuery(filter, paramsFilter, statuses)
+        ),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
@@ -49,7 +53,7 @@ const SolicitudRoute = () => {
         kind === "STUDENT"
           ? await axios.get(
               `/api/student/appeal?$filter=${JSON.stringify(
-                buildFilterQuery(filter, statuses)
+                buildFilterQuery(filter, paramsFilter, statuses)
               )}`
             )
           : await axios.get(`/api/appeal?${params}`);
@@ -104,7 +108,11 @@ const SolicitudRoute = () => {
   useEffect(() => {
     const getSolicitudesCount = async () => {
       try {
-        const filterQuery = buildFilterQuery(filter, selectedStatuses);
+        const filterQuery = buildFilterQuery(
+          filter,
+          paramsFilter,
+          selectedStatuses
+        );
         const { data } = await axios.get(`/api/appeal/count`, {
           params: { filter: JSON.stringify(filterQuery) },
         });

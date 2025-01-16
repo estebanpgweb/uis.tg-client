@@ -19,10 +19,12 @@ export default function UsuariosRoute() {
     field: null,
     sort: "asc",
   });
-  const pageLimit = 10;
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
   const { toast } = useToast();
+
+  const pageLimit = 10;
+  const paramsFilter = ["name", "lastname", "username"];
 
   const fetchUsuarios = async (
     page: number,
@@ -32,7 +34,7 @@ export default function UsuariosRoute() {
     try {
       setIsLoading(true);
       const params = new URLSearchParams({
-        filter: JSON.stringify(buildFilterQuery(filter)),
+        filter: JSON.stringify(buildFilterQuery(filter, paramsFilter)),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
@@ -86,7 +88,7 @@ export default function UsuariosRoute() {
   useEffect(() => {
     const getUsuariosCount = async () => {
       try {
-        const filterQuery = buildFilterQuery(filter);
+        const filterQuery = buildFilterQuery(filter, paramsFilter);
         const { data } = await axios.get(`/api/users/count`, {
           params: { filter: JSON.stringify(filterQuery) },
         });
