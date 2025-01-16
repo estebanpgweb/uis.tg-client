@@ -134,7 +134,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
           </Select>
         )}
         <p className="text-gray-500">
-          Mostrando {data.length} de {rows} solicitudes
+          Mostrando {data.length} de {rows} resultados
         </p>
       </div>
 

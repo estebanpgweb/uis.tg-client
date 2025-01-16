@@ -28,7 +28,11 @@ const SolicitudRoute = () => {
   const { toast } = useToast();
 
   const pageLimit = 10;
-  const paramsFilter = ["student.identification"];
+  const paramsFilter = [
+    "student.identification",
+    "student.name",
+    "student.lastname",
+  ];
 
   const fetchSolicitudes = async (
     page: number,
@@ -51,11 +55,7 @@ const SolicitudRoute = () => {
 
       const { data } =
         kind === "STUDENT"
-          ? await axios.get(
-              `/api/student/appeal?$filter=${JSON.stringify(
-                buildFilterQuery(filter, paramsFilter, statuses)
-              )}`
-            )
+          ? await axios.get(`/api/student/appeals?${params}`)
           : await axios.get(`/api/appeal?${params}`);
       return data;
     } catch (error) {
@@ -113,9 +113,16 @@ const SolicitudRoute = () => {
           paramsFilter,
           selectedStatuses
         );
-        const { data } = await axios.get(`/api/appeal/count`, {
-          params: { filter: JSON.stringify(filterQuery) },
-        });
+        const kind = auth?.user?.kind || "STUDENT";
+
+        const { data } =
+          kind === "STUDENT"
+            ? await axios.get(`/api/student/appeals/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+              })
+            : await axios.get(`/api/appeal/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+              });
         setTotalSolicitudes(data);
       } catch (error) {
         console.error("Error fetching solicitudes count", error);

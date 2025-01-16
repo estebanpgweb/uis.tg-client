@@ -44,20 +44,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import SolicitudTiempoEspera from "@/utils/tiempoEspera";
+import { useAuth } from "@/providers/AuthContext";
 
 const SolicitudDetalleRoute = () => {
   const { id } = useParams<{ id: string }>(); // Captura el id desde la URL
   const axios: AxiosInstance = useAxios();
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [completed, setCompleted] = useState<boolean>(false);
   const [observaciones, setObservaciones] = useState<string>("");
   const { toast } = useToast();
+  const auth = useAuth();
+  const kind = auth?.user?.kind || "STUDENT";
 
   useEffect(() => {
     const fetchSolicitud = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/appeal/${id}`);
+        const { data } =
+          kind === "STUDENT"
+            ? await axios.get(`/api/student/appeals/${id}`)
+            : await axios.get(`/api/appeal/${id}`);
         setSolicitud(data);
       } catch (error) {
         const errorMessage =
@@ -77,7 +84,7 @@ const SolicitudDetalleRoute = () => {
     };
 
     fetchSolicitud();
-  }, [axios, id, toast]);
+  }, [axios, id, toast, completed, kind]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {
@@ -116,7 +123,7 @@ const SolicitudDetalleRoute = () => {
       ...solicitud,
       status: newStatus,
       requests: solicitud?.requests || [],
-      observations: observaciones,
+      observation: observaciones,
     };
     try {
       await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
@@ -124,6 +131,7 @@ const SolicitudDetalleRoute = () => {
         title: "Solicitud enviada",
         description: "La solicitud ha sido enviada al director de escuela",
       });
+      setCompleted(true);
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -158,11 +166,12 @@ const SolicitudDetalleRoute = () => {
       ...solicitud,
       status: newStatus,
       requests: solicitud?.requests || [],
-      observations: observaciones,
+      observation: observaciones,
     };
 
     try {
-      await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
+      await axios.put(`/api/appeal/${solicitud?._id}`, newSolicitud);
+      setCompleted(true);
       toast({
         title: "Solicitud completada",
         description: "La solicitud ha sido marcada como completada",
@@ -278,7 +287,9 @@ const SolicitudDetalleRoute = () => {
                   </Label>
                   <div hidden={petición.status !== "REJECTED"}>
                     <Select
-                      disabled={solicitud?.status !== "PENDING"}
+                      disabled={
+                        solicitud?.status !== "PENDING" || kind === "STUDENT"
+                      }
                       value={petición.reason || ""}
                       onValueChange={(value) =>
                         handlePeticionReason(index, value)
@@ -311,7 +322,9 @@ const SolicitudDetalleRoute = () => {
                 <div className="flex gap-x-2">
                   <Button
                     onClick={() => handlePeticion(index, "APPROVED")}
-                    disabled={solicitud?.status !== "PENDING"}
+                    disabled={
+                      solicitud?.status !== "PENDING" || kind === "STUDENT"
+                    }
                     className={`${
                       petición.status !== "REJECTED" &&
                       "bg-green-500 text-white"
@@ -325,7 +338,9 @@ const SolicitudDetalleRoute = () => {
                   </Button>
                   <Button
                     onClick={() => handlePeticion(index, "REJECTED")}
-                    disabled={solicitud?.status !== "PENDING"}
+                    disabled={
+                      solicitud?.status !== "PENDING" || kind === "STUDENT"
+                    }
                     className={` ${
                       petición.status !== "APPROVED" && "bg-red-500 text-white"
                     } `}
@@ -348,14 +363,16 @@ const SolicitudDetalleRoute = () => {
           <h2 className="text-xl font-medium">Observaciones adicionales</h2>
         </div>
         <Textarea
-          disabled={solicitud?.status !== "PENDING"}
-          value={observaciones}
+          disabled={solicitud?.status !== "PENDING" || kind === "STUDENT"}
+          value={solicitud?.observation || observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Ingrese observaciones adicionales para la solicitud del estudiante."
         />
       </Card>
       {/* Botones de acción */}
-      <div className="flex justify-around mt-8">
+      <div
+        className={kind === "STUDENT" ? "hidden" : "flex justify-around mt-8"}
+      >
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button

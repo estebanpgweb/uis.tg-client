@@ -22,7 +22,7 @@ export interface Solicitud {
     reason?: string | null;
   }[];
   status?: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
-  observations?: string;
+  observation?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -33,8 +33,8 @@ export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 export const getStatusLabel = (status: string): string => {
   const statusLabels: Record<string, string> = {
     PENDING: "Pendiente",
-    PARTIAL_REJECTED: "En Revisión",
-    REJECTED: "Completamente Fallido",
+    PARTIAL_REJECTED: "Parcialmente Completada",
+    REJECTED: "Fallida",
     APPROVED: "Completada",
   };
   return statusLabels[status] || "Desconocido";

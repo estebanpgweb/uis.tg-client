@@ -212,9 +212,12 @@ export default function UsuariosRoute() {
   useEffect(() => {
     const getUsuariosCount = async () => {
       try {
-        const filterQuery = buildFilterQuery(filter, paramsFilter);
+        const dynamicFilter = buildFilterQuery(filter, paramsFilter);
+        const fixedFilter = { kind: { $ne: "ROOT" } }; // Retira los usuarios ROOT
+        const combinedFilter = { ...dynamicFilter, ...fixedFilter };
+
         const { data } = await axios.get(`/api/users/count`, {
-          params: { filter: JSON.stringify(filterQuery) },
+          params: { filter: JSON.stringify(combinedFilter) },
         });
         setTotalUsuarios(data);
       } catch (error) {
