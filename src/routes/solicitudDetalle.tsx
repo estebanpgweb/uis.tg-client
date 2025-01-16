@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
-import { Solicitud, RequestStatus } from "../types/solicitudesTypes";
+import {
+  Solicitud,
+  RequestStatus,
+  getBadgeColor,
+  getStatusLabel,
+} from "../types/solicitudesTypes";
 import {
   ArrowLeft,
   User,
@@ -19,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -116,16 +122,47 @@ const SolicitudDetalleRoute = () => {
     // }
   };
 
+  const solicitudStatus = () => {
+    const peticionesStatus = solicitud?.requests.map(
+      (request) => request.status
+    );
+    if (!peticionesStatus?.includes("APPROVED")) {
+      return "REJECTED";
+    } else if (peticionesStatus?.includes("REJECTED")) {
+      return "PARTIAL_REJECTED";
+    } else {
+      return "APPROVED";
+    }
+  };
+
   const handleCompletada = async () => {
-    toast({
-      title: "Solicitud completada",
-      description: "La solicitud ha sido marcada como completada",
-    });
-    // try {
-    //   await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
-    // } catch (err) {
-    //   console.error(err);
-    // }
+    const newStatus = solicitudStatus();
+    const newSolicitud: Solicitud = {
+      ...solicitud,
+      status: newStatus,
+      requests: solicitud?.requests || [],
+      observations: observaciones,
+    };
+    console.log(newSolicitud);
+    try {
+      await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
+      toast({
+        title: "Solicitud completada",
+        description: "La solicitud ha sido marcada como completada",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Solicitud fallida",
+        description: errorMessage,
+      });
+    }
   };
 
   const peticionMessage = (index: number) => {
@@ -166,9 +203,19 @@ const SolicitudDetalleRoute = () => {
           Detalles de Solicitud de Matricula
         </h1>
       </div>
-      <Label className="text-gray-500 mx-4">
-        ID de la solicitud: {solicitud._id}
-      </Label>
+      <div className="flex items-center justify-between mx-8">
+        <Label className="text-gray-500 mx-4">
+          ID de la solicitud: {solicitud._id}
+        </Label>
+        <Label className="text-gray-500 mx-4">
+          Estado de la solicitud:{" "}
+          <Badge
+            className={getBadgeColor(solicitud.status || "") + " text-white"}
+          >
+            {getStatusLabel(solicitud.status || "")}
+          </Badge>
+        </Label>
+      </div>
       <div className="flex mx-8 my-4 gap-x-8 justify-between">
         {/* Información del estudiante */}
         <Card className="flex flex-col gap-6 flex-1 px-6 py-4">

@@ -22,6 +22,7 @@ export interface Solicitud {
     reason?: string | null;
   }[];
   status?: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
+  observations?: string;
   createdAt?: string;
   updatedAt?: string;
 }

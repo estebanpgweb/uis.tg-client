@@ -74,7 +74,6 @@ const SolicitudRoute = () => {
         kind === "STUDENT"
           ? await axios.get(`/api/student/appeal?${params}`)
           : await axios.get(`/api/appeal?${params}`);
-      console.log(data);
       return data;
     } catch (error) {
       const errorMessage =

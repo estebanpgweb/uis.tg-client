@@ -23,8 +23,8 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     cell: ({ row }) => {
       const status = row.original.status;
       return (
-        <Badge className={getBadgeColor(status) + " text-white"}>
-          {getStatusLabel(status)}
+        <Badge className={getBadgeColor(status || "") + " text-white"}>
+          {getStatusLabel(status || "")}
         </Badge>
       );
     },
