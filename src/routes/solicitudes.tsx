@@ -6,8 +6,8 @@ import { SolicitudesColumns } from "../types/tableTypes";
 import { useAuth } from "@/providers/AuthContext";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
-
-type SortingState = { field: string | null; sort: "asc" | "desc" };
+import { SortingState } from "@/types/tableTypes";
+import { buildFilterQuery } from "@/utils/filterQuery";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -27,31 +27,6 @@ const SolicitudRoute = () => {
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const { toast } = useToast();
-
-  // Función para construir el filtro basado en MongoDB
-  const buildFilterQuery = (search: string, statuses: string[]) => {
-    const conditions = [];
-
-    // Añadir condiciones de búsqueda si existe un término
-    if (search && search !== "") {
-      conditions.push({
-        $or: [
-          { _id: { $regex: search, $options: "i" } },
-          { "student.identification": { $regex: search, $options: "i" } },
-        ],
-      });
-    }
-
-    // Añadir condiciones de estado si hay estados seleccionados
-    if (statuses.length > 0) {
-      conditions.push({
-        status: { $in: statuses },
-      });
-    }
-
-    // Combinar todas las condiciones con $and
-    return conditions.length > 0 ? { $and: conditions } : {};
-  };
 
   const fetchSolicitudes = async (
     page: number,
