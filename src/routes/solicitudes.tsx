@@ -6,8 +6,8 @@ import { SolicitudesColumns } from "../types/tableTypes";
 import { useAuth } from "@/providers/AuthContext";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
-
-type SortingState = { field: string | null; sort: "asc" | "desc" };
+import { SortingState } from "@/types/tableTypes";
+import { buildFilterQuery } from "@/utils/filterQuery";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -22,36 +22,17 @@ const SolicitudRoute = () => {
     field: null,
     sort: "asc",
   });
-  const pageLimit = 10;
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const { toast } = useToast();
 
-  // Función para construir el filtro basado en MongoDB
-  const buildFilterQuery = (search: string, statuses: string[]) => {
-    const conditions = [];
-
-    // Añadir condiciones de búsqueda si existe un término
-    if (search && search !== "") {
-      conditions.push({
-        $or: [
-          { _id: { $regex: search, $options: "i" } },
-          { "student.identification": { $regex: search, $options: "i" } },
-        ],
-      });
-    }
-
-    // Añadir condiciones de estado si hay estados seleccionados
-    if (statuses.length > 0) {
-      conditions.push({
-        status: { $in: statuses },
-      });
-    }
-
-    // Combinar todas las condiciones con $and
-    return conditions.length > 0 ? { $and: conditions } : {};
-  };
+  const pageLimit = 10;
+  const paramsFilter = [
+    "student.identification",
+    "student.name",
+    "student.lastname",
+  ];
 
   const fetchSolicitudes = async (
     page: number,
@@ -63,7 +44,9 @@ const SolicitudRoute = () => {
       setIsLoading(true);
       const kind = auth?.user?.kind || "STUDENT";
       const params = new URLSearchParams({
-        filter: JSON.stringify(buildFilterQuery(filter, statuses)),
+        filter: JSON.stringify(
+          buildFilterQuery(filter, paramsFilter, statuses)
+        ),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
@@ -72,11 +55,7 @@ const SolicitudRoute = () => {
 
       const { data } =
         kind === "STUDENT"
-          ? await axios.get(
-              `/api/student/appeal?$filter=${JSON.stringify(
-                buildFilterQuery(filter, statuses)
-              )}`
-            )
+          ? await axios.get(`/api/student/appeals?${params}`)
           : await axios.get(`/api/appeal?${params}`);
       return data;
     } catch (error) {
@@ -129,10 +108,21 @@ const SolicitudRoute = () => {
   useEffect(() => {
     const getSolicitudesCount = async () => {
       try {
-        const filterQuery = buildFilterQuery(filter, selectedStatuses);
-        const { data } = await axios.get(`/api/appeal/count`, {
-          params: { filter: JSON.stringify(filterQuery) },
-        });
+        const filterQuery = buildFilterQuery(
+          filter,
+          paramsFilter,
+          selectedStatuses
+        );
+        const kind = auth?.user?.kind || "STUDENT";
+
+        const { data } =
+          kind === "STUDENT"
+            ? await axios.get(`/api/student/appeals/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+              })
+            : await axios.get(`/api/appeal/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+              });
         setTotalSolicitudes(data);
       } catch (error) {
         console.error("Error fetching solicitudes count", error);

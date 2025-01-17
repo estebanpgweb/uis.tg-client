@@ -9,10 +9,10 @@ const SolicitudTiempoEspera = ({ createdAt }: { createdAt: string }) => {
     const horas = Math.floor(minutos / 60);
     const días = Math.floor(horas / 24);
 
-    if (días > 0) return `${días} día${días > 1 ? "s" : ""}`;
-    if (horas > 0) return `${horas} hora${horas > 1 ? "s" : ""}`;
-    if (minutos > 0) return `${minutos} minuto${minutos > 1 ? "s" : ""}`;
-    return `${segundos} segundo${segundos > 1 ? "s" : ""}`;
+    if (días > 0) return `${días}d ${horas % 24}h`;
+    if (horas > 0) return `${horas}h ${minutos % 60}m`;
+    if (minutos > 0) return `${minutos}m ${segundos % 60}s`;
+    return `${segundos}s`;
   };
 
   return calcularTiempoTranscurrido(createdAt);

@@ -36,8 +36,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
-
-type SortingState = { field: string | null; sort: "asc" | "desc" };
+import { SortingState } from "@/types/tableTypes";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,8 +46,8 @@ interface DataTableProps<TData, TValue> {
   setPage: (page: number) => void;
   filter: string;
   setFilter: (filter: string) => void;
-  selectedStatuses: string[];
-  setSelectedStatuses: (statuses: string[]) => void;
+  selectedStatuses?: string[];
+  setSelectedStatuses?: (statuses: string[]) => void;
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
 }
@@ -80,14 +79,14 @@ export function DataTable<TData extends { status?: string }, TValue>({
   });
 
   const handleStatusChange = (status: string) => {
-    if (!selectedStatuses.includes(status)) {
-      setSelectedStatuses([...selectedStatuses, status]);
+    if (selectedStatuses && !selectedStatuses.includes(status)) {
+      setSelectedStatuses?.([...selectedStatuses, status]);
     }
   };
 
   const removeStatus = (statusToRemove: string) => {
-    setSelectedStatuses(
-      selectedStatuses.filter((status) => status !== statusToRemove)
+    setSelectedStatuses?.(
+      selectedStatuses?.filter((status) => status !== statusToRemove) || []
     );
   };
 
@@ -115,26 +114,31 @@ export function DataTable<TData extends { status?: string }, TValue>({
             className="absolute right-3 top-1/2 -translate-y-1/2 hover:cursor-pointer"
           />
         </div>
-        <Select onValueChange={handleStatusChange} name="estados">
-          <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Seleccionar Estados" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((status) => (
-              <SelectItem
-                key={status}
-                value={status}
-                disabled={selectedStatuses.includes(status)}
-              >
-                {getStatusLabel(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-gray-500">Mostrando 10 de {rows} solicitudes</p>
+        {/* Filtro de estados */}
+        {selectedStatuses && (
+          <Select onValueChange={handleStatusChange} name="estados">
+            <SelectTrigger className="max-w-sm">
+              <SelectValue placeholder="Seleccionar Estados" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((status) => (
+                <SelectItem
+                  key={status}
+                  value={status}
+                  disabled={selectedStatuses.includes(status)}
+                >
+                  {getStatusLabel(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <p className="text-gray-500">
+          Mostrando {data.length} de {rows} resultados
+        </p>
       </div>
 
-      {selectedStatuses.length > 0 && (
+      {selectedStatuses && selectedStatuses.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {selectedStatuses.map((status) => (
             <Badge key={status} variant="secondary" className="px-3 py-1">
@@ -151,7 +155,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
             variant="ghost"
             size="sm"
             onClick={() => {
-              setSelectedStatuses([]);
+              setSelectedStatuses?.([]);
               setPage(0); // Reset to first page when clearing filters
             }}
             className="h-7"
