@@ -5,22 +5,26 @@ import { Navigate, useLocation } from "react-router-dom";
 const KindGuard = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
   const location = useLocation();
-  const kind = auth?.user?.kind || "STUDENT";
+  const kind: "STUDENT" | "ROOT" | "ADMIN" = auth?.user?.kind || "STUDENT";
 
   if (!auth?.loggedIn) return null;
 
   // Definir rutas permitidas según el tipo de usuario
   const routesByKind = {
     STUDENT: [
+      "/",
       "/horario",
       "/solicitudes",
-      "/",
       { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
     ],
     ROOT: [
       "/solicitudes",
       "/estadisticas",
       "/usuarios",
+      { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
+    ],
+    ADMIN: [
+      "/solicitudes",
       { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
     ],
   };
