@@ -1,4 +1,6 @@
 import "./App.css";
+import { useAxios } from "./providers/AxiosContext";
+import { AxiosInstance } from "axios";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./components/ui/button";
@@ -15,19 +17,41 @@ import {
 } from "lucide-react";
 
 function App() {
-  const [horario, setHorario] = useState(false);
+  const [horario, setHorario] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const axios: AxiosInstance = useAxios();
 
   useEffect(() => {
-    const loadHorario = () => {
-      setTimeout(() => {
-        setHorario(true);
-      }, 3000);
+    const fetchHorario = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await axios.get(`/api/schedule/count`);
+        setHorario(data);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Horario fallida",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadHorario();
-  }, []);
+    fetchHorario();
+  }, [axios, toast]);
+
+  if (isLoading) {
+    return <div className="text-center p-4">Cargando...</div>;
+  }
 
   return (
     <div className="container mx-auto">
@@ -35,7 +59,7 @@ function App() {
         Bienvenido al sistema de ajuste de matrícula
       </h1>
       {/* Alerta de horario */}
-      {!horario ? (
+      {!horario || horario === 0 ? (
         <Alert variant="destructive" className="my-4 mx-8">
           <AlertCircle />
           <AlertTitle>¡Horario no registrado!</AlertTitle>
@@ -93,7 +117,7 @@ function App() {
           <Button
             className={"w-fit mx-auto"}
             onClick={() =>
-              horario
+              horario && horario > 0
                 ? navigate("/solicitudes")
                 : toast({
                     variant: "destructive",

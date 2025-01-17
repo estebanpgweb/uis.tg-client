@@ -25,7 +25,7 @@ const Template = ({ children }: PropsWithChildren) => {
 
   return (
     <div className="flex flex-col h-screen">
-      <nav className="w-full h-1/12 flex justify-between items-center p-4 fixed top-0 left-0 right-0 z-10 bg-background shadow-md">
+      <nav className="w-full flex justify-between items-center p-4 bg-background shadow-md">
         <img src={UIS} alt="logo uis" className="w-1/12" />
         <ul className="flex gap-x-8 items-center">
           {navLinks
@@ -52,8 +52,8 @@ const Template = ({ children }: PropsWithChildren) => {
           </li>
         </ul>
       </nav>
-      <main className="flex-1 py-14 px-10 bg-template mt-16">
-        <Card className="px-12 py-6">{children}</Card>
+      <main className="flex-1 py-6 px-8 bg-template">
+        <Card className="px-6 py-4">{children}</Card>
       </main>
     </div>
   );
