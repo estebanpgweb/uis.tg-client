@@ -45,6 +45,7 @@ export default function UsuariosRoute() {
   const [formData, setFormData] = useState<UserType>({
     name: "",
     lastname: "",
+    identification: "",
     username: "",
     kind: "ADMIN", // Valor predeterminado, ajusta según tu estructura.
     permissions: [],
@@ -110,6 +111,7 @@ export default function UsuariosRoute() {
       setFormData({
         name: "",
         lastname: "",
+        identification: "",
         username: "",
         kind: "ADMIN",
         permissions: [],
@@ -289,6 +291,22 @@ export default function UsuariosRoute() {
                   onChange={handleInputChange}
                 />
               </div>
+              {/* Codigo del estudiante */}
+              {formData.kind === "STUDENT" && (
+                <div className="flex flex-col gap-2">
+                  <Label className="font-normal" htmlFor="identification">
+                    Codigo
+                  </Label>
+                  <Input
+                    required
+                    id="identification"
+                    autoComplete="identification"
+                    type="text"
+                    value={formData.identification}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              )}
               <div className="flex flex-col gap-2">
                 <Label className="font-normal" htmlFor="username">
                   Correo electrónico
