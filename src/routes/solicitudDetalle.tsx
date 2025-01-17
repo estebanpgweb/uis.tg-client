@@ -126,7 +126,7 @@ const SolicitudDetalleRoute = () => {
       observation: observaciones,
     };
     try {
-      await axios.put(`/api/appeal/${solicitud?._id}`, { newSolicitud });
+      await axios.put(`/api/appeal/${solicitud?._id}`, newSolicitud);
       toast({
         title: "Solicitud enviada",
         description: "La solicitud ha sido enviada al director de escuela",
