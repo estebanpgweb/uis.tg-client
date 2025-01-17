@@ -16,8 +16,9 @@ const Template = ({ children }: PropsWithChildren) => {
   };
 
   const navLinks = [
-    { path: "/solicitudes", label: "Solicitudes", kind: "" },
+    { path: "/", label: "Inicio", kind: "STUDENT" },
     { path: "/horario", label: "Horario", kind: "STUDENT" },
+    { path: "/solicitudes", label: "Solicitudes", kind: "" },
     { path: "/usuarios", label: "Usuarios", kind: "ROOT" },
     { path: "/estadisticas", label: "Estadisticas", kind: "ROOT" },
   ];
@@ -33,7 +34,8 @@ const Template = ({ children }: PropsWithChildren) => {
               <li key={link.path}>
                 <Link
                   className={`${
-                    location.pathname === link.path && "!font-extrabold"
+                    location.pathname === link.path &&
+                    "!font-extrabold !text-xl"
                   } ${buttonVariants({ variant: "link" })} !text-lg`}
                   to={link.path}
                 >
