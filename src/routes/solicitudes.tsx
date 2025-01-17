@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
-import { Solicitud } from "../types/solicitudesTypes";
-import { SolicitudesColumns } from "../types/tableTypes";
 import { useAuth } from "@/providers/AuthContext";
+import { Solicitud } from "../types/solicitudesTypes";
+import { SolicitudesColumns, SortingState } from "../types/tableTypes";
+import { Link } from "react-router-dom";
+import { buttonVariants } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
-import { SortingState } from "@/types/tableTypes";
 import { buildFilterQuery } from "@/utils/filterQuery";
+import { Plus } from "lucide-react";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -138,7 +140,18 @@ const SolicitudRoute = () => {
 
   return (
     <div className="container mx-auto">
-      <h1 className="text-2xl font-bold">Solicitudes de Ajuste de Matrícula</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">
+          Solicitudes de Ajuste de Matrícula
+        </h1>
+        <Link
+          to="/solicitud/crear"
+          className={buttonVariants({ variant: "default" })}
+        >
+          <Plus size={24} />
+          Crear usuario
+        </Link>
+      </div>
       <DataTable
         data={solicitudes}
         columns={SolicitudesColumns}

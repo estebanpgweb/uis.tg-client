@@ -15,6 +15,7 @@ const KindGuard = ({ children }: PropsWithChildren) => {
       "/",
       "/horario",
       "/solicitudes",
+      "/solicitud/crear",
       { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
     ],
     ROOT: [

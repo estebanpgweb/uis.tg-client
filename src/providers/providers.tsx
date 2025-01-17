@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider.tsx";
 import App from "../App.tsx";
 //student
 import HorarioRoute from "../routes/horario.tsx";
+import SolicitudCrearRoute from "@/routes/solicitudCrear.tsx";
 //root
 import SolicitudRoute from "../routes/solicitudes.tsx";
 import SolicitudDetalleRoute from "@/routes/solicitudDetalle.tsx";
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <HorarioRoute />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/solicitud/crear",
+    element: (
+      <AuthGuard>
+        <SolicitudCrearRoute />
       </AuthGuard>
     ),
   },

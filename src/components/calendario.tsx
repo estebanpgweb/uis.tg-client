@@ -14,7 +14,7 @@ import { Trash2, Save } from "lucide-react";
 interface CalendarioProps {
   horario: Materia[];
   setHorario: (horario: Materia[]) => void;
-  handleSaveSchedule: () => void;
+  handleSaveSchedule?: () => void;
 }
 
 export default function Calendario({
@@ -45,6 +45,8 @@ export default function Calendario({
 
   // Función para obtener la clase de color de una celda
   const getClassForCell = (materiaId: string) => {
+    if (horario.length === 0) return "bg-gray-300 text-gray-800";
+
     const colorClasses = [
       "bg-blue-500",
       "bg-green-500",
@@ -219,7 +221,10 @@ export default function Calendario({
           </TableBody>
         </Table>
         <div className="mt-4">
-          <Button className="w-full" onClick={() => handleSaveSchedule()}>
+          <Button
+            className="w-full"
+            onClick={() => handleSaveSchedule && handleSaveSchedule()}
+          >
             <Save />
             Guardar horario
           </Button>
