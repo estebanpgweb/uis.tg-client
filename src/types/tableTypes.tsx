@@ -126,7 +126,7 @@ export const UsuariosColumns = ({
           {/* Botón para editar */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button>
+              <Button variant="outline">
                 <Pencil />
               </Button>
             </AlertDialogTrigger>
