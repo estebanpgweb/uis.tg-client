@@ -1,10 +1,12 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "./components/ui/button";
 import { buttonVariants } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Label } from "./components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "./hooks/use-toast";
 import {
   CalendarDays,
   FileText,
@@ -14,6 +16,8 @@ import {
 
 function App() {
   const [horario, setHorario] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadHorario = () => {
@@ -86,12 +90,21 @@ function App() {
             <li>Cambiar los grupos de las materias.</li>
             <li>Solicitar excepciones académicas.</li>
           </ul>
-          <Link
-            to={"/solicitudes"}
-            className={buttonVariants() + "w-fit mx-auto"}
+          <Button
+            className={"w-fit mx-auto"}
+            onClick={() =>
+              horario
+                ? navigate("/solicitudes")
+                : toast({
+                    variant: "destructive",
+                    title: "¡Horario no registrado!",
+                    description:
+                      "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+                  })
+            }
           >
             Crear solicitud
-          </Link>
+          </Button>
         </Card>
       </div>
     </div>
