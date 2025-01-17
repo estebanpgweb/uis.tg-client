@@ -12,6 +12,7 @@ import { UserPlus, Eye, EyeOff } from "lucide-react";
 const RegisterRoute = () => {
   const [name, setName] = useState<string>("");
   const [lastname, setLastname] = useState<string>("");
+  const [identification, setIdentification] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -28,7 +29,14 @@ const RegisterRoute = () => {
       if (password !== confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
       }
-      await auth?.register(email, password, confirmPassword, name, lastname);
+      await auth?.register(
+        email,
+        password,
+        confirmPassword,
+        name,
+        lastname,
+        identification
+      );
       toast({
         title: "Registro exitoso",
         description: "Por favor revisa tu correo para confirmar tu cuenta",
@@ -83,6 +91,19 @@ const RegisterRoute = () => {
                 onChange={(e) => setLastname(e.target.value)}
               />
             </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="font-normal" htmlFor="codigo">
+              Codigo
+            </Label>
+            <Input
+              required
+              id="identification"
+              autoComplete="identification"
+              type="number"
+              value={identification}
+              onChange={(e) => setIdentification(e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label className="font-normal" htmlFor="email">

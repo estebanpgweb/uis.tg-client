@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useAxios } from "./AxiosContext.tsx";
 import { AxiosInstance } from "axios";
-import UserType from "../types/userTypes.ts";
+import { UserType } from "../types/userTypes.ts";
 
 type AuthContextType = {
   loggedIn: boolean;
@@ -11,7 +11,8 @@ type AuthContextType = {
     password: string,
     confirmPassword: string,
     name: string,
-    lastname: string
+    lastname: string,
+    identification: string
   ) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
@@ -29,7 +30,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     confirmPassword: string,
     name: string,
-    lastname: string
+    lastname: string,
+    identification: string
   ): Promise<void> => {
     await axios.post("/api/auth/register", {
       email,
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       confirm_password: confirmPassword,
       name,
       lastname,
+      identification,
     });
   };
 
