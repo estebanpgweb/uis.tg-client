@@ -2,6 +2,7 @@ export interface UserType {
   _id?: number;
   name: string;
   lastname: string;
+  identification?: string;
   username: string;
   permissions: string[];
   kind: "STUDENT" | "ROOT" | "ADMIN";
