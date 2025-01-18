@@ -42,17 +42,17 @@ export default function UsuariosRoute() {
     sort: "asc",
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [formData, setFormData] = useState<UserType>({
+  const emptyUser: UserType = {
     name: "",
     lastname: "",
-    identification: "",
+    identification: null,
     username: "",
-    kind: "ADMIN", // Valor predeterminado, ajusta según tu estructura.
+    kind: "ADMIN",
     permissions: [],
     verified: false,
     password: "",
-  });
-
+  };
+  const [formData, setFormData] = useState<UserType>(emptyUser);
   const axios: AxiosInstance = useAxios();
   const { toast } = useToast();
 
@@ -145,6 +145,7 @@ export default function UsuariosRoute() {
       setUsuarios((prev) =>
         prev.map((u) => (u._id === usuario._id ? usuario : u))
       );
+      setFormData(emptyUser); // Reinicia el formulario
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -183,7 +184,6 @@ export default function UsuariosRoute() {
         title: "Eliminar usuario fallido",
         description: errorMessage,
       });
-      return [];
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +294,7 @@ export default function UsuariosRoute() {
               {formData.kind === "STUDENT" && (
                 <div className="flex flex-col gap-2">
                   <Label className="font-normal" htmlFor="identification">
-                    Codigo
+                    Código
                   </Label>
                   <Input
                     required
@@ -337,6 +337,7 @@ export default function UsuariosRoute() {
                   Tipo de usuario
                 </Label>
                 <Select
+                  defaultValue={formData.kind}
                   value={formData.kind}
                   onValueChange={(value) =>
                     setFormData((prev) => ({

@@ -114,7 +114,10 @@ export const UsuariosColumns = ({
     header: "Acciones",
     accessorKey: "accion",
     cell: ({ row }) => {
-      const [formData, setFormData] = useState<UserType>({ ...row.original });
+      const [formData, setFormData] = useState<UserType>({
+        ...row.original,
+        kind: row.original.kind || "STUDENT",
+      });
 
       const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;

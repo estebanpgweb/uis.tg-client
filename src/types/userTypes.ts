@@ -1,8 +1,9 @@
 export interface UserType {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   lastname: string;
-  identification?: string;
+  identification?: string | null;
   username: string;
   permissions: string[];
   kind: "STUDENT" | "ROOT" | "ADMIN";
