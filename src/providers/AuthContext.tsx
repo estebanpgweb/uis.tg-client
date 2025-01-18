@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const emptyUser: UserType = {
+    id: "",
     name: "",
     lastname: "",
     username: "",
