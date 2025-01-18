@@ -12,6 +12,7 @@ import { isTimeOverlap } from "@/utils/tiempoEspera";
 const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
   const { user } = useAuth();
+  const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
   const [horario, setHorario] = useState<Materia[]>([
     {
       _id: "676ef7cb6b6d1036fd789f80",
@@ -84,6 +85,10 @@ const SolicitudCrearRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setHorarioInicial(horario);
+  }, []);
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -205,14 +210,28 @@ const SolicitudCrearRoute = () => {
     );
   };
 
-  const handleRemoveGrupo = (materiaId: string, groupSku?: string) => {
-    const newHorario = horario.map((m) => {
-      if (m._id === materiaId) {
-        const newGroups = m.groups.filter((g) => g.sku !== groupSku);
-        return { ...m, groups: newGroups };
-      }
-      return m;
-    });
+  const handleRemoveGrupo = (
+    materiaId: string,
+    groupSku?: string,
+    isInicial?: boolean
+  ) => {
+    console.log(materiaId, groupSku, isInicial);
+    const newHorario = isInicial
+      ? //vuelve a poner el grupo en el horario
+        horarioInicial.map((m) => {
+          if (m._id === materiaId) {
+            return { ...m, groups: m.groups };
+          }
+          return m;
+        })
+      : horario.map((m) => {
+          if (m._id === materiaId) {
+            const newGroups = m.groups.filter((g) => g.sku !== groupSku);
+            return { ...m, groups: newGroups };
+          }
+          return m;
+        });
+    console.log(newHorario);
 
     setHorario(newHorario);
   };

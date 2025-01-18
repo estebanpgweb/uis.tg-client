@@ -10,11 +10,15 @@ import {
   TableRow,
 } from "./ui/table";
 import { Materia } from "@/types/materiaTypes";
-import { Trash2, Save } from "lucide-react";
+import { Trash2, Save, X } from "lucide-react";
 
 interface CalendarioProps {
   horario: Materia[];
-  handleRemoveMateria: (materiaId: string, groupSku?: string) => void;
+  handleRemoveMateria: (
+    materiaId: string,
+    groupSku?: string,
+    isInicial?: boolean
+  ) => void;
   handleSaveSchedule?: () => void;
 }
 
@@ -68,8 +72,7 @@ export default function Calendario({
         ?.groups?.map((group) => group.sku).length || 0;
     const isInicial = horarioInicial.find((m) => m.groups[0]?.sku === group);
     const isInicialDeleted =
-      horario.find((m) => m._id === materiaId)?.groups?.length === 0;
-
+      horario.find((m) => m.groups.find((g) => g.sku === group)) === undefined;
     if (isInicialDeleted) {
       return "border-2 border-red-500 text-red-500 line-through";
     } else if (isInicial && grupos <= 1) {
@@ -159,6 +162,17 @@ export default function Calendario({
         const [currentHour] = time.split("-").map((t) => parseInt(t));
         const cellKey = `${materia._id}-${group.sku}-${day}`;
 
+        const grupos =
+          horario
+            .find((m) => m._id === materia._id)
+            ?.groups?.map((group) => group.sku).length || 0;
+        const isInicial =
+          horarioInicial.find((m) => m.groups[0]?.sku === group.sku) !==
+          undefined;
+        const isInicialDeleted =
+          horario.find((m) => m.groups.find((g) => g.sku === group.sku)) ===
+          undefined;
+
         // Si no es la primera hora de la materia, no renderizar
         if (
           currentHour !== timeRange.start ||
@@ -194,16 +208,22 @@ export default function Calendario({
               <br />
               <span className="text-xs opacity-50">Grupo {group.sku}</span>
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="!p-1 !h-fit"
-              onClick={() => {
-                handleRemoveMateria(materia._id, group.sku);
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {(!isInicial || (isInicial && grupos <= 1) || isInicialDeleted) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!p-1 !h-fit"
+                onClick={() => {
+                  handleRemoveMateria(
+                    materia._id,
+                    group.sku,
+                    isInicial && isInicialDeleted
+                  );
+                }}
+              >
+                {isInicialDeleted ? <X /> : <Trash2 />}
+              </Button>
+            )}
           </div>
         );
       })
