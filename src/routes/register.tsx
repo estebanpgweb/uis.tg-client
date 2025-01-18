@@ -26,9 +26,21 @@ const RegisterRoute = () => {
   const onSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     try {
+      //validamos que las contraseñas coincidan
       if (password !== confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
       }
+      //validamos si el correo es de la universidad
+      if (!email.includes("@correo.uis.edu.co")) {
+        throw new Error("El correo debe ser de la universidad UIS");
+      }
+      //validamos si las contraseñas tiene una may,min y un numero
+      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(password)) {
+        throw new Error(
+          "La contraseña debe tener al menos una mayúscula, una minúscula y un número"
+        );
+      }
+
       await auth?.register(
         email,
         password,
@@ -125,6 +137,7 @@ const RegisterRoute = () => {
             <div className="relative">
               <Input
                 required
+                minLength={8}
                 id="password"
                 autoComplete="new-password"
                 type={showPassword ? "text" : "password"}
@@ -148,6 +161,7 @@ const RegisterRoute = () => {
             <div className="relative">
               <Input
                 required
+                minLength={8}
                 id="confirmPassword"
                 autoComplete="new-password"
                 type={showConfirmPassword ? "text" : "password"}
