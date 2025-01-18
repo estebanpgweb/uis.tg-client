@@ -126,7 +126,7 @@ const HorarioRoute = () => {
       toast({
         variant: "destructive",
         title: "Conflicto de horario",
-        description: "Este grupo se solapa con otro ya seleccionado.",
+        description: "Este grupo se cruza con otro ya seleccionado.",
       });
       return;
     }

@@ -82,14 +82,14 @@ const SolicitudCrearRoute = () => {
           schedule: [
             {
               dia: "LUNES",
-              hora: "10-12",
+              hora: "10-11",
               edificio: "C",
               aula: "103",
               profesor: "Prof. C",
             },
             {
               dia: "MIERCOLES",
-              hora: "10-12",
+              hora: "10-11",
               edificio: "C",
               aula: "103",
               profesor: "Prof. C",
@@ -206,7 +206,7 @@ const SolicitudCrearRoute = () => {
       toast({
         variant: "destructive",
         title: "Conflicto de horario",
-        description: "Este grupo se solapa con otra materia ya seleccionada.",
+        description: "Este grupo se cruza con otra materia ya seleccionada.",
       });
       return;
     }
@@ -243,7 +243,6 @@ const SolicitudCrearRoute = () => {
     groupSku?: string,
     isInicial?: boolean
   ) => {
-    console.log(materiaId, groupSku, isInicial);
     const newHorario = isInicial
       ? //vuelve a poner el grupo en el horario
         horarioInicial.map((m) => {
@@ -259,7 +258,24 @@ const SolicitudCrearRoute = () => {
           }
           return m;
         });
-    console.log(newHorario);
+
+    const materiaName = materias.find((m) => m._id === materiaId)?.name;
+    const isInicialDeleted =
+      horario.find((m) => m.groups.find((g) => g.sku === groupSku)) ===
+      undefined;
+
+    if (isInicialDeleted) {
+      toast({
+        title: "Grupo Añadido",
+        description: `Grupo ${groupSku} de ${materiaName} añadido al horario`,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Grupo removido",
+        description: `Grupo ${groupSku} de ${materiaName} removido del horario`,
+      });
+    }
 
     setHorario(newHorario);
   };
