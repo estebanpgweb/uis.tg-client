@@ -208,7 +208,7 @@ const HorarioRoute = () => {
           <Calendario
             horario={horario}
             handleRemoveMateria={handleRemoveMateria}
-            handleSaveSchedule={handleSaveSchedule}
+            handleSave={handleSaveSchedule}
           />
         </div>
 

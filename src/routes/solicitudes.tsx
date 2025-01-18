@@ -4,8 +4,8 @@ import { AxiosInstance } from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import { Solicitud } from "../types/solicitudesTypes";
 import { SolicitudesColumns, SortingState } from "../types/tableTypes";
-import { Link } from "react-router-dom";
-import { buttonVariants } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
 import { buildFilterQuery } from "@/utils/filterQuery";
@@ -13,6 +13,7 @@ import { Plus } from "lucide-react";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [horario, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
   >({});
@@ -27,7 +28,9 @@ const SolicitudRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
+  const kind = auth?.user?.kind || "STUDENT";
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const pageLimit = 10;
   const paramsFilter = [
@@ -134,6 +137,32 @@ const SolicitudRoute = () => {
     getSolicitudesCount();
   }, [axios, filter, selectedStatuses]);
 
+  useEffect(() => {
+    const fetchHorario = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await axios.get(`/api/schedule/count`);
+        setHorario(data);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Horario fallida",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHorario();
+  }, [axios, toast]);
+
   if (isLoading) {
     return <div className="text-center p-4">Cargando solicitudes...</div>;
   }
@@ -144,13 +173,25 @@ const SolicitudRoute = () => {
         <h1 className="text-2xl font-bold">
           Solicitudes de Ajuste de Matrícula
         </h1>
-        <Link
-          to="/solicitud/crear"
-          className={buttonVariants({ variant: "default" })}
-        >
-          <Plus size={24} />
-          Crear solicitud
-        </Link>
+        {kind === "STUDENT" && (
+          <Button
+            onClick={() => {
+              if (horario === 0) {
+                toast({
+                  variant: "destructive",
+                  title: "Horario no registrado",
+                  description:
+                    "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+                });
+              } else {
+                navigate("/solicitud/crear");
+              }
+            }}
+          >
+            <Plus size={24} />
+            Crear solicitud
+          </Button>
+        )}
       </div>
       <DataTable
         data={solicitudes}

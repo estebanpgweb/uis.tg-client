@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/providers/AuthContext";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { Materia } from "@/types/materiaTypes";
@@ -8,10 +7,10 @@ import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
 import { Solicitud } from "@/types/solicitudesTypes";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
+import { updateSolicitud, hasPendingChanges } from "@/utils/solicitudCrear";
 
 const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
-  const { user } = useAuth();
   const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
   const [horario, setHorario] = useState<Materia[]>([
     {
@@ -100,12 +99,6 @@ const SolicitudCrearRoute = () => {
     },
   ]);
   const emptySolicitud: Solicitud = {
-    student: {
-      name: user.name,
-      lastname: user.lastname,
-      username: user.username,
-      identification: user.identification || "",
-    },
     status: "PENDING",
     requests: [],
   };
@@ -117,6 +110,18 @@ const SolicitudCrearRoute = () => {
   useEffect(() => {
     setHorarioInicial(horario);
   }, []);
+
+  // Actualizar la solicitud cuando cambia el horario
+  useEffect(() => {
+    if (horarioInicial.length > 0) {
+      const updatedSolicitud = updateSolicitud(
+        solicitud,
+        horarioInicial,
+        horario
+      );
+      setSolicitud(updatedSolicitud);
+    }
+  }, [horario]);
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -144,16 +149,13 @@ const SolicitudCrearRoute = () => {
     fetchMaterias();
   }, [axios, toast]);
 
-  // Función para verificar si hay conflicto entre materias (no entre grupos de la misma materia)
   const checkMateriaConflict = (
     existingSchedule: Materia["groups"][0]["schedule"],
     newSchedule: Materia["groups"][0]["schedule"]
   ): boolean => {
     return existingSchedule.some((existing) =>
       newSchedule.some((newSlot) => {
-        // Primero verificamos si es el mismo día
         if (existing.dia.toUpperCase() === newSlot.dia.toUpperCase()) {
-          // Luego verificamos si hay solapamiento en las horas
           return isTimeOverlap(existing.hora, newSlot.hora);
         }
         return false;
@@ -165,11 +167,9 @@ const SolicitudCrearRoute = () => {
     materia: Materia,
     group: Materia["groups"][0]
   ) => {
-    // Verificar si la materia ya está en el horario
     const hasMateria = horario.some((m) => m._id === materia._id);
     const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
 
-    // Si el grupo ya está seleccionado, permitimos la deselección
     if (isCurrentlySelected) {
       setHorario((prevHorario) => {
         const newHorario = prevHorario.map((m) => {
@@ -193,7 +193,6 @@ const SolicitudCrearRoute = () => {
       return;
     }
 
-    // Verificar conflictos solo con otras materias
     const hasConflict = horario.some(
       (existingMateria) =>
         existingMateria._id !== materia._id &&
@@ -213,7 +212,6 @@ const SolicitudCrearRoute = () => {
 
     setHorario((prevHorario) => {
       if (hasMateria) {
-        // Solo agregar el nuevo grupo sin quitar los anteriores
         return prevHorario.map((m) => {
           if (m._id === materia._id) {
             return { ...m, groups: [...m.groups, group] };
@@ -221,7 +219,6 @@ const SolicitudCrearRoute = () => {
           return m;
         });
       } else {
-        // Agregar nueva materia con el grupo
         return [...prevHorario, { ...materia, groups: [group] }];
       }
     });
@@ -243,41 +240,129 @@ const SolicitudCrearRoute = () => {
     groupSku?: string,
     isInicial?: boolean
   ) => {
-    const newHorario = isInicial
-      ? //vuelve a poner el grupo en el horario
-        horarioInicial.map((m) => {
-          if (m._id === materiaId) {
-            return { ...m, groups: m.groups };
+    if (isInicial) {
+      // Buscar el grupo inicial que queremos restaurar
+      const materiaInicial = horarioInicial.find((m) => m._id === materiaId);
+      const groupInicial = materiaInicial?.groups.find(
+        (g) => g.sku === groupSku
+      );
+
+      if (materiaInicial && groupInicial) {
+        // Verificar conflictos antes de restaurar
+        const hasConflict = horario.some(
+          (existingMateria) =>
+            existingMateria._id !== materiaId &&
+            existingMateria.groups.some((existingGroup) =>
+              checkMateriaConflict(
+                existingGroup.schedule,
+                groupInicial.schedule
+              )
+            )
+        );
+
+        if (hasConflict) {
+          toast({
+            variant: "destructive",
+            title: "Conflicto de horario",
+            description:
+              "No se puede restaurar el grupo debido a conflictos con otras materias.",
+          });
+          return;
+        }
+
+        // Actualizar el horario manteniendo los cambios existentes
+        setHorario((prevHorario) => {
+          const materiaExists = prevHorario.some((m) => m._id === materiaId);
+
+          if (materiaExists) {
+            return prevHorario.map((m) => {
+              if (m._id === materiaId) {
+                return {
+                  ...m,
+                  groups: [...m.groups, groupInicial],
+                };
+              }
+              return m;
+            });
+          } else {
+            return [
+              ...prevHorario,
+              { ...materiaInicial, groups: [groupInicial] },
+            ];
           }
-          return m;
-        })
-      : horario.map((m) => {
-          if (m._id === materiaId) {
-            const newGroups = m.groups.filter((g) => g.sku !== groupSku);
-            return { ...m, groups: newGroups };
-          }
-          return m;
         });
 
-    const materiaName = materias.find((m) => m._id === materiaId)?.name;
-    const isInicialDeleted =
-      horario.find((m) => m.groups.find((g) => g.sku === groupSku)) ===
-      undefined;
-
-    if (isInicialDeleted) {
-      toast({
-        title: "Grupo Añadido",
-        description: `Grupo ${groupSku} de ${materiaName} añadido al horario`,
-      });
+        toast({
+          title: "Grupo restaurado",
+          description: `Grupo ${groupSku} de ${materiaInicial.name} restaurado al horario`,
+        });
+      }
     } else {
+      // Lógica existente para remover grupos no iniciales
+      setHorario(
+        (prevHorario) =>
+          prevHorario
+            .map((m) => {
+              if (m._id === materiaId) {
+                const newGroups = m.groups.filter((g) => g.sku !== groupSku);
+                if (newGroups.length === 0) {
+                  return null;
+                }
+                return { ...m, groups: newGroups };
+              }
+              return m;
+            })
+            .filter(Boolean) as Materia[]
+      );
+
+      const materiaName = materias.find((m) => m._id === materiaId)?.name;
       toast({
         variant: "destructive",
         title: "Grupo removido",
         description: `Grupo ${groupSku} de ${materiaName} removido del horario`,
       });
     }
+  };
 
-    setHorario(newHorario);
+  // Función para guardar la solicitud
+  const handleSaveSolicitud = async () => {
+    if (!hasPendingChanges(horarioInicial, horario)) {
+      toast({
+        variant: "destructive",
+        title: "Sin cambios",
+        description: "No hay cambios pendientes para guardar",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const updatedSolicitud = updateSolicitud(
+        solicitud,
+        horarioInicial,
+        horario
+      );
+      await axios.post("/api/appeal", updatedSolicitud);
+
+      toast({
+        title: "Solicitud guardada",
+        description: "Los cambios han sido guardados exitosamente",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Error al guardar solicitud",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -292,9 +377,9 @@ const SolicitudCrearRoute = () => {
           <Calendario
             horario={horario}
             handleRemoveMateria={handleRemoveGrupo}
+            handleSave={handleSaveSolicitud}
           />
         </div>
-
         <div className="w-1/5">
           <Materias
             materias={materias}

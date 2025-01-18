@@ -19,13 +19,13 @@ interface CalendarioProps {
     groupSku?: string,
     isInicial?: boolean
   ) => void;
-  handleSaveSchedule?: () => void;
+  handleSave?: () => void;
 }
 
 export default function Calendario({
   horario,
   handleRemoveMateria,
-  handleSaveSchedule,
+  handleSave,
 }: CalendarioProps) {
   const timeSlots = [
     "6-7",
@@ -256,10 +256,10 @@ export default function Calendario({
         <div className="mt-4">
           <Button
             className="w-full"
-            onClick={() => handleSaveSchedule && handleSaveSchedule()}
+            onClick={() => handleSave && handleSave()}
           >
             <Save />
-            Guardar horario
+            Guardar
           </Button>
         </div>
       </CardContent>
