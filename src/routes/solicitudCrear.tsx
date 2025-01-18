@@ -12,92 +12,7 @@ import { updateSolicitud, hasPendingChanges } from "@/utils/solicitudCrear";
 const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
   const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
-  const [horario, setHorario] = useState<Materia[]>([
-    {
-      _id: "676ef7cb6b6d1036fd789f80",
-      name: "Cálculo I",
-      sku: "20252",
-      level: 1,
-      credits: 4,
-      groups: [
-        {
-          sku: "Z1",
-          schedule: [
-            {
-              dia: "VIERNES",
-              hora: "6-8",
-              edificio: "A",
-              aula: "101",
-              profesor: "Prof. A",
-            },
-            {
-              dia: "MIERCOLES",
-              hora: "6-8",
-              edificio: "A",
-              aula: "101",
-              profesor: "Prof. A",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      _id: "2",
-      name: "Materia 2",
-      sku: "MAT-2",
-      level: 1,
-      credits: 4,
-      groups: [
-        {
-          sku: "01",
-          schedule: [
-            {
-              dia: "MARTES",
-              hora: "6-7",
-              edificio: "B",
-              aula: "102",
-              profesor: "Prof. B",
-            },
-            {
-              dia: "JUEVES",
-              hora: "6-7",
-              edificio: "B",
-              aula: "102",
-              profesor: "Prof. B",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      _id: "3",
-      name: "Materia 3",
-      sku: "MAT-3",
-      level: 1,
-      credits: 4,
-      groups: [
-        {
-          sku: "02",
-          schedule: [
-            {
-              dia: "LUNES",
-              hora: "10-11",
-              edificio: "C",
-              aula: "103",
-              profesor: "Prof. C",
-            },
-            {
-              dia: "MIERCOLES",
-              hora: "10-11",
-              edificio: "C",
-              aula: "103",
-              profesor: "Prof. C",
-            },
-          ],
-        },
-      ],
-    },
-  ]);
+  const [horario, setHorario] = useState<Materia[]>([]);
   const emptySolicitud: Solicitud = {
     status: "PENDING",
     requests: [],
@@ -147,6 +62,33 @@ const SolicitudCrearRoute = () => {
     };
 
     fetchMaterias();
+  }, [axios, toast]);
+
+  useEffect(() => {
+    const fetchHorario = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await axios.get(`/api/schedule`);
+        const sucjects = data?.subjects || [];
+        setHorario(sucjects);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Horario fallida",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHorario();
   }, [axios, toast]);
 
   const checkMateriaConflict = (

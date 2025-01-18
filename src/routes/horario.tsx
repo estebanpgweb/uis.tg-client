@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
+import { useAuth } from "@/providers/AuthContext";
 
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -13,6 +14,8 @@ const HorarioRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const auth = useAuth();
+  const user = auth?.user;
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -45,7 +48,8 @@ const HorarioRoute = () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get(`/api/schedule`);
-        setHorario(data);
+        const sucjects = data?.subjects || [];
+        setHorario(sucjects);
       } catch (error) {
         const errorMessage =
           (error as { response?: { data?: { message?: string } } }).response
@@ -174,7 +178,12 @@ const HorarioRoute = () => {
     }
     try {
       setIsLoading(true);
-      await axios.put(`/api/schedule`, horario);
+      const formatedHorario = {
+        studentId: user.id,
+        subjects: horario.map((m) => m),
+      };
+      console.log(formatedHorario);
+      await axios.post(`/api/schedule`, formatedHorario);
       toast({
         title: "Horario guardado",
         description: "El horario ha sido guardado exitosamente.",
