@@ -74,11 +74,11 @@ export default function Calendario({
     const isInicialDeleted =
       horario.find((m) => m.groups.find((g) => g.sku === group)) === undefined;
     if (isInicialDeleted) {
-      return "border-2 border-red-500 text-red-500 line-through";
+      return "border-2 border-red-500 text-red-500 line-through opacity-40";
     } else if (isInicial && grupos <= 1) {
       return "bg-gray-500 text-white";
     } else if (isInicial && grupos > 1) {
-      return "border-2 border-primary text-primary";
+      return "border-2 border-primary text-primary opacity-40";
     }
     const index = horario.findIndex((m) => m._id === materiaId);
     return `${colorClasses[index % colorClasses.length]} text-white`;
@@ -206,7 +206,7 @@ export default function Calendario({
             <p className="font-medium text-xs">
               {materia.name}
               <br />
-              <span className="text-xs opacity-50">Grupo {group.sku}</span>
+              <span className="text-xs opacity-75">Grupo {group.sku}</span>
             </p>
             {(!isInicial || (isInicial && grupos <= 1) || isInicialDeleted) && (
               <Button

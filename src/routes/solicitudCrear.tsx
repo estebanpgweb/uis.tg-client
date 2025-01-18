@@ -70,6 +70,34 @@ const SolicitudCrearRoute = () => {
         },
       ],
     },
+    {
+      _id: "3",
+      name: "Materia 3",
+      sku: "MAT-3",
+      level: 1,
+      credits: 4,
+      groups: [
+        {
+          sku: "02",
+          schedule: [
+            {
+              dia: "LUNES",
+              hora: "10-12",
+              edificio: "C",
+              aula: "103",
+              profesor: "Prof. C",
+            },
+            {
+              dia: "MIERCOLES",
+              hora: "10-12",
+              edificio: "C",
+              aula: "103",
+              profesor: "Prof. C",
+            },
+          ],
+        },
+      ],
+    },
   ]);
   const emptySolicitud: Solicitud = {
     student: {
