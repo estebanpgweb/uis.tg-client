@@ -18,4 +18,18 @@ const SolicitudTiempoEspera = ({ createdAt }: { createdAt: string }) => {
   return calcularTiempoTranscurrido(createdAt);
 };
 
-export default SolicitudTiempoEspera;
+// Función auxiliar para convertir el formato de hora a minutos
+const timeToMinutes = (time: string): number => {
+  const [hours] = time.split(":").map(Number);
+  return hours * 60;
+};
+
+// Función para verificar si dos rangos de tiempo se solapan
+const isTimeOverlap = (time1: string, time2: string): boolean => {
+  const [start1, end1] = time1.split("-").map(timeToMinutes);
+  const [start2, end2] = time2.split("-").map(timeToMinutes);
+
+  return !(end1 <= start2 || end2 <= start1);
+};
+
+export { SolicitudTiempoEspera, isTimeOverlap };

@@ -149,7 +149,7 @@ const SolicitudRoute = () => {
           className={buttonVariants({ variant: "default" })}
         >
           <Plus size={24} />
-          Crear usuario
+          Crear solicitud
         </Link>
       </div>
       <DataTable

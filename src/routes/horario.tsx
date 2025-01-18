@@ -5,6 +5,7 @@ import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
+import { isTimeOverlap } from "@/utils/tiempoEspera";
 
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -65,20 +66,6 @@ const HorarioRoute = () => {
     fetchHorario();
   }, [axios, toast]);
 
-  // Función auxiliar para convertir el formato de hora a minutos
-  const timeToMinutes = (time: string): number => {
-    const [hours] = time.split(":").map(Number);
-    return hours * 60;
-  };
-
-  // Función para verificar si dos rangos de tiempo se solapan
-  const isTimeOverlap = (time1: string, time2: string): boolean => {
-    const [start1, end1] = time1.split("-").map(timeToMinutes);
-    const [start2, end2] = time2.split("-").map(timeToMinutes);
-
-    return !(end1 <= start2 || end2 <= start1);
-  };
-
   // Función mejorada para verificar conflictos de horario
   const checkScheduleConflict = (
     existingSchedule: Materia["groups"][0]["schedule"],
@@ -135,7 +122,7 @@ const HorarioRoute = () => {
       )
     );
 
-    if (hasConflict) {
+    if (hasConflict && !hasMateria) {
       toast({
         variant: "destructive",
         title: "Conflicto de horario",
@@ -169,6 +156,11 @@ const HorarioRoute = () => {
     return horario.some(
       (m) => m._id === materiaId && m.groups.some((g) => g.sku === groupSku)
     );
+  };
+
+  const handleRemoveMateria = (materiaId: string) => {
+    const newHorario = horario.filter((m) => m._id !== materiaId);
+    setHorario(newHorario);
   };
 
   const handleSaveSchedule = async () => {
@@ -215,7 +207,7 @@ const HorarioRoute = () => {
         <div className="flex-1 w-4/5">
           <Calendario
             horario={horario}
-            setHorario={setHorario}
+            handleRemoveMateria={handleRemoveMateria}
             handleSaveSchedule={handleSaveSchedule}
           />
         </div>

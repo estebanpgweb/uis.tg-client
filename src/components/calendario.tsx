@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import {
@@ -13,13 +14,13 @@ import { Trash2, Save } from "lucide-react";
 
 interface CalendarioProps {
   horario: Materia[];
-  setHorario: (horario: Materia[]) => void;
+  handleRemoveMateria: (materiaId: string, groupSku?: string) => void;
   handleSaveSchedule?: () => void;
 }
 
 export default function Calendario({
   horario,
-  setHorario,
+  handleRemoveMateria,
   handleSaveSchedule,
 }: CalendarioProps) {
   const timeSlots = [
@@ -40,13 +41,16 @@ export default function Calendario({
     "20-21",
     "21-22",
   ];
-
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
-  // Función para obtener la clase de color de una celda
-  const getClassForCell = (materiaId: string) => {
-    if (horario.length === 0) return "bg-gray-300 text-gray-800";
+  const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
 
+  useEffect(() => {
+    setHorarioInicial(horario);
+  }, []);
+
+  // Función para obtener la clase de color de una celda
+  const getClassForCell = (materiaId: string, group?: string) => {
     const colorClasses = [
       "bg-blue-500",
       "bg-green-500",
@@ -57,6 +61,22 @@ export default function Calendario({
       "bg-red-500",
     ];
 
+    // Verificar si la materia es inicial y si tiene más de un grupo
+    const grupos =
+      horario
+        .find((m) => m._id === materiaId)
+        ?.groups?.map((group) => group.sku).length || 0;
+    const isInicial = horarioInicial.find((m) => m.groups[0]?.sku === group);
+    const isInicialDeleted =
+      horario.find((m) => m._id === materiaId)?.groups?.length === 0;
+
+    if (isInicialDeleted) {
+      return "border-2 border-red-500 text-red-500 line-through";
+    } else if (isInicial && grupos <= 1) {
+      return "bg-gray-500 text-white";
+    } else if (isInicial && grupos > 1) {
+      return "border-2 border-primary text-primary";
+    }
     const index = horario.findIndex((m) => m._id === materiaId);
     return `${colorClasses[index % colorClasses.length]} text-white`;
   };
@@ -84,7 +104,7 @@ export default function Calendario({
     time: string,
     schedule: Materia["groups"][0]["schedule"]
   ): boolean {
-    const dayMap: { [key: string]: string } = {
+    const dayMap: Record<string, string> = {
       LUNES: "Lunes",
       MARTES: "Martes",
       MIERCOLES: "Miércoles",
@@ -93,17 +113,17 @@ export default function Calendario({
       SABADO: "Sábado",
     };
 
-    const [startHour, endHour] = time
-      .split("-")
-      .map((t) => parseInt(t.trim(), 10));
+    const [startHour, endHour] = time.split("-").map(Number);
 
-    return schedule.some((s) => {
-      const [scheduleStart, scheduleEnd] = s.hora
+    return schedule.some(({ dia, hora }) => {
+      const [scheduleStart, scheduleEnd] = hora
         .split("-")
-        .map((t) => parseInt(t.trim().split(":")[0], 10));
-      const dayMatch = dayMap[s.dia.toUpperCase()] === day;
-      const timeMatch = startHour >= scheduleStart && endHour <= scheduleEnd;
-      return dayMatch && timeMatch;
+        .map((h) => parseInt(h));
+      return (
+        dayMap[dia.toUpperCase()] === day &&
+        startHour >= scheduleStart &&
+        endHour <= scheduleEnd
+      );
     });
   }
 
@@ -122,8 +142,10 @@ export default function Calendario({
       timeRange: { start: number; end: number };
     }> = [];
 
+    const combinedHorario = horario.concat(horarioInicial);
+
     // Recolectar todas las materias que coinciden con este horario
-    horario.forEach((materia) => {
+    combinedHorario.forEach((materia) => {
       materia.groups.forEach((group) => {
         if (matchDayAndTime(day, time, group.schedule)) {
           const timeRange = getTimeRangeFromSchedule(group.schedule);
@@ -148,15 +170,16 @@ export default function Calendario({
         // Marcar esta materia como renderizada
         renderedSlots[day].add(cellKey);
 
-        const slotHeight = (timeRange.end - timeRange.start) * 36; // 48px por hora
+        const slotHeight = (timeRange.end - timeRange.start) * 36; // 36px por hora
 
         return (
           <div
             key={cellKey}
             className={`${getClassForCell(
-              materia._id
+              materia._id,
+              group.sku
             )} mx-1 px-2 py-1 rounded-md 
-            overflow-x-clip flex justify-between items-center`}
+                overflow-x-clip flex justify-between items-center`}
             style={{
               height: `${slotHeight}px`,
               position: "absolute",
@@ -169,15 +192,14 @@ export default function Calendario({
             <p className="font-medium text-xs">
               {materia.name}
               <br />
-              <span className="text-xs opacity-75">Grupo {group.sku}</span>
+              <span className="text-xs opacity-50">Grupo {group.sku}</span>
             </p>
             <Button
               variant="ghost"
               size="sm"
               className="!p-1 !h-fit"
               onClick={() => {
-                const newHorario = horario.filter((m) => m._id !== materia._id);
-                setHorario(newHorario);
+                handleRemoveMateria(materia._id, group.sku);
               }}
             >
               <Trash2 className="h-4 w-4" />

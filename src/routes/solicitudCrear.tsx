@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/providers/AuthContext";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
+import { Solicitud } from "@/types/solicitudesTypes";
+import { isTimeOverlap } from "@/utils/tiempoEspera";
 
 const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
+  const { user } = useAuth();
   const [horario, setHorario] = useState<Materia[]>([
     {
       _id: "676ef7cb6b6d1036fd789f80",
@@ -20,15 +24,15 @@ const SolicitudCrearRoute = () => {
           sku: "Z1",
           schedule: [
             {
-              dia: "LUNES",
-              hora: "6-7",
+              dia: "VIERNES",
+              hora: "6-8",
               edificio: "A",
               aula: "101",
               profesor: "Prof. A",
             },
             {
               dia: "MIERCOLES",
-              hora: "6-7",
+              hora: "6-8",
               edificio: "A",
               aula: "101",
               profesor: "Prof. A",
@@ -66,6 +70,17 @@ const SolicitudCrearRoute = () => {
       ],
     },
   ]);
+  const emptySolicitud: Solicitud = {
+    student: {
+      name: user.name,
+      lastname: user.lastname,
+      username: user.username,
+      identification: user.identification || "",
+    },
+    status: "PENDING",
+    requests: [],
+  };
+  const [solicitud, setSolicitud] = useState<Solicitud>(emptySolicitud);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -95,20 +110,6 @@ const SolicitudCrearRoute = () => {
 
     fetchMaterias();
   }, [axios, toast]);
-
-  // Función auxiliar para convertir el formato de hora a minutos
-  const timeToMinutes = (time: string): number => {
-    const [hours] = time.split(":").map(Number);
-    return hours * 60;
-  };
-
-  // Función para verificar si dos rangos de tiempo se solapan
-  const isTimeOverlap = (time1: string, time2: string): boolean => {
-    const [start1, end1] = time1.split("-").map(timeToMinutes);
-    const [start2, end2] = time2.split("-").map(timeToMinutes);
-
-    return !(end1 <= start2 || end2 <= start1);
-  };
 
   // Función para verificar si hay conflicto entre materias (no entre grupos de la misma materia)
   const checkMateriaConflict = (
@@ -204,6 +205,18 @@ const SolicitudCrearRoute = () => {
     );
   };
 
+  const handleRemoveGrupo = (materiaId: string, groupSku?: string) => {
+    const newHorario = horario.map((m) => {
+      if (m._id === materiaId) {
+        const newGroups = m.groups.filter((g) => g.sku !== groupSku);
+        return { ...m, groups: newGroups };
+      }
+      return m;
+    });
+
+    setHorario(newHorario);
+  };
+
   if (isLoading) {
     return <div className="text-center p-4">Cargando horario...</div>;
   }
@@ -213,7 +226,10 @@ const SolicitudCrearRoute = () => {
       <h1 className="text-2xl font-bold">Solicitud ajuste de matricula</h1>
       <div className="flex w-full my-4 gap-x-8 justify-between">
         <div className="flex-1 w-4/5">
-          <Calendario horario={horario} setHorario={setHorario} />
+          <Calendario
+            horario={horario}
+            handleRemoveMateria={handleRemoveGrupo}
+          />
         </div>
 
         <div className="w-1/5">
