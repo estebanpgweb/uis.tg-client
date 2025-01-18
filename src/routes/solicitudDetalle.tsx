@@ -43,7 +43,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import SolicitudTiempoEspera from "@/utils/tiempoEspera";
+import { SolicitudTiempoEspera } from "@/utils/tiempoEspera";
 import { useAuth } from "@/providers/AuthContext";
 
 const SolicitudDetalleRoute = () => {

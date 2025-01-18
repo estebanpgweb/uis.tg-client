@@ -5,7 +5,7 @@ import { UserType } from "../types/userTypes.ts";
 
 type AuthContextType = {
   loggedIn: boolean;
-  user: UserType | null;
+  user: UserType;
   register: (
     email: string,
     password: string,
@@ -21,8 +21,16 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const emptyUser: UserType = {
+    name: "",
+    lastname: "",
+    username: "",
+    permissions: [],
+    kind: "STUDENT",
+    verified: false,
+  };
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<UserType>(emptyUser);
   const axios: AxiosInstance = useAxios();
 
   const register = async (
@@ -55,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     setLoggedIn(false);
-    setUser(null);
+    setUser(emptyUser);
     localStorage.removeItem("access_token");
   };
 

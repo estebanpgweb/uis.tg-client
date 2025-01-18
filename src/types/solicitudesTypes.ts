@@ -8,20 +8,20 @@ export interface Solicitud {
     identification: string;
   };
   requests: {
-    from?: {
+    from: {
       group: string;
       sku: string;
       name: string;
-    };
-    to?: {
-      group: string;
+    } | null;
+    to: {
+      group: string[];
       sku: string;
       name: string;
-    };
+    } | null;
     status?: RequestStatus;
     reason?: string | null;
   }[];
-  status?: "PENDING" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
+  status?: "PENDING" | "REVIEW" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
   observation?: string;
   createdAt?: string;
   updatedAt?: string;

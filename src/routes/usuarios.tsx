@@ -102,7 +102,6 @@ export default function UsuariosRoute() {
   const crearUsuario = async (usuario: UserType) => {
     try {
       setIsLoading(true);
-      console.log(usuario);
       await axios.post(`/api/users`, usuario);
       toast({
         title: "Usuario creado",

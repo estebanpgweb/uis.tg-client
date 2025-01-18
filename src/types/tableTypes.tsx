@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import SolicitudTiempoEspera from "@/utils/tiempoEspera";
+import { SolicitudTiempoEspera } from "@/utils/tiempoEspera";
 import {
   AlertDialog,
   AlertDialogAction,
