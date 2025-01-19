@@ -3,15 +3,21 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthContext.tsx";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button.tsx";
 import UIS from "./assets/UIS.avif";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 
 const Template = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
   const location = useLocation();
   const kind = auth?.user?.kind || "";
 
-  const LogOut = () => {
+  const handleLogOut = () => {
     auth?.logout();
   };
 
@@ -44,11 +50,20 @@ const Template = ({ children }: PropsWithChildren) => {
               </li>
             ))}
           <li>
-            <User
-              onClick={() => LogOut()}
-              size={24}
-              className="cursor-pointer"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <User size={24} className="hover:cursor-pointer" />
+              </PopoverTrigger>
+              <PopoverContent className="w-60 flex flex-col">
+                <p className="text-center text-xl mb-2">
+                  Hola, {auth?.user?.name} {auth?.user?.lastname}
+                </p>
+                <Button variant="destructive" onClick={handleLogOut}>
+                  <LogOut />
+                  Cerrar sesión
+                </Button>
+              </PopoverContent>
+            </Popover>
           </li>
         </ul>
       </nav>

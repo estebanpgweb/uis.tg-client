@@ -301,7 +301,7 @@ export default function UsuariosRoute() {
                     id="identification"
                     autoComplete="identification"
                     type="text"
-                    value={formData.identification}
+                    value={formData.identification ?? ""}
                     onChange={handleInputChange}
                   />
                 </div>
