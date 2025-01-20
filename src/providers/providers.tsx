@@ -1,23 +1,41 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { PropsWithChildren } from "react";
 import { AxiosProvider } from "./AxiosContext.tsx";
-import { AuthProvider } from "./AuthContext.tsx";
+import { AuthProvider, useAuth } from "./AuthContext.tsx";
 import AuthGuard from "../guard/AuthGuard.tsx";
 import GuestGuard from "../guard/GuestGuard.tsx";
 import { ThemeProvider } from "@/providers/ThemeProvider.tsx";
 import App from "../App.tsx";
-//student
+// student
 import HorarioRoute from "../routes/horario.tsx";
 import SolicitudCrearRoute from "@/routes/solicitudCrear.tsx";
-//root
+// root
 import SolicitudRoute from "../routes/solicitudes.tsx";
 import SolicitudDetalleRoute from "@/routes/solicitudDetalle.tsx";
 import UsuariosRoute from "../routes/usuarios.tsx";
 import EstadisticasRoute from "../routes/estadisticas.tsx";
-//login
+// login
 import LoginRoute from "../routes/login.tsx";
 import RegisterRoute from "../routes/register.tsx";
+
+// Componente para manejar redirecciones basadas en el tipo de usuario
+const DefaultRedirect = () => {
+  const { user } = useAuth();
+
+  // Puedes personalizar las rutas por defecto según el tipo de usuario
+  const defaultRoutes: Record<string, string> = {
+    STUDENT: "/",
+    ADMIN: "/solicitudes",
+    ROOT: "/solicitudes",
+  };
+
+  return <Navigate to={defaultRoutes[user?.kind || "default"]} replace />;
+};
 
 const router = createBrowserRouter([
   {
@@ -80,7 +98,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: (
       <GuestGuard>
-        <LoginRoute />,
+        <LoginRoute />
       </GuestGuard>
     ),
   },
@@ -92,21 +110,28 @@ const router = createBrowserRouter([
       </GuestGuard>
     ),
   },
+  {
+    // Captura cualquier ruta no definida
+    path: "*",
+    element: (
+      <AuthGuard>
+        <DefaultRedirect />
+      </AuthGuard>
+    ),
+  },
 ]);
 
 const Providers = ({ children }: PropsWithChildren) => {
   return (
-    <>
-      <AxiosProvider>
-        <AuthProvider>
-          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-            <RouterProvider router={router} />
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </AuthProvider>
-      </AxiosProvider>
-    </>
+    <AxiosProvider>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+          <RouterProvider router={router} />
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
+    </AxiosProvider>
   );
 };
 

@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useAxios } from "./AxiosContext.tsx";
 import { AxiosInstance } from "axios";
 import { UserType } from "../types/userTypes.ts";
+import Loader from "@/components/loader.tsx";
 
 type AuthContextType = {
   loggedIn: boolean;
@@ -30,8 +31,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     kind: "",
     verified: false,
   };
-  const [loggedIn, setLoggedIn] = useState(false);
+
+  const [loggedIn, setLoggedIn] = useState<boolean>(() => {
+    // Inicializar loggedIn basado en la existencia del token
+    return !!localStorage.getItem("access_token");
+  });
   const [user, setUser] = useState<UserType>(emptyUser);
+  const [isLoading, setIsLoading] = useState(true);
+
   const axios: AxiosInstance = useAxios();
 
   const register = async (
@@ -58,8 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       password,
     });
     localStorage.setItem("access_token", data.access_token);
-    await me(); // Obtener datos del usuario automáticamente después de iniciar sesión
     setLoggedIn(true);
+    await me();
   };
 
   const logout = () => {
@@ -72,26 +79,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data } = await axios.get("/api/auth/user");
       setUser(data);
-    } catch {
+      setLoggedIn(true);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
       logout();
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    if (token && !user) {
-      me(); // Actualizar datos si hay un token válido pero no hay usuario en memoria
+    if (token) {
+      me();
+    } else {
+      setIsLoading(false);
     }
-  }, []);
+  }, []); // Solo se ejecuta al montar el componente
+
+  if (isLoading) {
+    return <Loader isLoading={isLoading} />; // O un componente de loading
+  }
 
   return (
-    <AuthContext.Provider value={{ loggedIn, user, register, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        loggedIn,
+        user,
+        register,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Evitar problemas con Fast Refresh exportando la función directamente
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
