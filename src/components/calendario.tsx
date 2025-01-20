@@ -8,8 +8,20 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Materia } from "@/types/materiaTypes";
-import { Trash2, Save, X } from "lucide-react";
+import { Trash2, Save, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
+import { Solicitud } from "@/types/solicitudesTypes";
 
 interface CalendarioProps {
   horario: Materia[];
@@ -20,6 +32,7 @@ interface CalendarioProps {
   ) => void;
   handleSave?: () => void;
   horarioInicial?: Materia[];
+  solicitudes?: Solicitud["requests"];
 }
 
 export default function Calendario({
@@ -27,6 +40,7 @@ export default function Calendario({
   handleRemoveMateria,
   handleSave,
   horarioInicial = [],
+  solicitudes,
 }: CalendarioProps) {
   const timeSlots = [
     "6-7",
@@ -249,10 +263,100 @@ export default function Calendario({
           </TableBody>
         </Table>
         <div className="mt-4">
-          <Button className="w-full" onClick={() => handleSave && handleSave()}>
-            <Save />
-            Guardar
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger className="w-full" asChild>
+              <Button>
+                <Save />
+                Guardar
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Resumen de movimientos</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {horarioInicial.length > 0 ? (
+                    <div className="flex flex-col gap-y-2 mb-4">
+                      {solicitudes &&
+                        solicitudes?.length > 0 &&
+                        solicitudes.map((solicitud) =>
+                          solicitud.from && !solicitud.to ? (
+                            <div
+                              key={solicitud.from.sku}
+                              className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                            >
+                              <MinusCircle size={24} className="text-red-500" />
+                              <p>
+                                Eliminada: {solicitud.from.name} (
+                                {solicitud.from.group})
+                              </p>
+                            </div>
+                          ) : solicitud.to && !solicitud.from ? (
+                            <div
+                              key={solicitud.to[0].sku}
+                              className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                            >
+                              <PlusCircle
+                                size={24}
+                                className="text-green-500"
+                              />
+                              <p>
+                                Añadida: {solicitud.to[0].name} (
+                                {solicitud.to.map((m) => m.group).join(", ")})
+                              </p>
+                            </div>
+                          ) : (
+                            solicitud.to &&
+                            solicitud.from && (
+                              <div
+                                key={solicitud.from.sku}
+                                className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                              >
+                                <Repeat size={24} className="text-blue-500" />
+                                <p>
+                                  Cambio de grupo: {solicitud.from.name} (
+                                  {solicitud.from.group}) a (
+                                  {solicitud.to.map((m) => m.group).join(", ")})
+                                </p>
+                              </div>
+                            )
+                          )
+                        )}
+                    </div>
+                  ) : (
+                    horario.length > 0 && (
+                      <div>
+                        <h3 className="font-medium text-xl">
+                          Horario modificado
+                        </h3>
+                        <ul className="list-disc list-inside my-4">
+                          {horario.map((materia) => (
+                            <li key={materia._id}>
+                              {materia.sku} -{" "}
+                              <span className="font-semibold">
+                                {materia.name}
+                              </span>{" "}
+                              en grupo{" "}
+                              <span className="font-semibold">
+                                {materia.groups[0].sku}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  )}
+                  ¿Estás seguro de que deseas guardar? Por favor, revisa el
+                  resumen de los movimientos realizados.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleSave && handleSave()}>
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>

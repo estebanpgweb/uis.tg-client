@@ -327,6 +327,7 @@ const SolicitudCrearRoute = () => {
             handleRemoveMateria={handleRemoveGrupo}
             handleSave={handleSaveSolicitud}
             horarioInicial={horarioInicial}
+            solicitudes={solicitud.requests}
           />
         </div>
         <div className="w-1/5">
