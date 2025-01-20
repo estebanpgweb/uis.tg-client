@@ -57,9 +57,10 @@ const SolicitudDetalleRoute = () => {
   const { toast } = useToast();
   const auth = useAuth();
   const kind = auth?.user?.kind || "STUDENT";
-  const userId = auth?.user?._id;
+  const userId = auth?.user?.id;
 
   useEffect(() => {
+    if (!userId) return;
     const fetchSolicitud = async () => {
       try {
         setIsLoading(true);
@@ -88,7 +89,7 @@ const SolicitudDetalleRoute = () => {
     };
 
     fetchSolicitud();
-  }, [axios, id, toast, completed, kind]);
+  }, [axios, id, toast, completed, kind, userId]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {

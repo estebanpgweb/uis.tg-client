@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { useAuth } from "@/providers/AuthContext";
@@ -29,17 +29,16 @@ const SolicitudRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
-  const kind = auth?.user?.kind || "STUDENT";
-  const userId = auth?.user?._id;
+  const kind = auth?.user?.kind;
+  const userId = auth?.user?.id;
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const pageLimit = 10;
-  const paramsFilter = [
-    "student.identification",
-    "student.name",
-    "student.lastname",
-  ];
+  const paramsFilter = useMemo(
+    () => ["student.identification", "student.name", "student.lastname"],
+    []
+  );
 
   const fetchSolicitudes = async (
     page: number,
@@ -49,7 +48,6 @@ const SolicitudRoute = () => {
   ) => {
     try {
       setIsLoading(true);
-      const kind = auth?.user?.kind || "STUDENT";
       const params = new URLSearchParams({
         filter: JSON.stringify(
           buildFilterQuery(filter, paramsFilter, statuses)
@@ -87,6 +85,7 @@ const SolicitudRoute = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!userId) return;
       // Si hay un filtro o estados seleccionados, siempre consultar la API
       if (filter !== "" || selectedStatuses.length > 0 || sorting.field) {
         const data = await fetchSolicitudes(
@@ -112,7 +111,7 @@ const SolicitudRoute = () => {
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting]);
+  }, [page, filter, selectedStatuses, sorting, userId]);
 
   useEffect(() => {
     const getSolicitudesCount = async () => {
@@ -183,6 +182,17 @@ const SolicitudRoute = () => {
                   title: "Horario no registrado",
                   description:
                     "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+                });
+              } else if (
+                solicitudes.filter(
+                  (solicitud) => solicitud.status === "PENDING"
+                ).length > 0
+              ) {
+                toast({
+                  variant: "destructive",
+                  title: "Solicitud pendiente",
+                  description:
+                    "Ya tiene una solicitud de ajuste de matrícula pendiente.",
                 });
               } else {
                 navigate("/solicitud/crear");
