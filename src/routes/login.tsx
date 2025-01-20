@@ -25,7 +25,7 @@ const LoginRoute = () => {
     try {
       setIsLoading(true);
       await auth?.login(username, password);
-      const kind = auth?.user?.kind || "STUDENT";
+      const kind = auth?.user?.kind;
       if (kind === "STUDENT") navigate("/");
       else navigate("/solicitudes");
     } catch (error) {

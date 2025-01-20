@@ -53,12 +53,12 @@ function App() {
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
-      <h1 className="text-2xl font-bold">
+      <h1 className="text-2xl font-bold mb-4">
         Bienvenido al sistema de ajuste de matrícula
       </h1>
       {/* Alerta de horario */}
       {!horario || horario === 0 ? (
-        <Alert variant="destructive" className="my-4 mx-8">
+        <Alert variant="destructive">
           <AlertCircle />
           <AlertTitle>¡Horario no registrado!</AlertTitle>
           <AlertDescription>
@@ -67,7 +67,7 @@ function App() {
           </AlertDescription>
         </Alert>
       ) : (
-        <Alert className="my-4 mx-8">
+        <Alert>
           <TriangleAlert />
           <AlertTitle>¡Importante!</AlertTitle>
           <AlertDescription>

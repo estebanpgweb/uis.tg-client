@@ -65,7 +65,7 @@ const SolicitudDetalleRoute = () => {
         setIsLoading(true);
         const { data } =
           kind === "STUDENT"
-            ? await axios.get(`/api/student/appeals/${id}`, {
+            ? await axios.get(`/api/appeal/${id}`, {
                 headers: { "x-resource-id": userId },
               })
             : await axios.get(`/api/appeal/${id}`);

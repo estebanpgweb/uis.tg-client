@@ -218,7 +218,6 @@ const HorarioRoute = () => {
         }),
       };
 
-      console.log(formatedHorario);
       if (horarioInicial.length === 0 && idHorario === null) {
         await axios.post(`/api/schedule`, formatedHorario);
       } else {

@@ -6,7 +6,7 @@ export interface UserType {
   identification?: string | null;
   username: string;
   permissions: string[];
-  kind: "STUDENT" | "ROOT" | "ADMIN";
+  kind: "STUDENT" | "ROOT" | "ADMIN" | "";
   verified: boolean;
   createdAt?: string;
   password?: string;

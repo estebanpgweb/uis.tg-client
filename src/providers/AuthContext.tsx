@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     lastname: "",
     username: "",
     permissions: [],
-    kind: "STUDENT",
+    kind: "",
     verified: false,
   };
   const [loggedIn, setLoggedIn] = useState(false);

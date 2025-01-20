@@ -62,7 +62,7 @@ const SolicitudRoute = () => {
 
       const { data } =
         kind === "STUDENT"
-          ? await axios.get(`/api/student/appeals?${params}`, {
+          ? await axios.get(`/api/appeal?${params}`, {
               headers: { "x-resource-id": userId },
             })
           : await axios.get(`/api/appeal?${params}`);
@@ -122,11 +122,10 @@ const SolicitudRoute = () => {
           paramsFilter,
           selectedStatuses
         );
-        const kind = auth?.user?.kind || "STUDENT";
 
         const { data } =
           kind === "STUDENT"
-            ? await axios.get(`/api/student/appeals/count`, {
+            ? await axios.get(`/api/appeal/count`, {
                 params: { filter: JSON.stringify(filterQuery) },
                 headers: { "x-resource-id": userId },
               })
@@ -140,7 +139,7 @@ const SolicitudRoute = () => {
     };
 
     getSolicitudesCount();
-  }, [axios, filter, selectedStatuses]);
+  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
 
   useEffect(() => {
     const fetchHorario = async () => {
