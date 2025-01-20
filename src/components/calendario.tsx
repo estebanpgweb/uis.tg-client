@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import {
@@ -20,12 +19,14 @@ interface CalendarioProps {
     isInicial?: boolean
   ) => void;
   handleSave?: () => void;
+  horarioInicial?: Materia[];
 }
 
 export default function Calendario({
   horario,
   handleRemoveMateria,
   handleSave,
+  horarioInicial = [],
 }: CalendarioProps) {
   const timeSlots = [
     "6-7",
@@ -46,12 +47,6 @@ export default function Calendario({
     "21-22",
   ];
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-  const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
-
-  useEffect(() => {
-    setHorarioInicial(horario);
-  }, []);
 
   const getClassForCell = (materiaId: string, group?: string) => {
     const colorClasses = [
@@ -96,7 +91,7 @@ export default function Calendario({
   }
 
   function matchDayAndTime(
-    day: string,
+    dia: string,
     timeSlot: string,
     schedule: Materia["groups"][0]["schedule"]
   ): { matches: boolean; duration?: number } {
@@ -111,10 +106,10 @@ export default function Calendario({
 
     const [slotStart] = timeSlot.split("-").map(Number);
 
-    for (const { dia, hora } of schedule) {
-      if (dayMap[dia.toUpperCase()] !== day) continue;
+    for (const { day, time } of schedule) {
+      if (dayMap[day.toUpperCase()] !== dia) continue;
 
-      const { start: scheduleStart, end: scheduleEnd } = parseTimeRange(hora);
+      const { start: scheduleStart, end: scheduleEnd } = parseTimeRange(time);
 
       if (slotStart === scheduleStart) {
         return {
@@ -254,10 +249,7 @@ export default function Calendario({
           </TableBody>
         </Table>
         <div className="mt-4">
-          <Button
-            className="w-full"
-            onClick={() => handleSave && handleSave()}
-          >
+          <Button className="w-full" onClick={() => handleSave && handleSave()}>
             <Save />
             Guardar
           </Button>

@@ -10,13 +10,14 @@ export interface Materia {
     capacity?: number;
     enrolled?: number;
     schedule: {
-      dia: string;
-      hora: string;
-      edificio: string;
-      aula: string;
-      profesor: string;
+      day: string;
+      time: string;
+      building: string;
+      room: string;
+      professor: string;
     }[];
   }[];
+  group?: string;
   createdAt?: string;
   updatedAt?: string;
 }

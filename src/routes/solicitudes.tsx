@@ -30,6 +30,7 @@ const SolicitudRoute = () => {
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const kind = auth?.user?.kind || "STUDENT";
+  const userId = auth?.user?._id;
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -61,7 +62,9 @@ const SolicitudRoute = () => {
 
       const { data } =
         kind === "STUDENT"
-          ? await axios.get(`/api/student/appeals?${params}`)
+          ? await axios.get(`/api/student/appeals?${params}`, {
+              headers: { "x-resource-id": userId },
+            })
           : await axios.get(`/api/appeal?${params}`);
       return data;
     } catch (error) {
@@ -125,6 +128,7 @@ const SolicitudRoute = () => {
           kind === "STUDENT"
             ? await axios.get(`/api/student/appeals/count`, {
                 params: { filter: JSON.stringify(filterQuery) },
+                headers: { "x-resource-id": userId },
               })
             : await axios.get(`/api/appeal/count`, {
                 params: { filter: JSON.stringify(filterQuery) },

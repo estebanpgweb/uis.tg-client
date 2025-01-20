@@ -116,7 +116,7 @@ function App() {
             className={"w-fit mx-auto"}
             onClick={() =>
               horario && horario > 0
-                ? navigate("/solicitudes")
+                ? navigate("/solicitud/crear")
                 : toast({
                     variant: "destructive",
                     title: "¡Horario no registrado!",

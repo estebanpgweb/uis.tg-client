@@ -93,10 +93,10 @@ export default function Materias({
                                 <ul className="list-disc list-inside">
                                   {group.schedule.map((s, idx) => (
                                     <li key={idx}>
-                                      {s.dia}, {s.hora}
-                                      {s.edificio &&
-                                        s.aula &&
-                                        ` (${s.edificio} - ${s.aula})`}
+                                      {s.day}, {s.time}
+                                      {s.building &&
+                                        s.room &&
+                                        ` (${s.building} - ${s.room})`}
                                     </li>
                                   ))}
                                 </ul>

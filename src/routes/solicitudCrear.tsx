@@ -23,10 +23,6 @@ const SolicitudCrearRoute = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    setHorarioInicial(horario);
-  }, []);
-
   // Actualizar la solicitud cuando cambia el horario
   useEffect(() => {
     if (horarioInicial.length > 0) {
@@ -70,8 +66,20 @@ const SolicitudCrearRoute = () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get(`/api/schedule`);
-        const sucjects = data?.subjects || [];
-        setHorario(sucjects);
+        const subjects =
+          data.length > 0
+            ? data[0].subjects.map((subject: Materia) => {
+                return {
+                  ...subject,
+                  groups: [subject.group],
+                };
+              })
+            : [];
+
+        if (data.length > 0) {
+          setHorario(subjects);
+          setHorarioInicial(subjects);
+        }
       } catch (error) {
         const errorMessage =
           (error as { response?: { data?: { message?: string } } }).response
@@ -98,8 +106,8 @@ const SolicitudCrearRoute = () => {
   ): boolean => {
     return existingSchedule.some((existing) =>
       newSchedule.some((newSlot) => {
-        if (existing.dia.toUpperCase() === newSlot.dia.toUpperCase()) {
-          return isTimeOverlap(existing.hora, newSlot.hora);
+        if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
+          return isTimeOverlap(existing.time, newSlot.time);
         }
         return false;
       })
@@ -318,6 +326,7 @@ const SolicitudCrearRoute = () => {
             horario={horario}
             handleRemoveMateria={handleRemoveGrupo}
             handleSave={handleSaveSolicitud}
+            horarioInicial={horarioInicial}
           />
         </div>
         <div className="w-1/5">

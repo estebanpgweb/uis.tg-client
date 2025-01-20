@@ -11,6 +11,8 @@ import Loader from "@/components/loader";
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
   const [horario, setHorario] = useState<Materia[]>([]);
+  const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
+  const [idHorario, setIdHorario] = useState<string | null>(null);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -46,8 +48,21 @@ const HorarioRoute = () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get(`/api/schedule`);
-        const subjects = data?.subjects || [];
-        setHorario(subjects);
+        const subjects =
+          data.length > 0
+            ? data[0].subjects.map((subject: Materia) => {
+                return {
+                  ...subject,
+                  groups: [subject.group],
+                };
+              })
+            : [];
+
+        if (data.length > 0) {
+          setIdHorario(data[0]._id);
+          setHorario(subjects);
+          setHorarioInicial(subjects);
+        }
       } catch (error) {
         const errorMessage =
           (error as { response?: { data?: { message?: string } } }).response
@@ -76,9 +91,9 @@ const HorarioRoute = () => {
     return existingSchedule.some((existing) =>
       newSchedule.some((newSlot) => {
         // Primero verificamos si es el mismo día
-        if (existing.dia.toUpperCase() === newSlot.dia.toUpperCase()) {
+        if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
           // Luego verificamos si hay solapamiento en las horas
-          return isTimeOverlap(existing.hora, newSlot.hora);
+          return isTimeOverlap(existing.time, newSlot.time);
         }
         return false;
       })
@@ -176,11 +191,40 @@ const HorarioRoute = () => {
     }
     try {
       setIsLoading(true);
+      if (horarioInicial === horario) {
+        toast({
+          variant: "destructive",
+          title: "Sin cambios",
+          description: "No hay cambios pendientes para guardar",
+        });
+        return;
+      }
       const formatedHorario = {
-        subjects: horario.map((m) => m),
+        subjects: horario.map((m) => {
+          return {
+            ...m,
+            group: {
+              ...m.groups[0],
+              schedule: m.groups[0].schedule.map((slot) => {
+                const [start, end] = slot.time.split("-");
+                return {
+                  ...slot,
+                  start,
+                  end,
+                };
+              }),
+            },
+          };
+        }),
       };
+
       console.log(formatedHorario);
-      await axios.post(`/api/schedule`, formatedHorario);
+      if (horarioInicial.length === 0 && idHorario === null) {
+        await axios.post(`/api/schedule`, formatedHorario);
+      } else {
+        await axios.put(`/api/schedule/${idHorario}`, formatedHorario);
+      }
+
       toast({
         title: "Horario guardado",
         description: "El horario ha sido guardado exitosamente.",
