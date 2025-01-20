@@ -11,6 +11,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getStatusLabel } from "@/types/solicitudesTypes";
+import Loader from "@/components/loader";
 
 export default function EstadisticasRoute() {
   const [isLoading, setIsLoading] = useState(true);
@@ -167,12 +168,9 @@ export default function EstadisticasRoute() {
     );
   }, [solicitudes]);
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando estadisticas...</div>;
-  }
-
   return (
     <div className="container mx-auto">
+      <Loader isLoading={isLoading} />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Estadísticas de solicitudes</h1>
       </div>
@@ -187,25 +185,26 @@ export default function EstadisticasRoute() {
             <p className="text-2xl font-semibold ml-4">
               {
                 //calculamos un tiempo de respuesta promedio comparando el tiempo de creacion con el tiempo de ultima actualizacion cuando son status estas completadas
-                (
-                  solicitudesAtendidas.reduce((acc, solicitud) => {
-                    const createdAt = solicitud.createdAt
-                      ? new Date(solicitud.createdAt)
-                      : new Date();
-                    const updatedAt = solicitud.updatedAt
-                      ? new Date(solicitud.updatedAt)
-                      : new Date();
-                    return acc + (updatedAt.getTime() - createdAt.getTime());
-                  }, 0) /
-                  solicitudesAtendidas.length /
-                  1000 /
-                  60 /
-                  60
+                (solicitudesAtendidas.length === 0
+                  ? 0
+                  : solicitudesAtendidas.reduce((acc, solicitud) => {
+                      const createdAt = solicitud.createdAt
+                        ? new Date(solicitud.createdAt)
+                        : new Date();
+                      const updatedAt = solicitud.updatedAt
+                        ? new Date(solicitud.updatedAt)
+                        : new Date();
+                      return acc + (updatedAt.getTime() - createdAt.getTime());
+                    }, 0) /
+                    solicitudesAtendidas.length /
+                    1000 /
+                    60 /
+                    60
                 ).toFixed(1) + " horas"
               }
             </p>
             <span className="opacity-50">
-              en {solicitudesAtendidas.length} solicitudes
+              en {solicitudesAtendidas.length} solicitudes atendidas
             </span>
           </Card>
           <Card className="flex flex-col gap-y-2 flex-1 px-6 py-3">

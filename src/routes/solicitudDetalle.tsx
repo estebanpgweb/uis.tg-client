@@ -198,13 +198,21 @@ const SolicitudDetalleRoute = () => {
 
   const peticionMessage = (index: number) => {
     const request = solicitud?.requests[index];
+
     if (request?.from && request?.to) {
-      return `Cambio del grupo ${request.from.group} al ${request.to.group} en la materia ${request.from.sku}`;
+      return `Cambio del grupo ${request.from.group} al ${request.to
+        .map((g) => g.group)
+        .join(", ")} en la materia ${request.from.sku} - ${request.from.name}`;
     } else if (request?.from && !request?.to) {
-      return `Cancelar la materia ${request.from.sku}`;
+      return `Cancelar la materia ${request.from.sku} - ${request.from.name}`;
     } else if (!request?.from && request?.to) {
-      return `Incluir la materia ${request?.to.sku} grupo ${request.to.group}`;
+      return `Incluir la materia ${request.to
+        .map((t) => t.sku)
+        .join(", ")} - ${request.to
+        .map((t) => t.name)
+        .join(", ")} en el grupo ${request.to.map((g) => g.group).join(", ")}`;
     }
+
     return "Petición desconocida";
   };
 
@@ -232,10 +240,10 @@ const SolicitudDetalleRoute = () => {
         </h1>
       </div>
       <div className="flex items-center justify-between mx-8">
-        <Label className="text-gray-500 mx-4">
+        <Label className="opacity-50 mx-4">
           ID de la solicitud: {solicitud._id}
         </Label>
-        <Label className="text-gray-500 mx-4">
+        <Label className="opacity-50 mx-4">
           Estado de la solicitud:{" "}
           <Badge
             className={getBadgeColor(solicitud.status || "") + " text-white"}
@@ -252,19 +260,19 @@ const SolicitudDetalleRoute = () => {
             <h2 className="text-xl font-medium">Datos del estudiante</h2>
           </div>
           <div className="flex flex-col gap-2 mx-4">
-            <Label className="text-gray-500">Código del estudiante</Label>
+            <Label className="opacity-50">Código del estudiante</Label>
             <Label className="font-medium text-lg">
               {solicitud.student?.identification}
             </Label>
           </div>
           <div className="flex flex-col gap-2 mx-4">
-            <Label className="text-gray-500">Nombre del estudiante</Label>
+            <Label className="opacity-50">Nombre del estudiante</Label>
             <Label className="font-medium text-lg">
               {solicitud.student?.name + " " + solicitud.student?.lastname}
             </Label>
           </div>
           <div className="flex flex-col gap-2 mx-4">
-            <Label className="text-gray-500">
+            <Label className="opacity-50">
               Tiempo en espera de la solicitud
             </Label>
             <Label className="font-medium text-lg">
@@ -284,9 +292,7 @@ const SolicitudDetalleRoute = () => {
               <div className="flex items-center justify-between" key={index}>
                 <div className="flex flex-col gap-1 mx-4">
                   <Label className="text-lg">Petición #{index + 1}</Label>
-                  <Label className="text-gray-500">
-                    {peticionMessage(index)}
-                  </Label>
+                  <Label className="opacity-50">{peticionMessage(index)}</Label>
                   <div hidden={petición.status !== "REJECTED"}>
                     <Select
                       disabled={
@@ -378,6 +384,7 @@ const SolicitudDetalleRoute = () => {
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
+              className={`${kind !== "ADMIN" ? "hidden" : ""}`}
               disabled={solicitud?.status !== "PENDING"}
               variant={"outline"}
             >

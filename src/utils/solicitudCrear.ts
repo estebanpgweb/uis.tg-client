@@ -47,11 +47,11 @@ export function generateAppeals(
 
       // Si hay diferencias en los grupos, registrar el cambio
       if (
-        ![...gruposIniciales].every((g) => gruposActuales.has(g)) ||
-        ![...gruposActuales].every((g) => gruposIniciales.has(g))
+        gruposIniciales.size !== gruposActuales.size ||
+        [...gruposIniciales].some((g) => !gruposActuales.has(g))
       ) {
         materiaInicial.groups.forEach((groupInicial) => {
-          if (!materiaActual.groups.some((g) => g.sku === groupInicial.sku)) {
+          if (!materiaActual.groups.every((g) => g.sku === groupInicial.sku)) {
             // El grupo inicial ya no está presente, registrar cambio o eliminación
             const appeal: Solicitud["requests"][0] = {
               from: {
@@ -66,11 +66,13 @@ export function generateAppeals(
 
             // Si hay nuevos grupos, agregarlos como destino
             if (materiaActual.groups.length > 0) {
-              appeal.to = {
-                group: materiaActual.groups.map((group) => group.sku),
-                sku: materiaActual.sku,
-                name: materiaActual.name,
-              };
+              appeal.to = materiaActual.groups
+                .filter((g) => g.sku !== groupInicial.sku)
+                .map((g) => ({
+                  group: g.sku,
+                  sku: materiaActual.sku,
+                  name: materiaActual.name,
+                }));
             } else {
               appeal.to = null;
             }
@@ -88,11 +90,13 @@ export function generateAppeals(
       // Caso: Nueva materia agregada
       appeals.push({
         from: null,
-        to: {
-          group: materiaActual.groups.map((g) => g.sku),
-          sku: materiaActual.sku,
-          name: materiaActual.name,
-        },
+        to: [
+          materiaActual.groups.map((g) => ({
+            group: g.sku,
+            sku: materiaActual.sku,
+            name: materiaActual.name,
+          }))[0],
+        ],
         status: "PENDING",
         reason: null,
       });

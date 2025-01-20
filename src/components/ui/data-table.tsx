@@ -133,7 +133,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
-        <p className="text-gray-500">
+        <p className="opacity-50">
           Mostrando {data.length} de {rows} resultados
         </p>
       </div>

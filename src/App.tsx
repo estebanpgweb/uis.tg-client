@@ -84,7 +84,7 @@ function App() {
             <CalendarDays size={28} />
             <h2 className="text-xl font-medium">Cargar Horario</h2>
           </div>
-          <Label className="text-gray-500">
+          <Label className="opacity-50">
             Visualiza y organiza tu horario académico
           </Label>
           <p>En esta sección podrá:</p>
@@ -103,7 +103,7 @@ function App() {
             <FileText size={28} />
             <h2 className="text-xl font-medium">Crear Solicitud de Ajuste</h2>
           </div>
-          <Label className="text-gray-500">
+          <Label className="opacity-50">
             Solicita cambios en tu matricula académica
           </Label>
           <p>En esta sección podrá:</p>

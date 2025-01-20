@@ -48,7 +48,7 @@ export default function UsuariosRoute() {
     lastname: "",
     identification: null,
     username: "",
-    kind: "ADMIN",
+    kind: "STUDENT",
     permissions: [],
     verified: false,
     password: "",
@@ -114,7 +114,7 @@ export default function UsuariosRoute() {
         lastname: "",
         identification: "",
         username: "",
-        kind: "ADMIN",
+        kind: "STUDENT",
         permissions: [],
         verified: false,
         password: "",
@@ -265,6 +265,30 @@ export default function UsuariosRoute() {
               }}
             >
               <div className="flex flex-col gap-2">
+                <Label className="font-normal" htmlFor="kind">
+                  Tipo de usuario
+                </Label>
+                <Select
+                  defaultValue={formData.kind}
+                  value={formData.kind}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      kind: value as "ADMIN" | "STUDENT",
+                    }))
+                  }
+                  name="kind"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo de usuario" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ADMIN">Administrador</SelectItem>
+                    <SelectItem value="STUDENT">Estudiante</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label className="font-normal" htmlFor="name">
                   Nombre
                 </Label>
@@ -332,31 +356,6 @@ export default function UsuariosRoute() {
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <Label className="font-normal" htmlFor="kind">
-                  Tipo de usuario
-                </Label>
-                <Select
-                  defaultValue={formData.kind}
-                  value={formData.kind}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      kind: value as "ADMIN" | "STUDENT",
-                    }))
-                  }
-                  name="kind"
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo de usuario" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADMIN">Administrador</SelectItem>
-                    <SelectItem value="STUDENT">Estudiante</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 <AlertDialogAction type="submit">Crear</AlertDialogAction>

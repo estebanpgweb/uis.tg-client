@@ -31,7 +31,6 @@ const SolicitudCrearRoute = () => {
         horarioInicial,
         horario
       );
-      console.log("solicitud:" + JSON.stringify(updatedSolicitud));
       setSolicitud(updatedSolicitud);
     }
   }, [horario]);

@@ -89,7 +89,7 @@ export default function Materias({
                               <span className="font-medium">
                                 Grupo {group.sku}
                               </span>
-                              <div className="text-xs text-gray-500 px-2">
+                              <div className="text-xs opacity-50 px-2">
                                 <ul className="list-disc list-inside">
                                   {group.schedule.map((s, idx) => (
                                     <li key={idx}>
@@ -113,7 +113,7 @@ export default function Materias({
                         );
                       })
                     ) : (
-                      <p className="text-gray-500 text-sm">
+                      <p className="opacity-50 text-sm">
                         No hay grupos disponibles
                       </p>
                     )}

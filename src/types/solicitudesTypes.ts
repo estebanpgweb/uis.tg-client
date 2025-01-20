@@ -13,11 +13,13 @@ export interface Solicitud {
       sku: string;
       name: string;
     } | null;
-    to: {
-      group: string[];
-      sku: string;
-      name: string;
-    } | null;
+    to:
+      | {
+          group: string;
+          sku: string;
+          name: string;
+        }[]
+      | null;
     status?: RequestStatus;
     reason?: string | null;
   }[];
