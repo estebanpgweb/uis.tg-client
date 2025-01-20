@@ -107,6 +107,7 @@ export default function UsuariosRoute() {
         title: "Usuario creado",
         description: "El usuario ha sido creado exitosamente",
       });
+      setUsuarios((prev) => [usuario, ...prev]);
       setFormData({
         name: "",
         lastname: "",
@@ -172,6 +173,7 @@ export default function UsuariosRoute() {
         title: "Usuario eliminado",
         description: "El usuario ha sido eliminado exitosamente",
       });
+      setUsuarios((prev) => prev.filter((u) => u._id !== usuario._id));
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
