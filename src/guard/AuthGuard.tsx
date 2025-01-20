@@ -11,7 +11,6 @@ const AuthGuard = ({ children }: PropsWithChildren) => {
   if (!auth) return null;
 
   if (!access_token || (access_token && !auth?.loggedIn)) {
-    auth?.logout();
     return <Navigate to={"/login"} />;
   }
 

@@ -24,10 +24,15 @@ const LoginRoute = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await auth?.login(username, password);
-      const kind = auth?.user?.kind;
-      if (kind === "STUDENT") navigate("/");
-      else navigate("/solicitudes");
+      // Esperamos a que se complete el login y obtenemos los datos del usuario
+      const userData = await auth.login(username, password);
+
+      // Ahora podemos usar los datos del usuario directamente
+      if (userData.kind === "STUDENT") {
+        navigate("/");
+      } else {
+        navigate("/solicitudes");
+      }
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data

@@ -15,7 +15,7 @@ type AuthContextType = {
     lastname: string,
     identification: string
   ) => Promise<void>;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<UserType>;
   logout: () => void;
 };
 
@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const [loggedIn, setLoggedIn] = useState<boolean>(() => {
-    // Inicializar loggedIn basado en la existencia del token
     return !!localStorage.getItem("access_token");
   });
   const [user, setUser] = useState<UserType>(emptyUser);
@@ -59,33 +58,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const me = async (): Promise<UserType> => {
+    try {
+      const { data } = await axios.get("/api/auth/user");
+      setUser(data);
+      setLoggedIn(true);
+      return data;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      logout();
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<UserType> => {
     const { data } = await axios.post("/api/auth/login", {
       username,
       password,
     });
     localStorage.setItem("access_token", data.access_token);
     setLoggedIn(true);
-    await me();
+    // Esperamos a que se obtengan los datos del usuario y los retornamos
+    const userData = await me();
+    return userData;
   };
 
   const logout = () => {
     setLoggedIn(false);
     setUser(emptyUser);
     localStorage.removeItem("access_token");
-  };
-
-  const me = async (): Promise<void> => {
-    try {
-      const { data } = await axios.get("/api/auth/user");
-      setUser(data);
-      setLoggedIn(true);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      logout();
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -95,10 +101,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setIsLoading(false);
     }
-  }, []); // Solo se ejecuta al montar el componente
+  }, []);
 
   if (isLoading) {
-    return <Loader isLoading={isLoading} />; // O un componente de loading
+    return <Loader isLoading={isLoading} />;
   }
 
   return (

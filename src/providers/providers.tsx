@@ -26,6 +26,7 @@ import RegisterRoute from "../routes/register.tsx";
 // Componente para manejar redirecciones basadas en el tipo de usuario
 const DefaultRedirect = () => {
   const { user } = useAuth();
+  const kind = user.kind;
 
   // Puedes personalizar las rutas por defecto según el tipo de usuario
   const defaultRoutes: Record<string, string> = {
@@ -34,7 +35,7 @@ const DefaultRedirect = () => {
     ROOT: "/solicitudes",
   };
 
-  return <Navigate to={defaultRoutes[user?.kind || "default"]} replace />;
+  return <Navigate to={defaultRoutes[kind]} replace />;
 };
 
 const router = createBrowserRouter([
