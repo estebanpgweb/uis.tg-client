@@ -90,13 +90,11 @@ export function generateAppeals(
       // Caso: Nueva materia agregada
       appeals.push({
         from: null,
-        to: [
-          materiaActual.groups.map((g) => ({
-            group: g.sku,
-            sku: materiaActual.sku,
-            name: materiaActual.name,
-          }))[0],
-        ],
+        to: materiaActual.groups.map((g) => ({
+          group: g.sku,
+          sku: materiaActual.sku,
+          name: materiaActual.name,
+        })),
         status: "PENDING",
         reason: null,
       });
