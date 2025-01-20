@@ -33,6 +33,7 @@ export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 export const getStatusLabel = (status: string): string => {
   const statusLabels: Record<string, string> = {
     PENDING: "Pendiente",
+    REVIEW: "En Revisión",
     PARTIAL_REJECTED: "Parcialmente Completada",
     REJECTED: "Fallida",
     APPROVED: "Completada",
