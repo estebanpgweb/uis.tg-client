@@ -15,6 +15,7 @@ import {
   AlertCircle,
   TriangleAlert,
 } from "lucide-react";
+import Loader from "./components/loader";
 
 function App() {
   const [horario, setHorario] = useState(0);
@@ -49,12 +50,9 @@ function App() {
     fetchHorario();
   }, [axios, toast]);
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando...</div>;
-  }
-
   return (
     <div className="container mx-auto">
+      <Loader isLoading={isLoading} />
       <h1 className="text-2xl font-bold">
         Bienvenido al sistema de ajuste de matrícula
       </h1>

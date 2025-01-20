@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
-import { useAuth } from "@/providers/AuthContext";
+import Loader from "@/components/loader";
 
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -14,8 +14,6 @@ const HorarioRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const auth = useAuth();
-  const user = auth?.user;
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -48,8 +46,8 @@ const HorarioRoute = () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get(`/api/schedule`);
-        const sucjects = data?.subjects || [];
-        setHorario(sucjects);
+        const subjects = data?.subjects || [];
+        setHorario(subjects);
       } catch (error) {
         const errorMessage =
           (error as { response?: { data?: { message?: string } } }).response
@@ -179,7 +177,6 @@ const HorarioRoute = () => {
     try {
       setIsLoading(true);
       const formatedHorario = {
-        studentId: user.id,
         subjects: horario.map((m) => m),
       };
       console.log(formatedHorario);
@@ -205,12 +202,9 @@ const HorarioRoute = () => {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando horario...</div>;
-  }
-
   return (
     <div className="w-full">
+      <Loader isLoading={isLoading} />
       <h1 className="text-2xl font-bold">Horario del estudiante</h1>
       <div className="flex w-full my-4 gap-x-8 justify-between">
         <div className="flex-1 w-4/5">

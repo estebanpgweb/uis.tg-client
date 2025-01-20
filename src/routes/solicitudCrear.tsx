@@ -8,6 +8,7 @@ import Calendario from "@/components/calendario";
 import { Solicitud } from "@/types/solicitudesTypes";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
 import { updateSolicitud, hasPendingChanges } from "@/utils/solicitudCrear";
+import Loader from "@/components/loader";
 
 const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -307,12 +308,9 @@ const SolicitudCrearRoute = () => {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando horario...</div>;
-  }
-
   return (
     <div className="w-full">
+      <Loader isLoading={isLoading} />
       <h1 className="text-2xl font-bold">Solicitud ajuste de matricula</h1>
       <div className="flex w-full my-4 gap-x-8 justify-between">
         <div className="flex-1 w-4/5">

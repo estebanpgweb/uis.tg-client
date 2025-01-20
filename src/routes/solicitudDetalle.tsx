@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SolicitudTiempoEspera } from "@/utils/tiempoEspera";
 import { useAuth } from "@/providers/AuthContext";
+import Loader from "@/components/loader";
 
 const SolicitudDetalleRoute = () => {
   const { id } = useParams<{ id: string }>(); // Captura el id desde la URL
@@ -203,10 +204,6 @@ const SolicitudDetalleRoute = () => {
     return "Petición desconocida";
   };
 
-  if (isLoading) {
-    return <div className="text-center">Cargando solicitud...</div>;
-  }
-
   if (!solicitud) {
     return (
       <div className="text-center">
@@ -217,6 +214,7 @@ const SolicitudDetalleRoute = () => {
 
   return (
     <div className="container mx-auto">
+      <Loader isLoading={isLoading} />
       {/* Titulo de la vista */}
       <div className="flex items-center justify-between mb-4">
         <Link

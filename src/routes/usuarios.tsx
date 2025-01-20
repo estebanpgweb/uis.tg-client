@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+import Loader from "@/components/loader";
 
 export default function UsuariosRoute() {
   const [usuarios, setUsuarios] = useState<UserType[]>([]);
@@ -236,12 +237,9 @@ export default function UsuariosRoute() {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando usuarios...</div>;
-  }
-
   return (
     <div className="container mx-auto">
+      <Loader isLoading={isLoading} />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Usuarios</h1>
         <AlertDialog>

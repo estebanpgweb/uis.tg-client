@@ -10,6 +10,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
 import { buildFilterQuery } from "@/utils/filterQuery";
 import { Plus } from "lucide-react";
+import Loader from "@/components/loader";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -163,12 +164,9 @@ const SolicitudRoute = () => {
     fetchHorario();
   }, [axios, toast]);
 
-  if (isLoading) {
-    return <div className="text-center p-4">Cargando solicitudes...</div>;
-  }
-
   return (
     <div className="container mx-auto">
+      <Loader isLoading={isLoading} />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
           Solicitudes de Ajuste de Matrícula

@@ -8,10 +8,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import Loader from "@/components/loader";
 
 const LoginRoute = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ const LoginRoute = () => {
   const onSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       await auth?.login(username, password);
       const kind = auth?.user?.kind || "STUDENT";
       if (kind === "STUDENT") navigate("/");
@@ -37,6 +40,8 @@ const LoginRoute = () => {
         title: "Inicio de sesión fallido",
         description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,6 +51,7 @@ const LoginRoute = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
+      <Loader isLoading={isLoading} />
       <Card className="p-4 min-w-96 space-y-4">
         <h1 className="text-2xl text-center">Ajuste de Matricula</h1>
         <h4 className="text-xs text-center">

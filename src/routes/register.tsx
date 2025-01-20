@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
+import Loader from "@/components/loader";
 
 const RegisterRoute = () => {
   const [name, setName] = useState<string>("");
@@ -17,6 +18,7 @@ const RegisterRoute = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
@@ -26,6 +28,7 @@ const RegisterRoute = () => {
   const onSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       //validamos que las contraseñas coincidan
       if (password !== confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
@@ -65,11 +68,14 @@ const RegisterRoute = () => {
         title: "Registro fallido",
         description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
+      <Loader isLoading={isLoading} />
       <Card className="p-4 min-w-96 space-y-4">
         <h1 className="text-2xl text-center">Registro de usuario</h1>
         <h4 className="text-xs text-center">
