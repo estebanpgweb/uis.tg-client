@@ -1,5 +1,6 @@
 import "./App.css";
 import { useAxios } from "./providers/AxiosContext";
+import { useAuth } from "./providers/AuthContext";
 import { AxiosInstance } from "axios";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,12 +24,18 @@ function App() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const axios: AxiosInstance = useAxios();
+  const auth = useAuth();
+  const userId = auth?.user?.id;
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchHorario = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/schedule`);
+        const { data } = await axios.get(`/api/schedule`, {
+          headers: { "x-resource-id": userId },
+        });
         setHorario(data.length);
       } catch (error) {
         const errorMessage =
@@ -48,7 +55,7 @@ function App() {
     };
 
     fetchHorario();
-  }, [axios, toast]);
+  }, [axios, toast, userId]);
 
   return (
     <div className="container mx-auto">

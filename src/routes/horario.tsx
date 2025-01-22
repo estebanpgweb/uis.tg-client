@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
+import { useAuth } from "@/providers/AuthContext";
 import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
@@ -16,6 +17,8 @@ const HorarioRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const auth = useAuth();
+  const userId = auth?.user?.id;
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -44,10 +47,14 @@ const HorarioRoute = () => {
   }, [axios, toast]);
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchHorario = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/schedule`);
+        const { data } = await axios.get(`/api/schedule`, {
+          headers: { "x-resource-id": userId },
+        });
         const subjects =
           data.length > 0
             ? data[0].subjects.map((subject: Materia) => {
@@ -81,7 +88,7 @@ const HorarioRoute = () => {
     };
 
     fetchHorario();
-  }, [axios, toast]);
+  }, [axios, toast, userId]);
 
   // Función mejorada para verificar conflictos de horario
   const checkScheduleConflict = (
@@ -221,7 +228,9 @@ const HorarioRoute = () => {
       if (horarioInicial.length === 0 && idHorario === null) {
         await axios.post(`/api/schedule`, formatedHorario);
       } else {
-        await axios.put(`/api/schedule/${idHorario}`, formatedHorario);
+        await axios.put(`/api/schedule/${idHorario}`, formatedHorario, {
+          headers: { "x-resource-id": userId },
+        });
       }
 
       toast({

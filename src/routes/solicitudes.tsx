@@ -84,8 +84,9 @@ const SolicitudRoute = () => {
   };
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchData = async () => {
-      if (!userId) return;
       // Si hay un filtro o estados seleccionados, siempre consultar la API
       if (filter !== "" || selectedStatuses.length > 0 || sorting.field) {
         const data = await fetchSolicitudes(
@@ -114,6 +115,8 @@ const SolicitudRoute = () => {
   }, [page, filter, selectedStatuses, sorting, userId]);
 
   useEffect(() => {
+    if (!userId) return;
+
     const getSolicitudesCount = async () => {
       try {
         const filterQuery = buildFilterQuery(
@@ -141,10 +144,14 @@ const SolicitudRoute = () => {
   }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchHorario = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/schedule`);
+        const { data } = await axios.get(`/api/schedule`, {
+          headers: { "x-resource-id": userId },
+        });
         setHorario(data.length);
       } catch (error) {
         const errorMessage =
@@ -164,7 +171,7 @@ const SolicitudRoute = () => {
     };
 
     fetchHorario();
-  }, [axios, toast]);
+  }, [axios, toast, userId]);
 
   return (
     <div className="container mx-auto">

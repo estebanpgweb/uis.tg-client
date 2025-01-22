@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/providers/AuthContext";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { Materia } from "@/types/materiaTypes";
@@ -22,6 +23,8 @@ const SolicitudCrearRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const auth = useAuth();
+  const userId = auth?.user?.id;
 
   // Actualizar la solicitud cuando cambia el horario
   useEffect(() => {
@@ -62,10 +65,14 @@ const SolicitudCrearRoute = () => {
   }, [axios, toast]);
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchHorario = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/schedule`);
+        const { data } = await axios.get(`/api/schedule`, {
+          headers: { "x-resource-id": userId },
+        });
         const subjects =
           data.length > 0
             ? data[0].subjects.map((subject: Materia) => {
@@ -98,7 +105,7 @@ const SolicitudCrearRoute = () => {
     };
 
     fetchHorario();
-  }, [axios, toast]);
+  }, [axios, toast, userId]);
 
   const checkMateriaConflict = (
     existingSchedule: Materia["groups"][0]["schedule"],
