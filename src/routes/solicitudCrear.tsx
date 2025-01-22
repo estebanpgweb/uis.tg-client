@@ -133,17 +133,13 @@ const SolicitudCrearRoute = () => {
     }
     checkedSkus.add(materia.sku);
 
-    const hasRequirements =
-      materia.requirements && materia.requirements.length > 0;
-    const hasGroups = materia.groups.length > 0;
-    const requirements = materia.requirements;
-
-    if (!hasRequirements || !hasGroups) {
+    // Si no tiene requisitos, se puede agregar
+    if (!materia.requirements?.length) {
       return undefined;
     }
 
-    // Verificar si algún requisito está en el horario actual (no se pueden ver simultáneamente)
-    const simultaneousRequisite = requirements?.find((requisite) =>
+    // Verificar si algún requisito está en el horario actual
+    const simultaneousRequisite = materia.requirements.find((requisite) =>
       horario.some((m) => m.sku === requisite)
     );
 
@@ -151,28 +147,11 @@ const SolicitudCrearRoute = () => {
       const requisiteName = materias.find(
         (m) => m.sku === simultaneousRequisite
       )?.name;
-      return `${requisiteName} (no se puede ver simultáneamente)`;
+      return `${requisiteName}`;
     }
 
-    // Revisar si faltan requisitos previos
-    const hasRequisite =
-      requirements &&
-      requirements.every((requisite) =>
-        horarioInicial.some((m) => m.sku === requisite && m.groups.length > 0)
-      );
-
-    if (!hasRequisite) {
-      const missingRequisite = requirements?.find(
-        (requisite) => !horarioInicial.some((m) => m.sku === requisite)
-      );
-      const requisiteName = materias.find(
-        (m) => m.sku === missingRequisite
-      )?.name;
-      return requisiteName;
-    }
-
-    // Revisar requisitos de los prerequisitos
-    for (const requisiteSku of requirements || []) {
+    // Verificar los prerequisitos de cada requisito recursivamente
+    for (const requisiteSku of materia.requirements) {
       const requisitoMateria = materias.find((m) => m.sku === requisiteSku);
       if (requisitoMateria) {
         const subRequirement = checkMateriaRequirements(
