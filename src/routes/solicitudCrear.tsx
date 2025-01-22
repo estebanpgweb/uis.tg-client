@@ -123,27 +123,69 @@ const SolicitudCrearRoute = () => {
     );
   };
 
-  //crea una funcion que pueda revisar si alguno de los requisitos de la materia esta en el horario, en caso tal avisar que no se puede agregar
-  const checkMateriaRequirements = (materia: Materia) => {
-    console.log("materia", materia.requirements);
-    horario.map((m) => {
-      console.log("sku ", m.sku);
-    });
+  const checkMateriaRequirements = (
+    materia: Materia,
+    checkedSkus: Set<string> = new Set()
+  ): string | undefined => {
+    // Evitar ciclos infinitos
+    if (checkedSkus.has(materia.sku)) {
+      return undefined;
+    }
+    checkedSkus.add(materia.sku);
+
     const hasRequirements =
       materia.requirements && materia.requirements.length > 0;
     const hasGroups = materia.groups.length > 0;
+    const requirements = materia.requirements;
 
     if (!hasRequirements || !hasGroups) {
-      return true;
+      return undefined;
     }
 
+    // Verificar si algún requisito está en el horario actual (no se pueden ver simultáneamente)
+    const simultaneousRequisite = requirements?.find((requisite) =>
+      horario.some((m) => m.sku === requisite)
+    );
+
+    if (simultaneousRequisite) {
+      const requisiteName = materias.find(
+        (m) => m.sku === simultaneousRequisite
+      )?.name;
+      return `${requisiteName} (no se puede ver simultáneamente)`;
+    }
+
+    // Revisar si faltan requisitos previos
     const hasRequisite =
-      materia.requirements &&
-      materia.requirements.some((requisite) =>
-        horario.some((m) => m.sku === requisite && m.groups.length > 0)
+      requirements &&
+      requirements.every((requisite) =>
+        horarioInicial.some((m) => m.sku === requisite && m.groups.length > 0)
       );
 
-    return !hasRequisite;
+    if (!hasRequisite) {
+      const missingRequisite = requirements?.find(
+        (requisite) => !horarioInicial.some((m) => m.sku === requisite)
+      );
+      const requisiteName = materias.find(
+        (m) => m.sku === missingRequisite
+      )?.name;
+      return requisiteName;
+    }
+
+    // Revisar requisitos de los prerequisitos
+    for (const requisiteSku of requirements || []) {
+      const requisitoMateria = materias.find((m) => m.sku === requisiteSku);
+      if (requisitoMateria) {
+        const subRequirement = checkMateriaRequirements(
+          requisitoMateria,
+          checkedSkus
+        );
+        if (subRequirement) {
+          return subRequirement;
+        }
+      }
+    }
+
+    return undefined;
   };
 
   const handleGroupSelection = (
@@ -178,11 +220,11 @@ const SolicitudCrearRoute = () => {
 
     const hasRequirements = checkMateriaRequirements(materia);
 
-    if (!hasRequirements) {
+    if (hasRequirements) {
       toast({
         variant: "destructive",
         title: "Requisitos no cumplidos",
-        description: "No se pueden agregar materias sin cumplir requisitos.",
+        description: `No se puede agregar debido a que no se han cumplido los requisitos de ${hasRequirements}`,
       });
       return;
     }
