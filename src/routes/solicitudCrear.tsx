@@ -123,6 +123,29 @@ const SolicitudCrearRoute = () => {
     );
   };
 
+  //crea una funcion que pueda revisar si alguno de los requisitos de la materia esta en el horario, en caso tal avisar que no se puede agregar
+  const checkMateriaRequirements = (materia: Materia) => {
+    console.log("materia", materia.requirements);
+    horario.map((m) => {
+      console.log("sku ", m.sku);
+    });
+    const hasRequirements =
+      materia.requirements && materia.requirements.length > 0;
+    const hasGroups = materia.groups.length > 0;
+
+    if (!hasRequirements || !hasGroups) {
+      return true;
+    }
+
+    const hasRequisite =
+      materia.requirements &&
+      materia.requirements.some((requisite) =>
+        horario.some((m) => m.sku === requisite && m.groups.length > 0)
+      );
+
+    return !hasRequisite;
+  };
+
   const handleGroupSelection = (
     materia: Materia,
     group: Materia["groups"][0]
@@ -149,6 +172,17 @@ const SolicitudCrearRoute = () => {
         variant: "destructive",
         title: "Grupo removido",
         description: `Grupo ${group.sku} de ${materia.name} removido del horario`,
+      });
+      return;
+    }
+
+    const hasRequirements = checkMateriaRequirements(materia);
+
+    if (!hasRequirements) {
+      toast({
+        variant: "destructive",
+        title: "Requisitos no cumplidos",
+        description: "No se pueden agregar materias sin cumplir requisitos.",
       });
       return;
     }
