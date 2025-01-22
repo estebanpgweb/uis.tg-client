@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Materia } from "@/types/materiaTypes";
+import { Materia, getMateriaNameBySku } from "@/types/materiaTypes";
 import { Card, CardContent, CardTitle, CardHeader } from "./ui/card";
 import { Input } from "./ui/input";
 import {
@@ -71,6 +71,23 @@ export default function Materias({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
+                  <div>
+                    <p className="text-sm opacity-50">
+                      <span className="font-semibold">Créditos:</span>{" "}
+                      {materia.credits}
+                    </p>
+                    <p className="text-sm opacity-50">
+                      <span className="font-semibold">Nivel:</span>{" "}
+                      {materia.level}
+                    </p>
+                    {materia.requirements &&
+                      materia.requirements.length > 0 && (
+                        <p className="text-sm opacity-50">
+                          <span className="font-semibold">Requisitos:</span>{" "}
+                          {getMateriaNameBySku(materias, materia.requirements)}
+                        </p>
+                      )}
+                  </div>
                   <div className="px-2">
                     {materia.groups && materia.groups?.length > 0 ? (
                       materia.groups?.map((group) => {
