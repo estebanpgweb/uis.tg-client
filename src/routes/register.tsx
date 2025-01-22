@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useAuth } from "../providers/AuthContext.tsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button.tsx";
@@ -24,6 +24,7 @@ const RegisterRoute = () => {
 
   const { toast } = useToast();
   const auth = useAuth();
+  const navigate = useNavigate();
 
   const onSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -56,6 +57,7 @@ const RegisterRoute = () => {
         title: "Registro exitoso",
         description: "Por favor revisa tu correo para confirmar tu cuenta",
       });
+      navigate("/login");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
