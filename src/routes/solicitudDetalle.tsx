@@ -46,6 +46,7 @@ import {
 import { SolicitudTiempoEspera } from "@/utils/tiempoEspera";
 import { useAuth } from "@/providers/AuthContext";
 import Loader from "@/components/loader";
+import { useNavigate } from "react-router-dom";
 
 const SolicitudDetalleRoute = () => {
   const { id } = useParams<{ id: string }>(); // Captura el id desde la URL
@@ -58,6 +59,7 @@ const SolicitudDetalleRoute = () => {
   const auth = useAuth();
   const kind = auth?.user?.kind || "STUDENT";
   const userId = auth?.user?.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
@@ -137,6 +139,7 @@ const SolicitudDetalleRoute = () => {
         description: "La solicitud ha sido enviada al director de escuela",
       });
       setCompleted(true);
+      navigate("/solicitudes");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -181,6 +184,7 @@ const SolicitudDetalleRoute = () => {
         title: "Solicitud completada",
         description: "La solicitud ha sido marcada como completada",
       });
+      navigate("/solicitudes");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -206,11 +210,9 @@ const SolicitudDetalleRoute = () => {
     } else if (request?.from && !request?.to) {
       return `Cancelar la materia ${request.from.sku} - ${request.from.name}`;
     } else if (!request?.from && request?.to) {
-      return `Incluir la materia ${request.to
-        .map((t) => t.sku)
-        .join(", ")} - ${request.to
-        .map((t) => t.name)
-        .join(", ")} en el grupo ${request.to.map((g) => g.group).join(", ")}`;
+      return `Incluir la materia ${request.to[0].sku} - ${
+        request.to[0].name
+      } en el grupo ${request.to.map((g) => g.group).join(", ")}`;
     }
 
     return "Petición desconocida";

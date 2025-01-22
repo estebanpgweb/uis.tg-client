@@ -4,6 +4,7 @@ import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
 import { Solicitud } from "@/types/solicitudesTypes";
@@ -25,6 +26,7 @@ const SolicitudCrearRoute = () => {
   const { toast } = useToast();
   const auth = useAuth();
   const userId = auth?.user?.id;
+  const navigate = useNavigate();
 
   // Actualizar la solicitud cuando cambia el horario
   useEffect(() => {
@@ -306,6 +308,7 @@ const SolicitudCrearRoute = () => {
         title: "Solicitud guardada",
         description: "Los cambios han sido guardados exitosamente",
       });
+      navigate("/solicitudes");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
