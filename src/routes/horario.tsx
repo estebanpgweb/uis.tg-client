@@ -170,6 +170,12 @@ const HorarioRoute = () => {
     // Verificar si la materia ya está en el horario
     const hasMateria = horario.some((m) => m._id === materia._id);
     const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
+    // Verificar conflictos con todas las materias en el horario
+    const hasConflict = horario.some((existingMateria) =>
+      existingMateria.groups.some((existingGroup) =>
+        checkScheduleConflict(existingGroup.schedule, group.schedule)
+      )
+    );
 
     // Si el grupo ya está seleccionado, permitimos la deselección
     if (isCurrentlySelected) {
@@ -194,6 +200,15 @@ const HorarioRoute = () => {
       });
       return;
     } else if (hasMateria) {
+      //Verificar si no tiene conflictos con los grupos de la materia
+      if (hasConflict) {
+        toast({
+          variant: "destructive",
+          title: "Conflicto de horario",
+          description: "Este grupo se cruza con otra materia ya seleccionada.",
+        });
+        return;
+      }
       // Actualizar el grupo de la materia existente
       setHorario((prevHorario) =>
         prevHorario.map((m) => {
@@ -222,12 +237,7 @@ const HorarioRoute = () => {
       return;
     }
 
-    // Verificar conflictos con todas las materias en el horario
-    const hasConflict = horario.some((existingMateria) =>
-      existingMateria.groups.some((existingGroup) =>
-        checkScheduleConflict(existingGroup.schedule, group.schedule)
-      )
-    );
+    // Verificar si hay conflictos de horario
     if (hasConflict && !hasMateria) {
       toast({
         variant: "destructive",
