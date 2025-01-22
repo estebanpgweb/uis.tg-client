@@ -10,6 +10,7 @@ export interface UserType {
   verified: boolean;
   createdAt?: string;
   password?: string;
+  status?: string;
 }
 
 // Función para obtener el color del usuario

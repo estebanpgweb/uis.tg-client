@@ -144,8 +144,8 @@ const SolicitudRoute = () => {
     const fetchHorario = async () => {
       try {
         setIsLoading(true);
-        const { data } = await axios.get(`/api/schedule/count`);
-        setHorario(data);
+        const { data } = await axios.get(`/api/schedule`);
+        setHorario(data.length);
       } catch (error) {
         const errorMessage =
           (error as { response?: { data?: { message?: string } } }).response
