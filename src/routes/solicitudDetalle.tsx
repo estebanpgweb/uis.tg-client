@@ -98,7 +98,19 @@ const SolicitudDetalleRoute = () => {
       ...solicitud,
       requests:
         solicitud?.requests?.map((request, i) =>
-          i === index ? { ...request, status } : request
+          i === index
+            ? {
+                ...request,
+                status,
+                to:
+                  request.to && request.to?.length < 2
+                    ? request.to.map((group) => ({
+                        ...group,
+                        approved: status === "APPROVED",
+                      }))
+                    : request.to,
+              }
+            : request
         ) || [],
     };
 
@@ -111,6 +123,30 @@ const SolicitudDetalleRoute = () => {
       requests:
         solicitud?.requests?.map((request, i) =>
           i === index ? { ...request, reason } : request
+        ) || [],
+    };
+
+    setSolicitud(newSolicitud);
+  };
+
+  const handlePeticionGroupApproved = async (index: number, group: string) => {
+    const newSolicitud: Solicitud = {
+      ...solicitud,
+      requests:
+        // todos los grupos que no sean el seleccionado se marcan como no aprobados y el seleccionado como aprobado
+        solicitud?.requests?.map((request, i) =>
+          i === index
+            ? {
+                ...request,
+                to: request.to
+                  ? request.to.map((g) =>
+                      g.group === group
+                        ? { ...g, approved: true }
+                        : { ...g, approved: false }
+                    )
+                  : null,
+              }
+            : request
         ) || [],
     };
 
@@ -295,6 +331,7 @@ const SolicitudDetalleRoute = () => {
                 <div className="flex flex-col gap-1 mx-4">
                   <Label className="text-lg">Petición #{index + 1}</Label>
                   <Label className="opacity-50">{peticionMessage(index)}</Label>
+                  {/* Motivo de rechazo de la peticion */}
                   <div hidden={petición.status !== "REJECTED"}>
                     <Select
                       disabled={
@@ -325,6 +362,43 @@ const SolicitudDetalleRoute = () => {
                         <SelectItem value="semestre">
                           Semestre superior
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {/* Grupo aprobado del listado de to de la peticion */}
+                  <div
+                    hidden={
+                      petición.to &&
+                      petición.to?.length > 1 &&
+                      petición.status === "APPROVED"
+                        ? false
+                        : true
+                    }
+                  >
+                    <Select
+                      required
+                      disabled={
+                        solicitud?.status !== "PENDING" || kind === "STUDENT"
+                      }
+                      value={
+                        petición.to?.find((group) => {
+                          return group.approved === true;
+                        })?.group || ""
+                      }
+                      onValueChange={(value) =>
+                        handlePeticionGroupApproved(index, value)
+                      }
+                      name="grupoAprobado"
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el grupo aprobado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {petición.to?.map((group, index) => (
+                          <SelectItem key={index} value={group.group}>
+                            {group.group}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
