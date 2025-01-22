@@ -72,6 +72,7 @@ export function generateAppeals(
                   group: g.sku,
                   sku: materiaActual.sku,
                   name: materiaActual.name,
+                  approved: null,
                 }));
             } else {
               appeal.to = null;
@@ -94,6 +95,7 @@ export function generateAppeals(
           group: g.sku,
           sku: materiaActual.sku,
           name: materiaActual.name,
+          approved: null,
         })),
         status: "PENDING",
         reason: null,

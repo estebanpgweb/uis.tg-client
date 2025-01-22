@@ -12,6 +12,7 @@ export interface Solicitud {
       group: string;
       sku: string;
       name: string;
+      approved?: boolean | null;
     } | null;
     to:
       | {
