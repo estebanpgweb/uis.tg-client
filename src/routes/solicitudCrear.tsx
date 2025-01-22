@@ -133,13 +133,10 @@ const SolicitudCrearRoute = () => {
     }
     checkedSkus.add(materia.sku);
 
-    // Si no tiene requisitos, se puede agregar
-    if (!materia.requirements?.length) {
-      return undefined;
-    }
+    const requisitos = materia.requirements || [];
 
     // Verificar si algún requisito está en el horario actual
-    const simultaneousRequisite = materia.requirements.find((requisite) =>
+    const simultaneousRequisite = requisitos.find((requisite) =>
       horario.some((m) => m.sku === requisite)
     );
 
@@ -147,11 +144,11 @@ const SolicitudCrearRoute = () => {
       const requisiteName = materias.find(
         (m) => m.sku === simultaneousRequisite
       )?.name;
-      return `${requisiteName}`;
+      return `La materia no cumple el requisito de ${requisiteName}`;
     }
 
     // Verificar los prerequisitos de cada requisito recursivamente
-    for (const requisiteSku of materia.requirements) {
+    for (const requisiteSku of requisitos) {
       const requisitoMateria = materias.find((m) => m.sku === requisiteSku);
       if (requisitoMateria) {
         const subRequirement = checkMateriaRequirements(
@@ -164,6 +161,21 @@ const SolicitudCrearRoute = () => {
       }
     }
 
+    //validamos que no sea una materia ya vista mirando los requisitos de las materias que ya estan en el horario
+    const requisitosMateriaEnHorario = materias
+      .filter((m) => {
+        return horario.some((h) => h._id === m._id);
+      })
+      .flatMap((m) => m.requirements || []);
+    if (requisitosMateriaEnHorario.includes(materia.sku)) {
+      return `Materia ${materia.name} ya fue vista, no se puede agregar`;
+    }
+
+    // Si no tiene requisitos, se puede agregar
+    if (!requisitos?.length) {
+      return undefined;
+    }
+
     return undefined;
   };
 
@@ -171,9 +183,11 @@ const SolicitudCrearRoute = () => {
     materia: Materia,
     group: Materia["groups"][0]
   ) => {
+    // Verificar si la materia ya está en el horario
     const hasMateria = horario.some((m) => m._id === materia._id);
     const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
 
+    // Si el grupo ya está seleccionado, permitimos la deselección
     if (isCurrentlySelected) {
       setHorario((prevHorario) => {
         const newHorario = prevHorario.map((m) => {
@@ -195,19 +209,35 @@ const SolicitudCrearRoute = () => {
         description: `Grupo ${group.sku} de ${materia.name} removido del horario`,
       });
       return;
-    }
-
-    const hasRequirements = checkMateriaRequirements(materia);
-
-    if (hasRequirements) {
+    } else if (hasMateria) {
+      // Actualizar el grupo de la materia existente
+      setHorario((prevHorario) =>
+        prevHorario.map((m) => {
+          if (m._id === materia._id) {
+            return { ...m, groups: [...m.groups, group] };
+          }
+          return m;
+        })
+      );
       toast({
-        variant: "destructive",
-        title: "Requisitos no cumplidos",
-        description: `No se puede agregar debido a que no se han cumplido los requisitos de ${hasRequirements}`,
+        title: "Grupo actualizado",
+        description: `Grupo ${group.sku} de ${materia.name} añadido al horario`,
       });
       return;
     }
 
+    // Verificar si cumple con los requisitos de la materia
+    const hasRequirements = checkMateriaRequirements(materia);
+    if (hasRequirements) {
+      toast({
+        variant: "destructive",
+        title: "Requisitos no cumplidos",
+        description: `${hasRequirements}`,
+      });
+      return;
+    }
+
+    // Verificar conflictos con todas las materias en el horario
     const hasConflict = horario.some(
       (existingMateria) =>
         existingMateria._id !== materia._id &&
@@ -215,7 +245,6 @@ const SolicitudCrearRoute = () => {
           checkMateriaConflict(existingGroup.schedule, group.schedule)
         )
     );
-
     if (hasConflict) {
       toast({
         variant: "destructive",
@@ -225,19 +254,10 @@ const SolicitudCrearRoute = () => {
       return;
     }
 
+    // Agregar nueva materia con el grupo seleccionado
     setHorario((prevHorario) => {
-      if (hasMateria) {
-        return prevHorario.map((m) => {
-          if (m._id === materia._id) {
-            return { ...m, groups: [...m.groups, group] };
-          }
-          return m;
-        });
-      } else {
-        return [...prevHorario, { ...materia, groups: [group] }];
-      }
+      return [...prevHorario, { ...materia, groups: [group] }];
     });
-
     toast({
       title: "Grupo añadido",
       description: `Grupo ${group.sku} de ${materia.name} añadido al horario`,
