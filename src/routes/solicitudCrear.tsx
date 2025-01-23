@@ -197,7 +197,6 @@ const SolicitudCrearRoute = () => {
 
     // Si el grupo ya está seleccionado, permitimos la deselección
     if (isCurrentlySelected) {
-      console.log("selected", hasConflict);
       setHorario((prevHorario) => {
         const newHorario = prevHorario.map((m) => {
           if (m._id === materia._id) {
@@ -219,7 +218,6 @@ const SolicitudCrearRoute = () => {
       });
       return;
     } else if (hasMateria) {
-      console.log("hasMateria", hasConflict);
       // si la materia ya está en el horario, verificar si se puede agregar el grupo
       if (hasConflict) {
         toast({

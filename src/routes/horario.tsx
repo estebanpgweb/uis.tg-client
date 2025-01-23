@@ -43,7 +43,11 @@ const HorarioRoute = () => {
   ];
 
   useEffect(() => {
-    setDialogOpen(!userShift);
+    if (userShift) {
+      setShift(userShift);
+    } else {
+      setDialogOpen(!userShift);
+    }
   }, [userShift]);
 
   useEffect(() => {
@@ -367,6 +371,7 @@ const HorarioRoute = () => {
   };
 
   const handleUserShift = async () => {
+    console.log(shift, userId);
     if (!shift || !userId) return;
 
     try {
@@ -376,6 +381,7 @@ const HorarioRoute = () => {
         { shift },
         { headers: { "x-resource-id": userId } }
       );
+      await auth.me();
       setDialogOpen(false);
       toast({
         title: "Franja horaria actualizada",
