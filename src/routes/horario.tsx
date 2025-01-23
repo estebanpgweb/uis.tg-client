@@ -6,8 +6,19 @@ import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
 import Loader from "@/components/loader";
+import { Sun, Moon } from "lucide-react";
 
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -16,9 +27,28 @@ const HorarioRoute = () => {
   const [idHorario, setIdHorario] = useState<string | null>(null);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
   const auth = useAuth();
   const userId = auth?.user?.id;
+  const userShift = auth?.user?.shift;
+  const [shift, setShift] = useState<{ day: string; time: string } | null>(
+    userShift || { day: "", time: "" }
+  );
+
+  const daysAndShifts = [
+    { day: "MONDAY", label: "Lunes" },
+    { day: "TUESDAY", label: "Martes" },
+    { day: "WEDNESDAY", label: "Miércoles" },
+  ];
+
+  useEffect(() => {
+    if (userShift) {
+      setShift(userShift);
+    } else {
+      setDialogOpen(!userShift);
+    }
+  }, [userShift]);
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -107,6 +137,62 @@ const HorarioRoute = () => {
     );
   };
 
+  const checkMateriaRequirements = (
+    materia: Materia,
+    checkedSkus: Set<string> = new Set()
+  ): string | undefined => {
+    // Evitar ciclos infinitos
+    if (checkedSkus.has(materia.sku)) {
+      return undefined;
+    }
+    checkedSkus.add(materia.sku);
+
+    const requisitos = materia.requirements || [];
+
+    // Verificar si algún requisito está en el horario actual
+    const simultaneousRequisite = requisitos.find((requisite) =>
+      horario.some((m) => m.sku === requisite)
+    );
+
+    if (simultaneousRequisite) {
+      const requisiteName = materias.find(
+        (m) => m.sku === simultaneousRequisite
+      )?.name;
+      return `La materia no cumple el requisito de ${requisiteName}`;
+    }
+
+    // Verificar los prerequisitos de cada requisito recursivamente
+    for (const requisiteSku of requisitos) {
+      const requisitoMateria = materias.find((m) => m.sku === requisiteSku);
+      if (requisitoMateria) {
+        const subRequirement = checkMateriaRequirements(
+          requisitoMateria,
+          checkedSkus
+        );
+        if (subRequirement) {
+          return subRequirement;
+        }
+      }
+    }
+
+    //validamos que no sea una materia ya vista mirando los requisitos de las materias que ya estan en el horario
+    const requisitosMateriaEnHorario = materias
+      .filter((m) => {
+        return horario.some((h) => h._id === m._id);
+      })
+      .flatMap((m) => m.requirements || []);
+    if (requisitosMateriaEnHorario.includes(materia.sku)) {
+      return `Materia ${materia.name} ya fue vista, no se puede agregar`;
+    }
+
+    // Si no tiene requisitos, se puede agregar
+    if (!requisitos?.length) {
+      return undefined;
+    }
+
+    return undefined;
+  };
+
   const handleGroupSelection = (
     materia: Materia,
     group: Materia["groups"][0]
@@ -114,6 +200,12 @@ const HorarioRoute = () => {
     // Verificar si la materia ya está en el horario
     const hasMateria = horario.some((m) => m._id === materia._id);
     const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
+    // Verificar conflictos con todas las materias en el horario
+    const hasConflict = horario.some((existingMateria) =>
+      existingMateria.groups.some((existingGroup) =>
+        checkScheduleConflict(existingGroup.schedule, group.schedule)
+      )
+    );
 
     // Si el grupo ya está seleccionado, permitimos la deselección
     if (isCurrentlySelected) {
@@ -137,39 +229,58 @@ const HorarioRoute = () => {
         description: `Grupo ${group.sku} de ${materia.name} removido del horario`,
       });
       return;
-    }
-
-    // Verificar conflictos con todas las materias en el horario
-    const hasConflict = horario.some((existingMateria) =>
-      existingMateria.groups.some((existingGroup) =>
-        checkScheduleConflict(existingGroup.schedule, group.schedule)
-      )
-    );
-
-    if (hasConflict && !hasMateria) {
-      toast({
-        variant: "destructive",
-        title: "Conflicto de horario",
-        description: "Este grupo se cruza con otro ya seleccionado.",
-      });
-      return;
-    }
-
-    setHorario((prevHorario) => {
-      if (hasMateria) {
-        // Actualizar el grupo de la materia existente
-        return prevHorario.map((m) => {
+    } else if (hasMateria) {
+      //Verificar si no tiene conflictos con los grupos de la materia
+      if (hasConflict) {
+        toast({
+          variant: "destructive",
+          title: "Conflicto de horario",
+          description: "Este grupo se cruza con otra materia ya seleccionada.",
+        });
+        return;
+      }
+      // Actualizar el grupo de la materia existente
+      setHorario((prevHorario) =>
+        prevHorario.map((m) => {
           if (m._id === materia._id) {
             return { ...m, groups: [group] };
           }
           return m;
-        });
-      } else {
-        // Agregar nueva materia con el grupo
-        return [...prevHorario, { ...materia, groups: [group] }];
-      }
-    });
+        })
+      );
 
+      toast({
+        title: "Grupo actualizado",
+        description: `Grupo ${group.sku} de ${materia.name} añadido al horario`,
+      });
+      return;
+    }
+
+    // Verificar si cumple con los requisitos de la materia
+    const hasRequirements = checkMateriaRequirements(materia);
+    if (hasRequirements) {
+      toast({
+        variant: "destructive",
+        title: "Requisitos no cumplidos",
+        description: `${hasRequirements}`,
+      });
+      return;
+    }
+
+    // Verificar si hay conflictos de horario
+    if (hasConflict && !hasMateria) {
+      toast({
+        variant: "destructive",
+        title: "Conflicto de horario",
+        description: "Este grupo se cruza con otra materia ya seleccionado.",
+      });
+      return;
+    }
+
+    // Agregar nueva materia con el grupo seleccionado
+    setHorario((prevHorario) => {
+      return [...prevHorario, { ...materia, groups: [group] }];
+    });
     toast({
       title: "Grupo actualizado",
       description: `Grupo ${group.sku} de ${materia.name} añadido al horario`,
@@ -188,6 +299,11 @@ const HorarioRoute = () => {
   };
 
   const handleSaveSchedule = async () => {
+    if (!userShift) {
+      setDialogOpen(true);
+      return;
+    }
+
     if (horario.length === 0) {
       toast({
         variant: "destructive",
@@ -254,9 +370,93 @@ const HorarioRoute = () => {
     }
   };
 
+  const handleUserShift = async () => {
+    console.log(shift, userId);
+    if (!shift || !userId) return;
+
+    try {
+      setIsLoading(true);
+      await axios.put(
+        `/api/student`,
+        { shift },
+        { headers: { "x-resource-id": userId } }
+      );
+      await auth.me();
+      setDialogOpen(false);
+      toast({
+        title: "Franja horaria actualizada",
+        description: "La franja horaria ha sido actualizada exitosamente.",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Actualizar franja horaria fallida",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       <Loader isLoading={isLoading} />
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Selección de Franja Horaria</DialogTitle>
+            <DialogDescription>
+              Elige el día y la franja horaria que te fue asignada en el sistema
+              de estudiantes UIS.
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {daysAndShifts.map(({ day, label }) => (
+                  <Card key={day}>
+                    <CardHeader className="text-center">
+                      <CardTitle>{label}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-y-2">
+                      <Button
+                        className="text-sm"
+                        variant={
+                          shift?.day === day && shift?.time === "AM"
+                            ? "default"
+                            : "secondary"
+                        }
+                        onClick={() => setShift({ day, time: "AM" })}
+                      >
+                        <Sun />
+                        Mañana
+                      </Button>
+                      <Button
+                        className="text-sm"
+                        variant={
+                          shift?.day === day && shift?.time === "PM"
+                            ? "default"
+                            : "secondary"
+                        }
+                        onClick={() => setShift({ day, time: "PM" })}
+                      >
+                        <Moon />
+                        Tarde
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button onClick={() => handleUserShift()}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <h1 className="text-2xl font-bold">Horario del estudiante</h1>
       <div className="flex w-full my-4 gap-x-8 justify-between">
         <div className="flex-1 w-4/5">

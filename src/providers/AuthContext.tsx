@@ -17,6 +17,7 @@ type AuthContextType = {
   ) => Promise<void>;
   login: (username: string, password: string) => Promise<UserType>;
   logout: () => void;
+  me: () => Promise<UserType>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     id: "",
     name: "",
     lastname: "",
+    shift: null,
     username: "",
     permissions: [],
     kind: "",
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const me = async (): Promise<UserType> => {
     try {
       const { data } = await axios.get("/api/auth/user");
+      console.log("User data:", data);
       setUser(data);
       setLoggedIn(true);
       return data;
@@ -115,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register,
         login,
         logout,
+        me,
       }}
     >
       {children}

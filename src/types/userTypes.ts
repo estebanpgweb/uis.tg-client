@@ -1,6 +1,10 @@
 export interface UserType {
   _id?: string;
   id?: string;
+  shift?: {
+    day: dayType;
+    time: "AM" | "PM";
+  } | null;
   name: string;
   lastname: string;
   identification?: string | null;
@@ -12,6 +16,8 @@ export interface UserType {
   password?: string;
   status?: string;
 }
+
+type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
 
 // Función para obtener el color del usuario
 export const getUserColor = (kind: string): string => {

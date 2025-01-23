@@ -21,3 +21,14 @@ export interface Materia {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export const getMateriaNameBySku = (
+  materias: Materia[],
+  requirements: Materia["requirements"]
+) => {
+  const requisitos = requirements?.map((req) => {
+    const materia = materias.find((m) => m.sku === req);
+    return materia?.name || "";
+  });
+  return requisitos?.join(", ");
+};
