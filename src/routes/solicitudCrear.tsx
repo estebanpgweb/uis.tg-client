@@ -24,9 +24,9 @@ const SolicitudCrearRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const auth = useAuth();
   const userId = auth?.user?.id;
-  const navigate = useNavigate();
 
   // Actualizar la solicitud cuando cambia el horario
   useEffect(() => {

@@ -6,8 +6,19 @@ import { Materia } from "@/types/materiaTypes";
 import { useToast } from "@/hooks/use-toast";
 import Materias from "@/components/materias";
 import Calendario from "@/components/calendario";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { isTimeOverlap } from "@/utils/tiempoEspera";
 import Loader from "@/components/loader";
+import { Sun, Moon } from "lucide-react";
 
 const HorarioRoute = () => {
   const axios: AxiosInstance = useAxios();
@@ -16,9 +27,24 @@ const HorarioRoute = () => {
   const [idHorario, setIdHorario] = useState<string | null>(null);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
   const auth = useAuth();
   const userId = auth?.user?.id;
+  const userShift = auth?.user?.shift;
+  const [shift, setShift] = useState<{ day: string; time: string } | null>(
+    userShift || { day: "", time: "" }
+  );
+
+  const daysAndShifts = [
+    { day: "MONDAY", label: "Lunes" },
+    { day: "TUESDAY", label: "Martes" },
+    { day: "WEDNESDAY", label: "Miércoles" },
+  ];
+
+  useEffect(() => {
+    setDialogOpen(!userShift);
+  }, [userShift]);
 
   useEffect(() => {
     const fetchMaterias = async () => {
@@ -269,6 +295,11 @@ const HorarioRoute = () => {
   };
 
   const handleSaveSchedule = async () => {
+    if (!userShift) {
+      setDialogOpen(true);
+      return;
+    }
+
     if (horario.length === 0) {
       toast({
         variant: "destructive",
@@ -335,9 +366,91 @@ const HorarioRoute = () => {
     }
   };
 
+  const handleUserShift = async () => {
+    if (!shift || !userId) return;
+
+    try {
+      setIsLoading(true);
+      await axios.put(
+        `/api/student`,
+        { shift },
+        { headers: { "x-resource-id": userId } }
+      );
+      setDialogOpen(false);
+      toast({
+        title: "Franja horaria actualizada",
+        description: "La franja horaria ha sido actualizada exitosamente.",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Actualizar franja horaria fallida",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       <Loader isLoading={isLoading} />
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Selección de Franja Horaria</DialogTitle>
+            <DialogDescription>
+              Elige el día y la franja horaria que te fue asignada en el sistema
+              de estudiantes UIS.
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {daysAndShifts.map(({ day, label }) => (
+                  <Card key={day}>
+                    <CardHeader className="text-center">
+                      <CardTitle>{label}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-y-2">
+                      <Button
+                        className="text-sm"
+                        variant={
+                          shift?.day === day && shift?.time === "AM"
+                            ? "default"
+                            : "secondary"
+                        }
+                        onClick={() => setShift({ day, time: "AM" })}
+                      >
+                        <Sun />
+                        Mañana
+                      </Button>
+                      <Button
+                        className="text-sm"
+                        variant={
+                          shift?.day === day && shift?.time === "PM"
+                            ? "default"
+                            : "secondary"
+                        }
+                        onClick={() => setShift({ day, time: "PM" })}
+                      >
+                        <Moon />
+                        Tarde
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button onClick={() => handleUserShift()}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <h1 className="text-2xl font-bold">Horario del estudiante</h1>
       <div className="flex w-full my-4 gap-x-8 justify-between">
         <div className="flex-1 w-4/5">
