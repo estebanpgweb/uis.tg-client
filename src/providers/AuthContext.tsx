@@ -63,7 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const me = async (): Promise<UserType> => {
     try {
       const { data } = await axios.get("/api/auth/user");
-      console.log("User data:", data);
       setUser(data);
       setLoggedIn(true);
       return data;

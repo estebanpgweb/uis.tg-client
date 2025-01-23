@@ -6,6 +6,20 @@ export interface Solicitud {
     lastname: string;
     username: string;
     identification: string;
+    shift?: {
+      day: dayType;
+      time: "AM" | "PM";
+    } | null;
+  };
+  user?: {
+    name: string;
+    lastname: string;
+    username: string;
+    identification: string;
+    shift?: {
+      day: dayType;
+      time: "AM" | "PM";
+    } | null;
   };
   requests: {
     from: {
@@ -31,6 +45,8 @@ export interface Solicitud {
   updatedAt?: string;
 }
 
+type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
+
 export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 // Función para obtener el texto del estado
@@ -49,7 +65,8 @@ export const getStatusLabel = (status: string): string => {
 export const getBadgeColor = (status: string): string => {
   const statusVariants: Record<string, string> = {
     PENDING: "bg-yellow-500",
-    PARTIAL_REJECTED: "bg-blue-500",
+    REVIEW: "bg-blue-500",
+    PARTIAL_REJECTED: "bg-orange-500",
     REJECTED: "bg-red-500",
     APPROVED: "bg-green-500",
   };

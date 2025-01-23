@@ -16,17 +16,24 @@ const SolicitudCrearRoute = () => {
   const axios: AxiosInstance = useAxios();
   const [horarioInicial, setHorarioInicial] = useState<Materia[]>([]);
   const [horario, setHorario] = useState<Materia[]>([]);
+  const auth = useAuth();
+  const userId = auth?.user?.id;
   const emptySolicitud: Solicitud = {
     status: "PENDING",
     requests: [],
+    user: {
+      name: auth?.user?.name || "",
+      lastname: auth?.user?.lastname || "",
+      username: auth?.user?.username || "",
+      identification: auth?.user?.identification || "",
+      shift: auth?.user?.shift || null,
+    },
   };
   const [solicitud, setSolicitud] = useState<Solicitud>(emptySolicitud);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const auth = useAuth();
-  const userId = auth?.user?.id;
 
   // Actualizar la solicitud cuando cambia el horario
   useEffect(() => {
@@ -38,7 +45,7 @@ const SolicitudCrearRoute = () => {
       );
       setSolicitud(updatedSolicitud);
     }
-  }, [horario]);
+  }, [horario, horarioInicial]);
 
   useEffect(() => {
     const fetchMaterias = async () => {

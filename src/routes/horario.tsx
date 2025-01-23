@@ -230,15 +230,6 @@ const HorarioRoute = () => {
       });
       return;
     } else if (hasMateria) {
-      //Verificar si no tiene conflictos con los grupos de la materia
-      if (hasConflict) {
-        toast({
-          variant: "destructive",
-          title: "Conflicto de horario",
-          description: "Este grupo se cruza con otra materia ya seleccionada.",
-        });
-        return;
-      }
       // Actualizar el grupo de la materia existente
       setHorario((prevHorario) =>
         prevHorario.map((m) => {
@@ -371,7 +362,6 @@ const HorarioRoute = () => {
   };
 
   const handleUserShift = async () => {
-    console.log(shift, userId);
     if (!shift || !userId) return;
 
     try {
