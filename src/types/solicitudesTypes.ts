@@ -41,6 +41,7 @@ export interface Solicitud {
   }[];
   status?: "PENDING" | "REVIEW" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
   observation?: string;
+  attendedBy?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -30,6 +30,7 @@ const SolicitudRoute = () => {
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const kind = auth?.user?.kind;
+  const user = auth?.user;
   const userId = auth?.user?.id;
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const SolicitudRoute = () => {
       setIsLoading(true);
       const params = new URLSearchParams({
         filter: JSON.stringify(
-          buildFilterQuery(filter, paramsFilter, statuses)
+          buildFilterQuery(filter, paramsFilter, statuses, user)
         ),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
@@ -112,7 +113,7 @@ const SolicitudRoute = () => {
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting, userId]);
+  }, [page, filter, selectedStatuses, sorting, userId, user]);
 
   useEffect(() => {
     if (!userId) return;
@@ -122,7 +123,8 @@ const SolicitudRoute = () => {
         const filterQuery = buildFilterQuery(
           filter,
           paramsFilter,
-          selectedStatuses
+          selectedStatuses,
+          user
         );
 
         const { data } =
@@ -141,7 +143,7 @@ const SolicitudRoute = () => {
     };
 
     getSolicitudesCount();
-  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
+  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter, user]);
 
   useEffect(() => {
     if (!userId) return;

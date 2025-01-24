@@ -1,7 +1,10 @@
+import { UserType } from "@/types/userTypes";
+
 export const buildFilterQuery = (
   search: string,
   params: string[],
-  statuses?: string[]
+  statuses?: string[],
+  user?: UserType
 ) => {
   const conditions = [];
 
@@ -20,6 +23,13 @@ export const buildFilterQuery = (
   if (statuses && statuses.length > 0) {
     conditions.push({
       status: { $in: statuses },
+    });
+  }
+
+  // Añadir condiciones de tipo de admin
+  if (user?.kind === "ADMIN") {
+    conditions.push({
+      attendedBy: user.id,
     });
   }
 

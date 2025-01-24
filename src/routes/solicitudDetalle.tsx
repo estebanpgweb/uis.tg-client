@@ -55,9 +55,10 @@ const SolicitudDetalleRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [completed, setCompleted] = useState<boolean>(false);
   const [observaciones, setObservaciones] = useState<string>("");
+  const [disabled, setDisabled] = useState<boolean>(false);
   const { toast } = useToast();
   const auth = useAuth();
-  const kind = auth?.user?.kind || "STUDENT";
+  const kind = auth?.user?.kind;
   const userId = auth?.user?.id;
   const navigate = useNavigate();
 
@@ -92,6 +93,20 @@ const SolicitudDetalleRoute = () => {
 
     fetchSolicitud();
   }, [axios, id, toast, completed, kind, userId]);
+
+  useEffect(() => {
+    if (
+      (solicitud?.status === "REVIEW" && kind !== "ADMIN") ||
+      kind === "STUDENT" ||
+      solicitud?.status === "APPROVED" ||
+      solicitud?.status === "REJECTED" ||
+      solicitud?.status === "PARTIAL_REJECTED"
+    ) {
+      setDisabled(true);
+    } else {
+      setDisabled(false);
+    }
+  }, [solicitud, kind]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {
@@ -156,7 +171,10 @@ const SolicitudDetalleRoute = () => {
   const validateRequests = () => {
     return solicitud?.requests?.every(
       (request) =>
-        request.status === "APPROVED" || request.status === "REJECTED"
+        //validamos que este aprobado o rechazado y que tenga un motivo si esta rechazado y que tenga un grupo aprobado si esta aprobado
+        (request.status === "APPROVED" &&
+          (request.to === null || request.to?.some((g) => g.approved))) ||
+        (request.status === "REJECTED" && request.reason)
     );
   };
 
@@ -210,6 +228,7 @@ const SolicitudDetalleRoute = () => {
       ...solicitud,
       status: newStatus,
       requests: solicitud?.requests || [],
+      attendedBy: userId,
       observation: observaciones,
     };
 
@@ -277,6 +296,7 @@ const SolicitudDetalleRoute = () => {
           Detalles de Solicitud de Matricula
         </h1>
       </div>
+      {/* Información de la solicitud */}
       <div className="flex items-center justify-between mx-8">
         <Label className="opacity-50 mx-4">
           ID de la solicitud: {solicitud._id}
@@ -334,9 +354,7 @@ const SolicitudDetalleRoute = () => {
                   {/* Motivo de rechazo de la peticion */}
                   <div hidden={petición.status !== "REJECTED"}>
                     <Select
-                      disabled={
-                        solicitud?.status !== "PENDING" || kind === "STUDENT"
-                      }
+                      disabled={disabled}
                       value={petición.reason || ""}
                       onValueChange={(value) =>
                         handlePeticionReason(index, value)
@@ -368,18 +386,16 @@ const SolicitudDetalleRoute = () => {
                   {/* Grupo aprobado del listado de to de la peticion */}
                   <div
                     hidden={
+                      petición.status === "APPROVED" &&
                       petición.to &&
-                      petición.to?.length > 1 &&
-                      petición.status === "APPROVED"
+                      petición.to?.length > 1
                         ? false
                         : true
                     }
                   >
                     <Select
                       required
-                      disabled={
-                        solicitud?.status !== "PENDING" || kind === "STUDENT"
-                      }
+                      disabled={disabled}
                       value={
                         petición.to?.find((group) => {
                           return group.approved === true;
@@ -403,12 +419,11 @@ const SolicitudDetalleRoute = () => {
                     </Select>
                   </div>
                 </div>
+                {/* Botones de acción aprobar o rechazar */}
                 <div className="flex gap-x-2">
                   <Button
                     onClick={() => handlePeticion(index, "APPROVED")}
-                    disabled={
-                      solicitud?.status !== "PENDING" || kind === "STUDENT"
-                    }
+                    disabled={disabled}
                     className={`${
                       petición.status !== "REJECTED" &&
                       "bg-green-500 text-white"
@@ -422,9 +437,7 @@ const SolicitudDetalleRoute = () => {
                   </Button>
                   <Button
                     onClick={() => handlePeticion(index, "REJECTED")}
-                    disabled={
-                      solicitud?.status !== "PENDING" || kind === "STUDENT"
-                    }
+                    disabled={disabled}
                     className={` ${
                       petición.status !== "APPROVED" && "bg-red-500 text-white"
                     } `}
@@ -447,7 +460,7 @@ const SolicitudDetalleRoute = () => {
           <h2 className="text-xl font-medium">Observaciones adicionales</h2>
         </div>
         <Textarea
-          disabled={solicitud?.status !== "PENDING" || kind === "STUDENT"}
+          disabled={disabled}
           value={solicitud?.observation || observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Ingrese observaciones adicionales para la solicitud del estudiante."
@@ -461,7 +474,7 @@ const SolicitudDetalleRoute = () => {
           <AlertDialogTrigger asChild>
             <Button
               className={`${kind !== "ADMIN" ? "hidden" : ""}`}
-              disabled={solicitud?.status !== "PENDING"}
+              disabled={disabled}
               variant={"outline"}
             >
               <Send />
@@ -489,9 +502,7 @@ const SolicitudDetalleRoute = () => {
         </AlertDialog>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              disabled={solicitud?.status !== "PENDING" || !validateRequests()}
-            >
+            <Button disabled={disabled || !validateRequests()}>
               <Check />
               Completada
             </Button>
