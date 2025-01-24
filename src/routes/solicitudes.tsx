@@ -8,12 +8,24 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { buildFilterQuery } from "@/utils/filterQuery";
 import { Plus } from "lucide-react";
 import Loader from "@/components/loader";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [lastPendingSolicitud, setLastPendingSolicitud] = useState<Solicitud>();
   const [horario, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
@@ -110,6 +122,9 @@ const SolicitudRoute = () => {
       const data = await fetchSolicitudes(page, "", [], sorting);
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
+      setLastPendingSolicitud(
+        data.find((solicitud: Solicitud) => solicitud.status === "PENDING")
+      );
     };
 
     fetchData();
@@ -178,6 +193,49 @@ const SolicitudRoute = () => {
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
+      {lastPendingSolicitud && (
+        <AlertDialog>
+          <AlertDialogTrigger>
+            {lastPendingSolicitud && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  navigate(`/solicitud/${lastPendingSolicitud._id}`);
+                }}
+              >
+                Ver solicitud pendiente
+              </Button>
+            )}
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Solicitud de ajuste de matrícula pendiente
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogDescription>
+              {lastPendingSolicitud?.student &&
+                lastPendingSolicitud.student.name}{" "}
+              {lastPendingSolicitud?.student &&
+                lastPendingSolicitud.student.lastname}{" "}
+              tiene una solicitud de ajuste de matrícula pendiente.
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogAction>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    navigate(`/solicitud/${lastPendingSolicitud?._id}`);
+                  }}
+                >
+                  Ver solicitud
+                </Button>
+              </AlertDialogAction>
+              <AlertDialogCancel />
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
           Solicitudes de Ajuste de Matrícula

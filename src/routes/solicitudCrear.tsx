@@ -21,7 +21,7 @@ const SolicitudCrearRoute = () => {
   const emptySolicitud: Solicitud = {
     status: "PENDING",
     requests: [],
-    user: {
+    student: {
       name: auth?.user?.name || "",
       lastname: auth?.user?.lastname || "",
       username: auth?.user?.username || "",

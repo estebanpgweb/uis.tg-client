@@ -11,16 +11,6 @@ export interface Solicitud {
       time: "AM" | "PM";
     } | null;
   };
-  user?: {
-    name: string;
-    lastname: string;
-    username: string;
-    identification: string;
-    shift?: {
-      day: dayType;
-      time: "AM" | "PM";
-    } | null;
-  };
   requests: {
     from: {
       group: string;
