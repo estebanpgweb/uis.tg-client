@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "./ui/label";
@@ -40,6 +41,7 @@ export default function Materias({
 }: MateriasProps) {
   const [filterInput, setFilterInput] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
   const emptyMateria = {
     name: "",
     sku: "",
@@ -70,7 +72,30 @@ export default function Materias({
 
   const handleSaveMateriaNoRegistrada = async (e: FormEvent) => {
     e.preventDefault();
+    if (
+      !materiaNoRegistrada.name ||
+      !materiaNoRegistrada.sku ||
+      !materiaNoRegistrada.groups[0].sku
+    ) {
+      return;
+    }
+
+    //verificar que no exista la materia en la lista de materias
+    const materiaExistente = materias.find(
+      (m) => m.sku === materiaNoRegistrada.sku && m.groups.length > 0
+    );
+
+    if (materiaExistente) {
+      toast({
+        variant: "destructive",
+        title: "Materia existente",
+        description: `La materia ${materiaExistente.sku} - ${materiaExistente?.name} ya se encuentra registrada en el sistema.`,
+      });
+      return;
+    }
+
     onGroupSelect(materiaNoRegistrada, materiaNoRegistrada.groups[0]);
+    setMateriaNoRegistrada(emptyMateria);
     setDialogOpen(false);
   };
 

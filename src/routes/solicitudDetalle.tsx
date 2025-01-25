@@ -106,7 +106,7 @@ const SolicitudDetalleRoute = () => {
     } else {
       setDisabled(false);
     }
-  }, [solicitud, kind]);
+  }, [solicitud, kind, userId]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {
