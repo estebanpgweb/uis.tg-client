@@ -392,19 +392,10 @@ export default function Calendario({
                         <h3 className="font-medium text-xl">
                           Horario modificado
                         </h3>
-                        <ul className="my-4">
+                        <ul className="flex flex-col gap-y-2 my-4">
                           {horario.map((materia) => (
                             <li key={materia.sku}>
-                              <div className="flex gap-x-1 items-center">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleRemoveMateria(materia.sku)
-                                  }
-                                >
-                                  <X className="text-red-500" />
-                                </Button>
+                              <div className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md">
                                 <p>
                                   {materia.sku} -{" "}
                                   <span className="font-semibold">
@@ -415,6 +406,15 @@ export default function Calendario({
                                     {materia.groups[0].sku}
                                   </span>
                                 </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleRemoveMateria(materia.sku)
+                                  }
+                                >
+                                  <X />
+                                </Button>
                               </div>
                             </li>
                           ))}
