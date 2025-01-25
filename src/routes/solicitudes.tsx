@@ -25,7 +25,9 @@ import Loader from "@/components/loader";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-  const [lastPendingSolicitud, setLastPendingSolicitud] = useState<Solicitud>();
+  const [lastReviewSolicitud, setLastReviewSolicitud] =
+    useState<Solicitud["_id"]>();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [horario, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
@@ -122,16 +124,32 @@ const SolicitudRoute = () => {
       const data = await fetchSolicitudes(page, "", [], sorting);
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
-      setLastPendingSolicitud(
+      setLastReviewSolicitud(
         data.find(
           (solicitud: Solicitud) =>
-            solicitud.status === "PENDING" && solicitud.attendedBy === user?.id
+            solicitud.status === "REVIEW" && solicitud.attended?._id === userId
         )
       );
     };
 
     fetchData();
   }, [page, filter, selectedStatuses, sorting, userId, user]);
+
+  useEffect(() => {
+    if (!userId || !kind) return;
+    const soli =
+      solicitudes &&
+      solicitudes.find(
+        (solicitud: Solicitud) =>
+          solicitud.status === "REVIEW" && solicitud.attended?._id === userId
+      );
+    const solicitudId = soli ? soli._id : undefined;
+
+    if (solicitudId && kind !== "STUDENT") {
+      setDialogOpen(true);
+    }
+    setLastReviewSolicitud(solicitudId);
+  }, [userId, solicitudes, kind]);
 
   useEffect(() => {
     if (!userId) return;
@@ -195,46 +213,28 @@ const SolicitudRoute = () => {
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
-      {lastPendingSolicitud && kind === "ADMIN" && (
-        <AlertDialog>
-          <AlertDialogTrigger>
-            {lastPendingSolicitud && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  navigate(`/solicitud/${lastPendingSolicitud._id}`);
-                }}
-              >
-                Ver solicitud pendiente
-              </Button>
-            )}
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Solicitud de ajuste de matrícula pendiente
-              </AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogDescription>
-              Tiene una solicitud de ajuste de matrícula pendiente, ¿desea ver
-              la solicitud?
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogAction>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    navigate(`/solicitud/${lastPendingSolicitud?._id}`);
-                  }}
-                >
-                  Ver solicitud
-                </Button>
-              </AlertDialogAction>
-              <AlertDialogCancel />
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog open={dialogOpen} onOpenChange={() => setDialogOpen(false)}>
+        <AlertDialogTrigger></AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Solicitud de ajuste de matrícula pendiente
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            Tiene una solicitud de ajuste de matrícula pendiente, ¿desea ver la
+            solicitud?
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => navigate(`/solicitudes/${lastReviewSolicitud}`)}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
           Solicitudes de Ajuste de Matrícula

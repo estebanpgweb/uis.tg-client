@@ -96,7 +96,7 @@ const SolicitudDetalleRoute = () => {
 
   useEffect(() => {
     if (
-      (solicitud?.status === "REVIEW" && kind !== "ADMIN") ||
+      (solicitud?.status === "REVIEW" && solicitud.attended?._id !== userId) ||
       kind === "STUDENT" ||
       solicitud?.status === "APPROVED" ||
       solicitud?.status === "REJECTED" ||
@@ -228,7 +228,6 @@ const SolicitudDetalleRoute = () => {
       ...solicitud,
       status: newStatus,
       requests: solicitud?.requests || [],
-      attendedBy: userId,
       observation: observaciones,
     };
 
