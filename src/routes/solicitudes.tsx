@@ -63,7 +63,7 @@ const SolicitudRoute = () => {
       setIsLoading(true);
       const params = new URLSearchParams({
         filter: JSON.stringify(
-          buildFilterQuery(filter, paramsFilter, statuses, user)
+          buildFilterQuery(filter, paramsFilter, statuses)
         ),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
@@ -141,8 +141,7 @@ const SolicitudRoute = () => {
         const filterQuery = buildFilterQuery(
           filter,
           paramsFilter,
-          selectedStatuses,
-          user
+          selectedStatuses
         );
 
         const { data } =
