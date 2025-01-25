@@ -20,13 +20,13 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Materia } from "@/types/materiaTypes";
-import { Trash2, Save, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
 import { Solicitud } from "@/types/solicitudesTypes";
+import { Trash2, Save, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
 
 interface CalendarioProps {
   horario: Materia[];
   handleRemoveMateria: (
-    materiaId: string,
+    materiaSku: string,
     groupSku?: string,
     isInicial?: boolean
   ) => void;
@@ -62,7 +62,7 @@ export default function Calendario({
   ];
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
-  const getClassForCell = (materiaId: string, group?: string) => {
+  const getClassForCell = (materiaSku: string, group?: string) => {
     const colorClasses = [
       "bg-blue-500",
       "bg-green-500",
@@ -75,20 +75,24 @@ export default function Calendario({
 
     const grupos =
       horario
-        .find((m) => m._id === materiaId)
+        .find((m) => m.sku === materiaSku)
         ?.groups?.map((group) => group.sku).length || 0;
     const isInicial = horarioInicial.find((m) => m.groups[0]?.sku === group);
     const isInicialDeleted =
       horario.find((m) => m.groups.find((g) => g.sku === group)) === undefined;
 
+    // REVISAR ESTEBAN
     if (isInicialDeleted) {
+      // Materia inicial eliminada
       return "border-2 border-red-500 text-red-500 line-through opacity-40";
     } else if (isInicial && grupos <= 1) {
+      // Materia inicial por defecto
       return "bg-gray-500 text-white";
     } else if (isInicial && grupos > 1) {
+      // Cambio de grupo de materia inicial
       return "border-2 border-primary text-primary opacity-40";
     }
-    const index = horario.findIndex((m) => m._id === materiaId);
+    const index = horario.findIndex((m) => m.sku === materiaSku);
     return `${colorClasses[index % colorClasses.length]} text-white`;
   };
 
@@ -120,6 +124,7 @@ export default function Calendario({
 
     const [slotStart] = timeSlot.split("-").map(Number);
 
+    if (!schedule) return { matches: false };
     for (const { day, time } of schedule) {
       if (dayMap[day.toUpperCase()] !== dia) continue;
 
@@ -166,7 +171,7 @@ export default function Calendario({
 
     return materiasEnHorario
       .map(({ materia, group, duration }) => {
-        const cellKey = `${materia._id}-${group.sku}-${day}`;
+        const cellKey = `${materia.sku}-${group.sku}-${day}`;
 
         if (renderedSlots[day].has(cellKey)) {
           return null;
@@ -177,7 +182,7 @@ export default function Calendario({
 
         const grupos =
           horario
-            .find((m) => m._id === materia._id)
+            .find((m) => m.sku === materia.sku)
             ?.groups?.map((group) => group.sku).length || 0;
         const isInicial =
           horarioInicial.find((m) => m.groups[0]?.sku === group.sku) !==
@@ -190,7 +195,7 @@ export default function Calendario({
           <div
             key={cellKey}
             className={`${getClassForCell(
-              materia._id,
+              materia.sku,
               group.sku
             )} mx-1 px-2 py-1 rounded-md 
             overflow-x-clip flex justify-between items-center`}
@@ -215,7 +220,7 @@ export default function Calendario({
                 className="!p-1 !h-fit"
                 onClick={() => {
                   handleRemoveMateria(
-                    materia._id,
+                    materia.sku,
                     group.sku,
                     isInicial && isInicialDeleted
                   );
@@ -282,41 +287,100 @@ export default function Calendario({
                           solicitud.from && !solicitud.to ? (
                             <div
                               key={solicitud.from.sku}
-                              className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                              className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
                             >
-                              <MinusCircle size={24} className="text-red-500" />
-                              <p>
-                                Eliminada: {solicitud.from.name} (
-                                {solicitud.from.group})
-                              </p>
+                              <div className="flex gap-2 items-center">
+                                <MinusCircle
+                                  size={24}
+                                  className="text-red-500"
+                                />
+                                <p>
+                                  Eliminada: {solicitud.from.name} (
+                                  {solicitud.from.group})
+                                </p>
+                              </div>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (solicitud.from) {
+                                    handleRemoveMateria(
+                                      solicitud.from.sku,
+                                      solicitud.from.group,
+                                      true
+                                    );
+                                  }
+                                }}
+                              >
+                                <X />
+                              </Button>
                             </div>
                           ) : solicitud.to && !solicitud.from ? (
                             <div
                               key={solicitud.to[0].sku}
-                              className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                              className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
                             >
-                              <PlusCircle
-                                size={24}
-                                className="text-green-500"
-                              />
-                              <p>
-                                Añadida: {solicitud.to[0].name} (
-                                {solicitud.to.map((m) => m.group).join(", ")})
-                              </p>
+                              <div className="flex gap-2 items-center">
+                                <PlusCircle
+                                  size={24}
+                                  className="text-green-500"
+                                />
+                                <p>
+                                  Añadida: {solicitud.to[0].name} (
+                                  {solicitud.to.map((m) => m.group).join(", ")})
+                                </p>
+                              </div>
+                              <Button
+                                className=""
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (solicitud.to) {
+                                    handleRemoveMateria(
+                                      solicitud.to[0].sku,
+                                      solicitud.to[0].group,
+                                      false
+                                    );
+                                  }
+                                }}
+                              >
+                                <X />
+                              </Button>
                             </div>
                           ) : (
                             solicitud.to &&
                             solicitud.from && (
                               <div
                                 key={solicitud.from.sku}
-                                className="flex gap-2 text-lg items-center bg-template px-2 py-1 rounded-md"
+                                className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
                               >
-                                <Repeat size={24} className="text-blue-500" />
-                                <p>
-                                  Cambio de grupo: {solicitud.from.name} (
-                                  {solicitud.from.group}) a (
-                                  {solicitud.to.map((m) => m.group).join(", ")})
-                                </p>
+                                <div className="flex gap-2 items-center">
+                                  <Repeat size={24} className="text-blue-500" />
+                                  <p>
+                                    Cambio de grupo: {solicitud.from.name} (
+                                    {solicitud.from.group}) a (
+                                    {solicitud.to
+                                      .map((m) => m.group)
+                                      .join(", ")}
+                                    )
+                                  </p>
+                                </div>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    if (solicitud.from && solicitud.to) {
+                                      handleRemoveMateria(
+                                        solicitud.from.sku,
+                                        solicitud.to[solicitud.to.length - 1]
+                                          .group,
+                                        false
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <X />
+                                </Button>
                               </div>
                             )
                           )
@@ -328,17 +392,30 @@ export default function Calendario({
                         <h3 className="font-medium text-xl">
                           Horario modificado
                         </h3>
-                        <ul className="list-disc list-inside my-4">
+                        <ul className="my-4">
                           {horario.map((materia) => (
-                            <li key={materia._id}>
-                              {materia.sku} -{" "}
-                              <span className="font-semibold">
-                                {materia.name}
-                              </span>{" "}
-                              en grupo{" "}
-                              <span className="font-semibold">
-                                {materia.groups[0].sku}
-                              </span>
+                            <li key={materia.sku}>
+                              <div className="flex gap-x-1 items-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleRemoveMateria(materia.sku)
+                                  }
+                                >
+                                  <X className="text-red-500" />
+                                </Button>
+                                <p>
+                                  {materia.sku} -{" "}
+                                  <span className="font-semibold">
+                                    {materia.name}
+                                  </span>{" "}
+                                  en grupo{" "}
+                                  <span className="font-semibold">
+                                    {materia.groups[0].sku}
+                                  </span>
+                                </p>
+                              </div>
                             </li>
                           ))}
                         </ul>

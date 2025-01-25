@@ -123,7 +123,10 @@ const SolicitudRoute = () => {
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
       setLastPendingSolicitud(
-        data.find((solicitud: Solicitud) => solicitud.status === "PENDING")
+        data.find(
+          (solicitud: Solicitud) =>
+            solicitud.status === "PENDING" && solicitud.attendedBy === user?.id
+        )
       );
     };
 
@@ -193,7 +196,7 @@ const SolicitudRoute = () => {
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
-      {lastPendingSolicitud && (
+      {lastPendingSolicitud && kind === "ADMIN" && (
         <AlertDialog>
           <AlertDialogTrigger>
             {lastPendingSolicitud && (
@@ -214,11 +217,8 @@ const SolicitudRoute = () => {
               </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
-              {lastPendingSolicitud?.student &&
-                lastPendingSolicitud.student.name}{" "}
-              {lastPendingSolicitud?.student &&
-                lastPendingSolicitud.student.lastname}{" "}
-              tiene una solicitud de ajuste de matrícula pendiente.
+              Tiene una solicitud de ajuste de matrícula pendiente, ¿desea ver
+              la solicitud?
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogAction>

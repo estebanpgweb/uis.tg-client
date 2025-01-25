@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAxios } from "../providers/AxiosContext";
+import { useNavigate } from "react-router-dom";
 import { AxiosInstance } from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import { Materia } from "@/types/materiaTypes";
@@ -35,6 +36,7 @@ const HorarioRoute = () => {
   const [shift, setShift] = useState<{ day: string; time: string } | null>(
     userShift || { day: "", time: "" }
   );
+  const navigate = useNavigate();
 
   const daysAndShifts = [
     { day: "MONDAY", label: "Lunes" },
@@ -125,16 +127,20 @@ const HorarioRoute = () => {
     existingSchedule: Materia["groups"][0]["schedule"],
     newSchedule: Materia["groups"][0]["schedule"]
   ): boolean => {
-    return existingSchedule.some((existing) =>
-      newSchedule.some((newSlot) => {
-        // Primero verificamos si es el mismo día
-        if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
-          // Luego verificamos si hay solapamiento en las horas
-          return isTimeOverlap(existing.time, newSlot.time);
-        }
-        return false;
-      })
-    );
+    return existingSchedule
+      ? existingSchedule.some(
+          (existing) =>
+            newSchedule &&
+            newSchedule.some((newSlot) => {
+              // Primero verificamos si es el mismo día
+              if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
+                // Luego verificamos si hay solapamiento en las horas
+                return isTimeOverlap(existing.time, newSlot.time);
+              }
+              return false;
+            })
+        )
+      : false;
   };
 
   const checkMateriaRequirements = (
@@ -178,7 +184,7 @@ const HorarioRoute = () => {
     //validamos que no sea una materia ya vista mirando los requisitos de las materias que ya estan en el horario
     const requisitosMateriaEnHorario = materias
       .filter((m) => {
-        return horario.some((h) => h._id === m._id);
+        return horario.some((h) => h.sku === m.sku);
       })
       .flatMap((m) => m.requirements || []);
     if (requisitosMateriaEnHorario.includes(materia.sku)) {
@@ -198,8 +204,8 @@ const HorarioRoute = () => {
     group: Materia["groups"][0]
   ) => {
     // Verificar si la materia ya está en el horario
-    const hasMateria = horario.some((m) => m._id === materia._id);
-    const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
+    const hasMateria = horario.some((m) => m.sku === materia.sku);
+    const isCurrentlySelected = isGroupSelected(materia.sku, group.sku);
     // Verificar conflictos con todas las materias en el horario
     const hasConflict = horario.some((existingMateria) =>
       existingMateria.groups.some((existingGroup) =>
@@ -211,7 +217,7 @@ const HorarioRoute = () => {
     if (isCurrentlySelected) {
       setHorario((prevHorario) => {
         const newHorario = prevHorario.map((m) => {
-          if (m._id === materia._id) {
+          if (m.sku === materia.sku) {
             const newGroups = m.groups.filter((g) => g.sku !== group.sku);
             if (newGroups.length === 0) {
               return null;
@@ -233,7 +239,7 @@ const HorarioRoute = () => {
       // Actualizar el grupo de la materia existente
       setHorario((prevHorario) =>
         prevHorario.map((m) => {
-          if (m._id === materia._id) {
+          if (m.sku === materia.sku) {
             return { ...m, groups: [group] };
           }
           return m;
@@ -278,14 +284,14 @@ const HorarioRoute = () => {
     });
   };
 
-  const isGroupSelected = (materiaId: string, groupSku: string) => {
+  const isGroupSelected = (materiaSku: string, groupSku: string) => {
     return horario.some(
-      (m) => m._id === materiaId && m.groups.some((g) => g.sku === groupSku)
+      (m) => m.sku === materiaSku && m.groups.some((g) => g.sku === groupSku)
     );
   };
 
-  const handleRemoveMateria = (materiaId: string) => {
-    const newHorario = horario.filter((m) => m._id !== materiaId);
+  const handleRemoveMateria = (materiaSku: string) => {
+    const newHorario = horario.filter((m) => m.sku !== materiaSku);
     setHorario(newHorario);
   };
 
@@ -319,7 +325,7 @@ const HorarioRoute = () => {
             ...m,
             group: {
               ...m.groups[0],
-              schedule: m.groups[0].schedule.map((slot) => {
+              schedule: m.groups[0].schedule?.map((slot) => {
                 const [start, end] = slot.time.split("-");
                 return {
                   ...slot,
@@ -344,6 +350,7 @@ const HorarioRoute = () => {
         title: "Horario guardado",
         description: "El horario ha sido guardado exitosamente.",
       });
+      navigate("/solicitudes");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data

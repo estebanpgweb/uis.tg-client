@@ -120,14 +120,16 @@ const SolicitudCrearRoute = () => {
     existingSchedule: Materia["groups"][0]["schedule"],
     newSchedule: Materia["groups"][0]["schedule"]
   ): boolean => {
-    return existingSchedule.some((existing) =>
-      newSchedule.some((newSlot) => {
-        if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
-          return isTimeOverlap(existing.time, newSlot.time);
-        }
-        return false;
-      })
-    );
+    return existingSchedule
+      ? existingSchedule.some((existing) =>
+          newSchedule?.some((newSlot) => {
+            if (existing.day.toUpperCase() === newSlot.day.toUpperCase()) {
+              return isTimeOverlap(existing.time, newSlot.time);
+            }
+            return false;
+          })
+        )
+      : false;
   };
 
   const checkMateriaRequirements = (
@@ -171,7 +173,7 @@ const SolicitudCrearRoute = () => {
     //validamos que no sea una materia ya vista mirando los requisitos de las materias que ya estan en el horario
     const requisitosMateriaEnHorario = materias
       .filter((m) => {
-        return horario.some((h) => h._id === m._id);
+        return horario.some((h) => h.sku === m.sku);
       })
       .flatMap((m) => m.requirements || []);
     if (requisitosMateriaEnHorario.includes(materia.sku)) {
@@ -191,12 +193,12 @@ const SolicitudCrearRoute = () => {
     group: Materia["groups"][0]
   ) => {
     // Verificar si la materia ya está en el horario
-    const hasMateria = horario.some((m) => m._id === materia._id);
-    const isCurrentlySelected = isGroupSelected(materia._id, group.sku);
+    const hasMateria = horario.some((m) => m.sku === materia.sku);
+    const isCurrentlySelected = isGroupSelected(materia.sku, group.sku);
     // Verificar conflictos con todas las materias en el horario
     const hasConflict = horario.some(
       (existingMateria) =>
-        existingMateria._id !== materia._id &&
+        existingMateria.sku !== materia.sku &&
         existingMateria.groups.some((existingGroup) =>
           checkMateriaConflict(existingGroup.schedule, group.schedule)
         )
@@ -206,7 +208,7 @@ const SolicitudCrearRoute = () => {
     if (isCurrentlySelected) {
       setHorario((prevHorario) => {
         const newHorario = prevHorario.map((m) => {
-          if (m._id === materia._id) {
+          if (m.sku === materia.sku) {
             const newGroups = m.groups.filter((g) => g.sku !== group.sku);
             if (newGroups.length === 0) {
               return null;
@@ -237,7 +239,7 @@ const SolicitudCrearRoute = () => {
       // Actualizar el grupo de la materia existente
       setHorario((prevHorario) =>
         prevHorario.map((m) => {
-          if (m._id === materia._id) {
+          if (m.sku === materia.sku) {
             return { ...m, groups: [...m.groups, group] };
           }
           return m;
@@ -281,20 +283,20 @@ const SolicitudCrearRoute = () => {
     });
   };
 
-  const isGroupSelected = (materiaId: string, groupSku: string) => {
+  const isGroupSelected = (materiaSku: string, groupSku: string) => {
     return horario.some(
-      (m) => m._id === materiaId && m.groups.some((g) => g.sku === groupSku)
+      (m) => m.sku === materiaSku && m.groups.some((g) => g.sku === groupSku)
     );
   };
 
   const handleRemoveGrupo = (
-    materiaId: string,
+    materiaSku: string,
     groupSku?: string,
     isInicial?: boolean
   ) => {
     if (isInicial) {
       // Buscar el grupo inicial que queremos restaurar
-      const materiaInicial = horarioInicial.find((m) => m._id === materiaId);
+      const materiaInicial = horarioInicial.find((m) => m.sku === materiaSku);
       const groupInicial = materiaInicial?.groups.find(
         (g) => g.sku === groupSku
       );
@@ -303,7 +305,7 @@ const SolicitudCrearRoute = () => {
         // Verificar conflictos antes de restaurar
         const hasConflict = horario.some(
           (existingMateria) =>
-            existingMateria._id !== materiaId &&
+            existingMateria.sku !== materiaSku &&
             existingMateria.groups.some((existingGroup) =>
               checkMateriaConflict(
                 existingGroup.schedule,
@@ -324,11 +326,11 @@ const SolicitudCrearRoute = () => {
 
         // Actualizar el horario manteniendo los cambios existentes
         setHorario((prevHorario) => {
-          const materiaExists = prevHorario.some((m) => m._id === materiaId);
+          const materiaExists = prevHorario.some((m) => m.sku === materiaSku);
 
           if (materiaExists) {
             return prevHorario.map((m) => {
-              if (m._id === materiaId) {
+              if (m.sku === materiaSku) {
                 return {
                   ...m,
                   groups: [...m.groups, groupInicial],
@@ -355,7 +357,7 @@ const SolicitudCrearRoute = () => {
         (prevHorario) =>
           prevHorario
             .map((m) => {
-              if (m._id === materiaId) {
+              if (m.sku === materiaSku) {
                 const newGroups = m.groups.filter((g) => g.sku !== groupSku);
                 if (newGroups.length === 0) {
                   return null;
@@ -367,7 +369,7 @@ const SolicitudCrearRoute = () => {
             .filter(Boolean) as Materia[]
       );
 
-      const materiaName = materias.find((m) => m._id === materiaId)?.name;
+      const materiaName = materias.find((m) => m.sku === materiaSku)?.name;
       toast({
         variant: "destructive",
         title: "Grupo removido",

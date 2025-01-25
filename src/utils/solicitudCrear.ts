@@ -11,7 +11,7 @@ export function generateAppeals(
   // Crear un mapa de materias iniciales para fácil acceso
   const materiasInicialesMap = new Map(
     horarioInicial.map((materia) => [
-      materia._id,
+      materia.sku,
       {
         name: materia.name,
         sku: materia.sku,
@@ -23,7 +23,7 @@ export function generateAppeals(
   // 1. Procesar eliminaciones y cambios de grupo
   horarioInicial.forEach((materiaInicial) => {
     const materiaActual = horarioActual.find(
-      (m) => m._id === materiaInicial._id
+      (m) => m.sku === materiaInicial.sku
     );
 
     if (!materiaActual) {
@@ -87,7 +87,7 @@ export function generateAppeals(
 
   // 2. Procesar nuevas materias agregadas
   horarioActual.forEach((materiaActual) => {
-    if (!materiasInicialesMap.has(materiaActual._id)) {
+    if (!materiasInicialesMap.has(materiaActual.sku)) {
       // Caso: Nueva materia agregada
       appeals.push({
         from: null,
