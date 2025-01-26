@@ -63,7 +63,10 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     cell: ({ row }) => {
       const logs = row.original.logs || [];
       const lastLog = logs[logs.length - 1];
-      return lastLog ? `${lastLog.user.name} ${lastLog.user.lastname}` : "";
+      const user = lastLog?.user;
+      return lastLog && user && user.name && user.lastname
+        ? `${user.name} ${user.lastname}`
+        : "";
     },
   },
   {
