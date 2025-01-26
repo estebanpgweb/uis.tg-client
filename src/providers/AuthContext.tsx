@@ -7,6 +7,7 @@ import Loader from "@/components/loader.tsx";
 type AuthContextType = {
   loggedIn: boolean;
   user: UserType;
+  forgotPassword: (email: string) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -41,6 +42,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const axios: AxiosInstance = useAxios();
+
+  const forgotPassword = async (email: string): Promise<void> => {
+    await axios.post("/api/auth/forgot-password", { email });
+  };
 
   const register = async (
     email: string,
@@ -114,6 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         loggedIn,
         user,
+        forgotPassword,
         register,
         login,
         logout,

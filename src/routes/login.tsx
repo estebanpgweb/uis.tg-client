@@ -9,12 +9,25 @@ import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/loader";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const LoginRoute = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const { toast } = useToast();
@@ -52,6 +65,37 @@ const LoginRoute = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const sendForgotPassword = async () => {
+    try {
+      setIsLoading(true);
+      if (!email.includes("@correo.uis.edu.co")) {
+        throw new Error("El correo debe ser de la universidad UIS");
+      }
+      await auth.forgotPassword(email);
+
+      toast({
+        title: "Solicitud enviada",
+        description:
+          "Se ha enviado un correo con las instrucciones necesarias para recuperar su contraseña",
+      });
+    } catch (error) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ||
+        (error as Error).message ||
+        "Ha ocurrido un error inesperado";
+
+      toast({
+        variant: "destructive",
+        title: "Solicitud fallida",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+      setShowForgotPassword(false);
+    }
   };
 
   return (
@@ -104,15 +148,52 @@ const LoginRoute = () => {
             Iniciar sesión
           </Button>
         </form>
-        <Button variant="link" className="text-xs">
-          ¿Olvidó su Contraseña?
-        </Button>
-        <Link
-          to="/register"
-          className={buttonVariants({ variant: "link" }) + " text-xs"}
-        >
-          ¿No tiene una cuenta? Registrese aquí
-        </Link>
+        <div className="flex w-full justify-between items-center">
+          <AlertDialog
+            open={showForgotPassword}
+            onOpenChange={setShowForgotPassword}
+          >
+            <AlertDialogTrigger>
+              <Button variant="link" className="text-xs">
+                ¿Olvidó su Contraseña?
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Recuperar Contraseña</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogDescription>
+                Para recuperar su contraseña, ingrese su correo electrónico y le
+                enviaremos las instrucciones necesarias.
+                <div className="flex flex-col gap-2 my-6">
+                  <Label className="font-normal" htmlFor="email">
+                    Correo electrónico
+                  </Label>
+                  <Input
+                    required
+                    id="email"
+                    autoComplete="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </AlertDialogDescription>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={sendForgotPassword}>
+                  Recuperar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Link
+            to="/register"
+            className={buttonVariants({ variant: "link" }) + " text-xs"}
+          >
+            ¿No tiene una cuenta? Registrese aquí
+          </Link>
+        </div>
       </Card>
     </div>
   );
