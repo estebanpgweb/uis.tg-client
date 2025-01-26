@@ -101,8 +101,8 @@ export default function Materias({
 
   return (
     <Card className="h-full">
-      <CardHeader className="!pb-2 !px-2">
-        <CardTitle className="pb-2">Asignaturas disponibles</CardTitle>
+      <CardHeader className="!pb-1 !pt-4 md:!pb-2 !px-2">
+        <CardTitle className="md:pb-2">Asignaturas disponibles</CardTitle>
         <div className="flex items-center justify-between gap-x-2">
           <Input
             type="search"
@@ -204,8 +204,8 @@ export default function Materias({
           </Dialog>
         </div>
       </CardHeader>
-      <CardContent className="!pr-0 !pl-3">
-        <ScrollArea className="flex flex-col h-[calc(100vh-11.5rem)] gap-y-4 pr-3">
+      <CardContent className="!pb-2 !pr-0 !pl-3">
+        <ScrollArea className="flex flex-col h-64 md:h-[calc(100vh-11.5rem)] gap-y-2 pr-3">
           <Accordion type="single" collapsible className="w-full">
             {filteredMaterias.map((materia) => (
               <AccordionItem
