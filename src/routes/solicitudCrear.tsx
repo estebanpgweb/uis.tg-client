@@ -432,6 +432,7 @@ const SolicitudCrearRoute = () => {
             handleSave={handleSaveSolicitud}
             horarioInicial={horarioInicial}
             solicitudes={solicitud.requests}
+            modalOpen={true}
           />
         </div>
         <div className="w-1/5">
