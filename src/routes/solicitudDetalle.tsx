@@ -187,7 +187,9 @@ const SolicitudDetalleRoute = () => {
       observation: observaciones,
     };
     try {
-      await axios.put(`/api/appeal/${solicitud?._id}`, newSolicitud);
+      await axios.put(`/api/appeal/${solicitud?._id}/scale`, {
+        id: newSolicitud._id,
+      });
       toast({
         title: "Solicitud enviada",
         description: "La solicitud ha sido enviada al director de escuela",
@@ -490,8 +492,9 @@ const SolicitudDetalleRoute = () => {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 ¿Está seguro de enviar esta solicitud al director? Solo debes
-                enviar en caso de incapacidad de resolver alguna petición, luego
-                se te asignará una nueva solicitud.
+                enviar en caso de incapacidad de resolver alguna petición y la
+                solicitud se enviara sin cambios el director, luego se te
+                asignará una nueva solicitud.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
