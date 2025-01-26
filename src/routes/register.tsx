@@ -84,7 +84,7 @@ const RegisterRoute = () => {
           Crea una cuenta para acceder al sistema de ajuste de matricula
         </h4>
         <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex flex-col gap-2">
               <Label className="font-normal" htmlFor="email">
                 Nombre

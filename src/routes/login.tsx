@@ -148,7 +148,7 @@ const LoginRoute = () => {
             Iniciar sesión
           </Button>
         </form>
-        <div className="flex w-full justify-between items-center">
+        <div className="md:flex w-full justify-between items-center">
           <AlertDialog
             open={showForgotPassword}
             onOpenChange={setShowForgotPassword}

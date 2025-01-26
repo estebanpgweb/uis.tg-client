@@ -84,9 +84,9 @@ function App() {
           </AlertDescription>
         </Alert>
       )}
-      <div className="flex mx-8 my-4 gap-x-8 justify-between">
+      <div className="flex flex-col md:flex-row md:mx-8 my-4 gap-x-8 gap-y-4 justify-between">
         {/* Horario */}
-        <Card className="flex flex-col gap-4 flex-1 px-6 py-4">
+        <Card className="flex flex-col gap-2 md:gap-4 flex-1 px-3 py-2 md:px-6 md:py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <CalendarDays size={28} />
             <h2 className="text-xl font-medium">Cargar Horario</h2>
@@ -105,7 +105,7 @@ function App() {
           </Link>
         </Card>
         {/* Solicitudes */}
-        <Card className="flex flex-col gap-4 flex-1 px-6 py-4">
+        <Card className="flex flex-col gap-2 md:gap-4 flex-1 px-3 py-2 md:px-6 md:py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <FileText size={28} />
             <h2 className="text-xl font-medium">Crear Solicitud de Ajuste</h2>
