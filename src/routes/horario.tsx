@@ -464,8 +464,8 @@ const HorarioRoute = () => {
         </DialogContent>
       </Dialog>
       <h1 className="text-2xl font-bold">Horario del estudiante</h1>
-      <div className="flex w-full my-4 gap-x-8 justify-between">
-        <div className="flex-1 w-4/5">
+      <div className="flex flex-col-reverse md:flex-row w-full md:my-4 gap-x-8  gap-y-2 justify-between">
+        <div className="flex-1 w-full md:w-4/5">
           <Calendario
             horario={horario}
             handleRemoveMateria={handleRemoveMateria}
@@ -474,7 +474,7 @@ const HorarioRoute = () => {
           />
         </div>
 
-        <div className="w-1/5">
+        <div className="w-full md:w-1/5">
           <Materias
             materias={materias}
             onGroupSelect={handleGroupSelection}

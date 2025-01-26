@@ -205,8 +205,8 @@ export default function Calendario({
             className={`${getClassForCell(
               materia.sku,
               group.sku
-            )} mx-1 px-2 py-1 rounded-md 
-            overflow-x-clip flex justify-between items-center`}
+            )} mx-0.5 px-1 py-0.5 rounded-md 
+            overflow-hidden flex items-center relative`}
             style={{
               height: `${slotHeight}px`,
               position: "absolute",
@@ -216,16 +216,20 @@ export default function Calendario({
               zIndex: 10,
             }}
           >
-            <p className="font-medium text-xs">
-              {materia.name}
-              <br />
-              <span className="text-xs opacity-75">Grupo {group.sku}</span>
-            </p>
+            <div className="flex-grow overflow-hidden">
+              <p className="font-medium text-[0.6rem] md:text-xs leading-tight">
+                {materia.name}
+                <br />
+                <span className="text-[0.5rem] md:text-xs opacity-75">
+                  Grupo {group.sku}
+                </span>
+              </p>
+            </div>
             {(!isInicial || (isInicial && grupos <= 1) || isInicialDeleted) && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="!p-1 !h-fit"
+                size="icon"
+                className="absolute top-0 right-0 !p-0.5 !h-5 !w-5 z-20"
                 onClick={() => {
                   handleRemoveMateria(
                     materia.sku,
@@ -234,7 +238,11 @@ export default function Calendario({
                   );
                 }}
               >
-                {isInicialDeleted ? <X /> : <Trash2 />}
+                {isInicialDeleted ? (
+                  <X className="h-3 w-3" />
+                ) : (
+                  <Trash2 className="h-3 w-3" />
+                )}
               </Button>
             )}
           </div>
@@ -244,68 +252,78 @@ export default function Calendario({
   }
 
   return (
-    <Card>
+    <Card className="w-full overflow-x-auto">
       <CardContent className="!p-0">
-        <Table className="table-fixed w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-14">Hora</TableHead>
-              {days.map((day) => (
-                <TableHead key={day} className="w-1/6 text-center">
-                  {day}
+        <div className="min-w-[600px]">
+          {/* Ensures horizontal scrolling on small screens */}
+          <Table className="table-fixed w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-6 md:w-14 text-xs md:text-sm">
+                  Hora
                 </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {timeSlots.map((time) => (
-              <TableRow key={time}>
-                <TableCell className="font-medium w-14 text-center">
-                  {time}
-                </TableCell>
                 {days.map((day) => (
-                  <TableCell
-                    key={`${day}-${time}`}
-                    className="w-1/6 p-1 relative h-9"
+                  <TableHead
+                    key={day}
+                    className="w-14 md:w-1/6 text-center text-xs md:text-sm"
                   >
-                    {renderCell(day, time)}
-                  </TableCell>
+                    {day}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="mt-4">
+            </TableHeader>
+            <TableBody>
+              {timeSlots.map((time) => (
+                <TableRow key={time}>
+                  <TableCell className="font-medium md:w-14 text-center text-[8px] md:text-sm">
+                    {time}
+                  </TableCell>
+                  {days.map((day) => (
+                    <TableCell
+                      key={`${day}-${time}`}
+                      className="w-1/6 p-0.5 relative h-9"
+                    >
+                      {renderCell(day, time)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-2 md:mt-4 px-2">
           <AlertDialog
             open={isDialogOpen}
             onOpenChange={(isOpen) => setIsDialogOpen(isOpen)}
           >
             <AlertDialogTrigger className="w-full" asChild>
-              <Button>
-                <Save />
+              <Button className="w-[600px] md:w-full text-xs md:text-base">
+                <Save className="h-4 w-4 mr-2" />
                 Guardar
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Resumen de movimientos</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-base md:text-xl">
+                  Resumen de movimientos
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-xs md:text-sm">
                   {horarioInicial.length > 0 ? (
-                    <div className="flex flex-col gap-y-2 mb-4">
+                    <div className="flex flex-col gap-y-1 md:gap-y-2 mb-2 md:mb-4">
                       {solicitudes &&
                         solicitudes?.length > 0 &&
                         solicitudes.map((solicitud) =>
                           solicitud.from && !solicitud.to ? (
                             <div
                               key={solicitud.from.sku}
-                              className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
+                              className="flex gap-1 md:gap-2 text-xs md:text-lg items-center justify-between bg-template px-1 md:px-2 py-0.5 md:py-1 rounded-md"
                             >
-                              <div className="flex gap-2 items-center">
+                              <div className="flex gap-1 md:gap-2 items-center">
                                 <MinusCircle
-                                  size={24}
+                                  size={16}
                                   className="text-red-500"
                                 />
-                                <p>
+                                <p className="text-xs md:text-base">
                                   Eliminada: {solicitud.from.name} (
                                   {solicitud.from.group})
                                 </p>
@@ -313,6 +331,7 @@ export default function Calendario({
                               <Button
                                 size="icon"
                                 variant="ghost"
+                                className="!h-6 !w-6"
                                 onClick={() => {
                                   if (solicitud.from) {
                                     handleRemoveMateria(
@@ -323,28 +342,28 @@ export default function Calendario({
                                   }
                                 }}
                               >
-                                <X />
+                                <X className="h-4 w-4" />
                               </Button>
                             </div>
                           ) : solicitud.to && !solicitud.from ? (
                             <div
                               key={solicitud.to[0].sku}
-                              className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
+                              className="flex gap-1 md:gap-2 text-xs md:text-lg items-center justify-between bg-template px-1 md:px-2 py-0.5 md:py-1 rounded-md"
                             >
-                              <div className="flex gap-2 items-center">
+                              <div className="flex gap-1 md:gap-2 items-center">
                                 <PlusCircle
-                                  size={24}
+                                  size={16}
                                   className="text-green-500"
                                 />
-                                <p>
+                                <p className="text-xs md:text-base">
                                   Añadida: {solicitud.to[0].name} (
                                   {solicitud.to.map((m) => m.group).join(", ")})
                                 </p>
                               </div>
                               <Button
-                                className=""
                                 size="icon"
                                 variant="ghost"
+                                className="!h-6 !w-6"
                                 onClick={() => {
                                   if (solicitud.to) {
                                     handleRemoveMateria(
@@ -355,7 +374,7 @@ export default function Calendario({
                                   }
                                 }}
                               >
-                                <X />
+                                <X className="h-4 w-4" />
                               </Button>
                             </div>
                           ) : (
@@ -363,11 +382,11 @@ export default function Calendario({
                             solicitud.from && (
                               <div
                                 key={solicitud.from.sku}
-                                className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md"
+                                className="flex gap-1 md:gap-2 text-xs md:text-lg items-center justify-between bg-template px-1 md:px-2 py-0.5 md:py-1 rounded-md"
                               >
-                                <div className="flex gap-2 items-center">
-                                  <Repeat size={24} className="text-blue-500" />
-                                  <p>
+                                <div className="flex gap-1 md:gap-2 items-center">
+                                  <Repeat size={16} className="text-blue-500" />
+                                  <p className="text-xs md:text-base">
                                     Cambio de grupo: {solicitud.from.name} (
                                     {solicitud.from.group}) a (
                                     {solicitud.to
@@ -379,6 +398,7 @@ export default function Calendario({
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="!h-6 !w-6"
                                   onClick={() => {
                                     if (solicitud.from && solicitud.to) {
                                       handleRemoveMateria(
@@ -390,7 +410,7 @@ export default function Calendario({
                                     }
                                   }}
                                 >
-                                  <X />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               </div>
                             )
@@ -400,14 +420,14 @@ export default function Calendario({
                   ) : (
                     horario.length > 0 && (
                       <div>
-                        <h3 className="font-medium text-xl">
+                        <h3 className="font-medium text-sm md:text-xl">
                           Horario modificado
                         </h3>
-                        <ul className="flex flex-col gap-y-2 my-4">
+                        <ul className="flex flex-col gap-y-1 md:gap-y-2 my-2 md:my-4">
                           {horario.map((materia) => (
                             <li key={materia.sku}>
-                              <div className="flex gap-2 text-lg items-center justify-between bg-template px-2 py-1 rounded-md">
-                                <p>
+                              <div className="flex gap-1 md:gap-2 text-xs md:text-lg items-center justify-between bg-template px-1 md:px-2 py-0.5 md:py-1 rounded-md">
+                                <p className="text-xs md:text-base">
                                   {materia.sku} -{" "}
                                   <span className="font-semibold">
                                     {materia.name}
@@ -420,11 +440,12 @@ export default function Calendario({
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="!h-6 !w-6"
                                   onClick={() =>
                                     handleRemoveMateria(materia.sku)
                                   }
                                 >
-                                  <X />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               </div>
                             </li>
@@ -438,8 +459,13 @@ export default function Calendario({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => handleSave && handleSave()}>
+                <AlertDialogCancel className="text-xs md:text-base">
+                  Cancelar
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleSave && handleSave()}
+                  className="text-xs md:text-base"
+                >
                   Confirmar
                 </AlertDialogAction>
               </AlertDialogFooter>

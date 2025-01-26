@@ -424,8 +424,8 @@ const SolicitudCrearRoute = () => {
     <div className="w-full">
       <Loader isLoading={isLoading} />
       <h1 className="text-2xl font-bold">Solicitud ajuste de matricula</h1>
-      <div className="flex w-full my-4 gap-x-8 justify-between">
-        <div className="flex-1 w-4/5">
+      <div className="flex flex-col-reverse md:flex-row w-full md:my-4 gap-x-8 gap-y-2 justify-between">
+        <div className="flex-1 md:w-4/5">
           <Calendario
             horario={horario}
             handleRemoveMateria={handleRemoveGrupo}
@@ -435,7 +435,7 @@ const SolicitudCrearRoute = () => {
             modalOpen={true}
           />
         </div>
-        <div className="w-1/5">
+        <div className="md:w-1/5">
           <Materias
             materias={materias}
             onGroupSelect={handleGroupSelection}
