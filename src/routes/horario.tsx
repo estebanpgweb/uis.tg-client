@@ -29,6 +29,7 @@ const HorarioRoute = () => {
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [resumeDialogOpen, setResumeDialogOpen] = useState(true);
   const { toast } = useToast();
   const auth = useAuth();
   const userId = auth?.user?.id;
@@ -45,10 +46,11 @@ const HorarioRoute = () => {
   ];
 
   useEffect(() => {
-    if (userShift) {
+    if (userShift && userShift.day && userShift.time) {
       setShift(userShift);
+      setDialogOpen(false);
     } else {
-      setDialogOpen(!userShift);
+      setDialogOpen(true);
     }
   }, [userShift]);
 
@@ -296,8 +298,15 @@ const HorarioRoute = () => {
   };
 
   const handleSaveSchedule = async () => {
-    if (!userShift) {
+    if (!userShift || !userShift.day || !userShift.time) {
+      setResumeDialogOpen(false);
       setDialogOpen(true);
+      toast({
+        variant: "destructive",
+        title: "Franja vacia",
+        description:
+          "Debe registrar la franja horaria antes de guardar el horario.",
+      });
       return;
     }
 
@@ -461,6 +470,7 @@ const HorarioRoute = () => {
             horario={horario}
             handleRemoveMateria={handleRemoveMateria}
             handleSave={handleSaveSchedule}
+            modalOpen={resumeDialogOpen}
           />
         </div>
 

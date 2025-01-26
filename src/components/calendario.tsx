@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import {
@@ -33,6 +34,7 @@ interface CalendarioProps {
   handleSave?: () => void;
   horarioInicial?: Materia[];
   solicitudes?: Solicitud["requests"];
+  modalOpen?: boolean;
 }
 
 export default function Calendario({
@@ -41,6 +43,7 @@ export default function Calendario({
   handleSave,
   horarioInicial = [],
   solicitudes,
+  modalOpen,
 }: CalendarioProps) {
   const timeSlots = [
     "6-7",
@@ -61,6 +64,12 @@ export default function Calendario({
     "21-22",
   ];
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    console.log(modalOpen);
+    setIsDialogOpen(!modalOpen || false);
+  }, [modalOpen]);
 
   const getClassForCell = (materiaSku: string, group?: string) => {
     const colorClasses = [
@@ -268,7 +277,10 @@ export default function Calendario({
           </TableBody>
         </Table>
         <div className="mt-4">
-          <AlertDialog>
+          <AlertDialog
+            open={isDialogOpen}
+            onOpenChange={(isOpen) => setIsDialogOpen(isOpen)}
+          >
             <AlertDialogTrigger className="w-full" asChild>
               <Button>
                 <Save />
