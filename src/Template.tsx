@@ -32,7 +32,12 @@ const Template = ({ children }: PropsWithChildren) => {
   const isActiveRoute = (path: string): boolean => {
     const routePatterns = [
       { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
+      { pattern: /^\/solicitud\/crear$/, defaultRoute: "/solicitudes" },
     ];
+
+    if (path === "/") {
+      return location.pathname === "/";
+    }
 
     if (location.pathname.startsWith(path)) {
       return true;
