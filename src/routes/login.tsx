@@ -70,9 +70,9 @@ const LoginRoute = () => {
   const sendForgotPassword = async () => {
     try {
       setIsLoading(true);
-      if (!email.includes("@correo.uis.edu.co")) {
-        throw new Error("El correo debe ser de la universidad UIS");
-      }
+      // if (!email.includes("@correo.uis.edu.co")) {
+      //   throw new Error("El correo debe ser de la universidad UIS");
+      // }
       await auth.forgotPassword(email);
 
       toast({
@@ -80,6 +80,10 @@ const LoginRoute = () => {
         description:
           "Se ha enviado un correo con las instrucciones necesarias para recuperar su contraseña",
       });
+
+      setShowForgotPassword(false);
+      setEmail("");
+      navigate("/cambiar-contraseña");
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data

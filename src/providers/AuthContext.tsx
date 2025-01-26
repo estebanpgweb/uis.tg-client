@@ -8,6 +8,11 @@ type AuthContextType = {
   loggedIn: boolean;
   user: UserType;
   forgotPassword: (email: string) => Promise<void>;
+  changePassword: (
+    password: string,
+    confirmPassword: string,
+    token: string
+  ) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -44,7 +49,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const axios: AxiosInstance = useAxios();
 
   const forgotPassword = async (email: string): Promise<void> => {
-    await axios.post("/api/auth/forgot-password", { email });
+    await axios.post("/api/auth/recover-password", { username: email });
+  };
+
+  const changePassword = async (
+    password: string,
+    confirmPassword: string,
+    token: string
+  ): Promise<void> => {
+    await axios.post(`/api/auth/change-password?t=${token}`, {
+      password,
+      confirmPassword,
+    });
   };
 
   const register = async (
@@ -120,6 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loggedIn,
         user,
         forgotPassword,
+        changePassword,
         register,
         login,
         logout,

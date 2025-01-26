@@ -22,6 +22,7 @@ import EstadisticasRoute from "../routes/estadisticas.tsx";
 // login
 import LoginRoute from "../routes/login.tsx";
 import RegisterRoute from "../routes/register.tsx";
+import RecuperarContraseñaRoute from "@/routes/recuperarContraseña.tsx";
 
 // Componente para manejar redirecciones basadas en el tipo de usuario
 const DefaultRedirect = () => {
@@ -108,6 +109,14 @@ const router = createBrowserRouter([
     element: (
       <GuestGuard>
         <RegisterRoute />
+      </GuestGuard>
+    ),
+  },
+  {
+    path: "/cambiar-contrasena",
+    element: (
+      <GuestGuard>
+        <RecuperarContraseñaRoute />
       </GuestGuard>
     ),
   },
