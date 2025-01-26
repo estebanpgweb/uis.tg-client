@@ -96,9 +96,9 @@ export function DataTable<TData extends { status?: string }, TValue>({
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between py-6">
-        <div className="relative min-w-[250px]">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between py-4 sm:py-6 gap-4 sm:gap-0">
+        <div className="relative w-full sm:min-w-[250px] sm:w-auto">
           <Input
             id="buscar"
             placeholder="Buscar"
@@ -107,6 +107,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
             onClick={() => {
               handleSearch();
             }}
+            className="pr-10"
           />
           <Search
             size={20}
@@ -117,7 +118,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
         {/* Filtro de estados */}
         {selectedStatuses && (
           <Select onValueChange={handleStatusChange} name="estados">
-            <SelectTrigger className="max-w-sm">
+            <SelectTrigger className="w-full sm:max-w-sm">
               <SelectValue placeholder="Seleccionar Estados" />
             </SelectTrigger>
             <SelectContent>
@@ -133,7 +134,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
-        <p className="opacity-50">
+        <p className="hidden sm:block opacity-50 text-sm">
           Mostrando {data.length} de {rows} resultados
         </p>
       </div>
@@ -141,11 +142,15 @@ export function DataTable<TData extends { status?: string }, TValue>({
       {selectedStatuses && selectedStatuses.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {selectedStatuses.map((status) => (
-            <Badge key={status} variant="secondary" className="px-3 py-1">
+            <Badge
+              key={status}
+              variant="secondary"
+              className="px-2 py-1 text-xs sm:px-3 sm:py-1"
+            >
               {getStatusLabel(status)}
               <button
                 onClick={() => removeStatus(status)}
-                className="ml-2 hover:text-red-500"
+                className="ml-1 sm:ml-2 hover:text-red-500"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -156,82 +161,90 @@ export function DataTable<TData extends { status?: string }, TValue>({
             size="sm"
             onClick={() => {
               setSelectedStatuses?.([]);
-              setPage(0); // Reset to first page when clearing filters
+              setPage(0);
             }}
-            className="h-7"
+            className="h-6 sm:h-7 text-xs sm:text-sm"
           >
             Limpiar filtros
           </Button>
         </div>
       )}
 
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder ? null : (
-                    <Button
-                      variant={
-                        header.id === sorting.field ? "secondary" : "ghost"
-                      }
-                      className={
-                        header.id === sorting.field ? "font-semibold" : ""
-                      }
-                      onClick={() => {
-                        if (header.id === "accion") return;
-                        setSorting({
-                          field: header.id,
-                          sort: sorting.sort === "asc" ? "desc" : "asc",
-                        });
-                      }}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.id === "accion" ? null : header.id !==
-                        sorting.field ? (
-                        <ArrowUpDown size={20} />
-                      ) : sorting.sort === "asc" ? (
-                        <ArrowUp size={20} />
-                      ) : (
-                        <ArrowDown size={20} />
-                      )}
-                    </Button>
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+      <div className="overflow-x-auto">
+        <Table className="min-w-full">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="text-xs sm:text-base">
+                    {header.isPlaceholder ? null : (
+                      <Button
+                        variant={
+                          header.id === sorting.field ? "secondary" : "ghost"
+                        }
+                        className={`${
+                          header.id === sorting.field ? "font-semibold" : ""
+                        } text-xs sm:text-base`}
+                        onClick={() => {
+                          if (header.id === "accion") return;
+                          setSorting({
+                            field: header.id,
+                            sort: sorting.sort === "asc" ? "desc" : "asc",
+                          });
+                        }}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.id === "accion" ? null : header.id !==
+                          sorting.field ? (
+                          <ArrowUpDown size={16} />
+                        ) : sorting.sort === "asc" ? (
+                          <ArrowUp size={16} />
+                        ) : (
+                          <ArrowDown size={16} />
+                        )}
+                      </Button>
+                    )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No hay resultados.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="text-xs sm:text-base"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="text-xs sm:text-base">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-xs sm:text-base"
+                >
+                  No hay resultados.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="flex items-center justify-end space-x-2 py-4">
-        {/* Paginación usando shadcdn */}
         {rows > 0 && (
           <Pagination>
             <PaginationContent>
@@ -239,7 +252,9 @@ export function DataTable<TData extends { status?: string }, TValue>({
                 <PaginationPrevious
                   href="#"
                   onClick={() => setPage(page - 1)}
-                  className={page === 0 ? "hidden" : ""}
+                  className={`${
+                    page === 0 ? "hidden" : ""
+                  } text-xs sm:text-base`}
                 />
               </PaginationItem>
               {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
@@ -248,6 +263,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                     href="#"
                     onClick={() => setPage(index)}
                     isActive={index === page}
+                    className="text-xs sm:text-base"
                   >
                     {index + 1}
                   </PaginationLink>
@@ -257,7 +273,9 @@ export function DataTable<TData extends { status?: string }, TValue>({
                 <PaginationNext
                   href="#"
                   onClick={() => setPage(page + 1)}
-                  className={page === Math.ceil(rows / 10) - 1 ? "hidden" : ""}
+                  className={`${
+                    page === Math.ceil(rows / 10) - 1 ? "hidden" : ""
+                  } text-xs sm:text-base`}
                 />
               </PaginationItem>
             </PaginationContent>
