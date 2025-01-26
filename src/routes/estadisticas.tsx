@@ -175,12 +175,12 @@ export default function EstadisticasRoute() {
         <h1 className="text-2xl font-bold">Estadísticas de solicitudes</h1>
       </div>
       <div className="flex flex-col gap-y-6">
-        <div className="flex justify-between gap-6 pt-6">
-          <Card className="flex flex-col gap-y-2 flex-1 px-6 py-3">
+        <div className="flex flex-col md:flex-row justify-between gap-y-2 gap-x-6 pt-2 md:pt-6">
+          <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Solicitudes totales</h3>
             <p className="text-2xl font-semibold ml-4">{solicitudes.length}</p>
           </Card>
-          <Card className="flex flex-col gap-y-2 flex-1 px-6 py-3">
+          <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Tiempo promedio de respuesta</h3>
             <p className="text-2xl font-semibold ml-4">
               {
@@ -207,7 +207,7 @@ export default function EstadisticasRoute() {
               en {solicitudesAtendidas.length} solicitudes atendidas
             </span>
           </Card>
-          <Card className="flex flex-col gap-y-2 flex-1 px-6 py-3">
+          <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Atendidas VS sin atender</h3>
             <p className="text-2xl font-semibold ml-4">
               {
@@ -229,8 +229,8 @@ export default function EstadisticasRoute() {
             </span>
           </Card>
         </div>
-        <div className="flex w-full gap-6 justify-between">
-          <Card className="w-full flex flex-col gap-y-2 flex-1 px-6 py-3">
+        <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Estado de solicitudes</h3>
             <span className="opacity-50">Estado de todas las solicitudes</span>
             <ChartContainer config={{}} className="mx-auto w-full min-h-[80px]">
@@ -252,7 +252,7 @@ export default function EstadisticasRoute() {
               </PieChart>
             </ChartContainer>
           </Card>
-          <Card className="w-full flex flex-col gap-y-2 flex-1 px-6 py-3">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Solicitudes por numero de intentos</h3>
             <span className="opacity-50">
               Numero de solicitudes por estudiante
@@ -276,7 +276,7 @@ export default function EstadisticasRoute() {
               </PieChart>
             </ChartContainer>
           </Card>
-          <Card className="w-full flex flex-col gap-y-2 flex-1 px-6 py-3">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Tipos de solicitudes</h3>
             <span className="opacity-50">
               Distribucion de solicitudes por tipo
