@@ -420,17 +420,17 @@ const HorarioRoute = () => {
             <DialogDescription>
               Elige el día y la franja horaria que te fue asignada en el sistema
               de estudiantes UIS.
-              <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-4 mt-4">
                 {daysAndShifts.map(({ day, label }) => (
                   <Card key={day}>
-                    <CardHeader className="text-center">
+                    <CardHeader className="text-center !py-2 md:!py-4">
                       <CardTitle>{label}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-y-2">
                       <Button
                         className="text-sm"
                         variant={
-                          shift?.day === day && shift?.time === "AM"
+                          shift && shift.day === day && shift.time === "AM"
                             ? "default"
                             : "secondary"
                         }
@@ -442,7 +442,7 @@ const HorarioRoute = () => {
                       <Button
                         className="text-sm"
                         variant={
-                          shift?.day === day && shift?.time === "PM"
+                          shift && shift.day === day && shift.time === "PM"
                             ? "default"
                             : "secondary"
                         }

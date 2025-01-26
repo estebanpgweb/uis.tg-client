@@ -261,9 +261,11 @@ export default function Materias({
                                 <ul className="flex flex-col gap-y-1 list-disc list-inside">
                                   {group.schedule?.map((s, idx) => (
                                     <li key={idx}>
-                                      {s.day}, {s.time}
+                                      <span className="font-semibold">
+                                        {s.day}, {s.time}
+                                      </span>
                                       <br />
-                                      <span className="text-xs font-thin">
+                                      <span className="text-xs">
                                         {s.professor
                                           ? `${s.professor}`
                                           : "No registrado"}
