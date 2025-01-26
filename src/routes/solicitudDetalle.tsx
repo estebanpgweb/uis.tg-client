@@ -284,19 +284,18 @@ const SolicitudDetalleRoute = () => {
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
       {/* Titulo de la vista */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-1 md:mb-4">
         <Link
           to="/solicitudes"
           className={buttonVariants({ variant: "link" }) + " text-xl"}
         >
-          <ArrowLeft /> Volver
+          <ArrowLeft />
+          <span className="hidden md:block">Volver</span>
         </Link>
-        <h1 className="text-2xl font-bold">
-          Detalles de Solicitud de Matricula
-        </h1>
+        <h1 className="text-2xl font-bold">Detalles de Solicitud</h1>
       </div>
       {/* Información de la solicitud */}
-      <div className="flex items-center justify-between mx-8">
+      <div className="flex flex-col md:flex-row gap-y-2 items-center justify-between md:mx-8">
         <Label className="opacity-50 mx-4">
           ID de la solicitud: {solicitud._id}
         </Label>
@@ -309,9 +308,9 @@ const SolicitudDetalleRoute = () => {
           </Badge>
         </Label>
       </div>
-      <div className="flex mx-8 my-4 gap-x-8 justify-between">
+      <div className="flex flex-col md:flex-row my-2 md:mx-8 md:my-4 gap-y-4 gap-x-8 justify-between">
         {/* Información del estudiante */}
-        <Card className="flex flex-col gap-6 flex-1 px-6 py-4">
+        <Card className="flex flex-col gap-2 md:gap-6 flex-1 px-3 py-2 md:px-6 md:py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <User size={28} />
             <h2 className="text-xl font-medium">Datos del estudiante</h2>
@@ -339,7 +338,7 @@ const SolicitudDetalleRoute = () => {
           </div>
         </Card>
         {/* Lista de peticiones */}
-        <Card className="flex flex-col gap-6 flex-1 px-6 py-4">
+        <Card className="flex flex-col gap-2 md:gap-6 flex-1 px-3 py-2 md:px-6 md:py-4">
           <div className="flex items-center gap-x-4 mb-2">
             <ClipboardList size={28} />
             <h2 className="text-xl font-medium">Lista de peticiones</h2>
@@ -453,7 +452,7 @@ const SolicitudDetalleRoute = () => {
         </Card>
       </div>
       {/* Observaciones adicionales */}
-      <Card className="flex flex-col gap-6 flex-1 px-6 py-4 mx-8 my-4">
+      <Card className="flex flex-col gap-2 md:gap-6 flex-1 px-3 py-2 md:px-6 md:py-4 md:mx-8 my-4">
         <div className="flex items-center gap-x-4 mb-2">
           <FileText />
           <h2 className="text-xl font-medium">Observaciones adicionales</h2>
@@ -467,7 +466,11 @@ const SolicitudDetalleRoute = () => {
       </Card>
       {/* Botones de acción */}
       <div
-        className={kind === "STUDENT" ? "hidden" : "flex justify-around mt-8"}
+        className={
+          kind === "STUDENT"
+            ? "hidden"
+            : "flex flex-col md:flex-row gap-y-4 justify-around mt-4 md:mt-8"
+        }
       >
         <AlertDialog>
           <AlertDialogTrigger asChild>
