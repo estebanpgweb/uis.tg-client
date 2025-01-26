@@ -251,7 +251,9 @@ const SolicitudRoute = () => {
                 });
               } else if (
                 solicitudes.filter(
-                  (solicitud) => solicitud.status === "PENDING"
+                  (solicitud) =>
+                    solicitud.status === "PENDING" ||
+                    solicitud.status === "REVIEW"
                 ).length > 0
               ) {
                 toast({

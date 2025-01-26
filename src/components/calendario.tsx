@@ -67,7 +67,6 @@ export default function Calendario({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    console.log(modalOpen);
     setIsDialogOpen(!modalOpen || false);
   }, [modalOpen]);
 

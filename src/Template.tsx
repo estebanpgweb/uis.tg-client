@@ -29,6 +29,25 @@ const Template = ({ children }: PropsWithChildren) => {
     { path: "/estadisticas", label: "Estadisticas", kind: "ROOT" },
   ];
 
+  const isActiveRoute = (path: string): boolean => {
+    const routePatterns = [
+      { pattern: /^\/solicitudes\/[^/]+$/, defaultRoute: "/solicitudes" },
+    ];
+
+    if (location.pathname.startsWith(path)) {
+      return true;
+    }
+
+    // Verificar patrones dinámicos
+    for (const { pattern, defaultRoute } of routePatterns) {
+      if (pattern.test(location.pathname) && defaultRoute === path) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <nav className="w-full flex justify-between items-center p-4 bg-background shadow-md">
@@ -40,8 +59,7 @@ const Template = ({ children }: PropsWithChildren) => {
               <li key={link.path}>
                 <Link
                   className={`${
-                    location.pathname === link.path &&
-                    "!font-extrabold !text-xl"
+                    isActiveRoute(link.path) && "!font-extrabold !text-xl"
                   } ${buttonVariants({ variant: "link" })} !text-lg`}
                   to={link.path}
                 >

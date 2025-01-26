@@ -40,9 +40,9 @@ const HorarioRoute = () => {
   const navigate = useNavigate();
 
   const daysAndShifts = [
-    { day: "MONDAY", label: "Lunes" },
-    { day: "TUESDAY", label: "Martes" },
     { day: "WEDNESDAY", label: "Miércoles" },
+    { day: "THURSDAY", label: "Jueves" },
+    { day: "FRIDAY", label: "Viernes" },
   ];
 
   useEffect(() => {
