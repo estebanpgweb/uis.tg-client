@@ -8,12 +8,26 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { buildFilterQuery } from "@/utils/filterQuery";
 import { Plus } from "lucide-react";
 import Loader from "@/components/loader";
 
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [lastReviewSolicitud, setLastReviewSolicitud] =
+    useState<Solicitud["_id"]>();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [horario, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
@@ -30,6 +44,7 @@ const SolicitudRoute = () => {
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const kind = auth?.user?.kind;
+  const user = auth?.user;
   const userId = auth?.user?.id;
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -109,10 +124,32 @@ const SolicitudRoute = () => {
       const data = await fetchSolicitudes(page, "", [], sorting);
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
+      setLastReviewSolicitud(
+        data.find(
+          (solicitud: Solicitud) =>
+            solicitud.status === "REVIEW" && solicitud.attended?._id === userId
+        )
+      );
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting, userId]);
+  }, [page, filter, selectedStatuses, sorting, userId, user]);
+
+  useEffect(() => {
+    if (!userId || !kind) return;
+    const soli =
+      solicitudes &&
+      solicitudes.find(
+        (solicitud: Solicitud) =>
+          solicitud.status === "REVIEW" && solicitud.attended?._id === userId
+      );
+    const solicitudId = soli ? soli._id : undefined;
+
+    if (solicitudId && kind !== "STUDENT") {
+      setDialogOpen(true);
+    }
+    setLastReviewSolicitud(solicitudId);
+  }, [userId, solicitudes, kind]);
 
   useEffect(() => {
     if (!userId) return;
@@ -141,7 +178,7 @@ const SolicitudRoute = () => {
     };
 
     getSolicitudesCount();
-  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
+  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter, user]);
 
   useEffect(() => {
     if (!userId) return;
@@ -176,6 +213,28 @@ const SolicitudRoute = () => {
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
+      <AlertDialog open={dialogOpen} onOpenChange={() => setDialogOpen(false)}>
+        <AlertDialogTrigger></AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Solicitud de ajuste de matrícula pendiente
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            Tiene una solicitud de ajuste de matrícula pendiente, ¿desea ver la
+            solicitud?
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => navigate(`/solicitudes/${lastReviewSolicitud}`)}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
           Solicitudes de Ajuste de Matrícula

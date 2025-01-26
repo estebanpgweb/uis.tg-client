@@ -11,16 +11,6 @@ export interface Solicitud {
       time: "AM" | "PM";
     } | null;
   };
-  user?: {
-    name: string;
-    lastname: string;
-    username: string;
-    identification: string;
-    shift?: {
-      day: dayType;
-      time: "AM" | "PM";
-    } | null;
-  };
   requests: {
     from: {
       group: string;
@@ -41,6 +31,11 @@ export interface Solicitud {
   }[];
   status?: "PENDING" | "REVIEW" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
   observation?: string;
+  attended?: {
+    name: string;
+    lastname: string;
+    _id: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

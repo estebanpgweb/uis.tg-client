@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { Materia, getMateriaNameBySku } from "@/types/materiaTypes";
 import { Card, CardContent, CardTitle, CardHeader } from "./ui/card";
 import { Input } from "./ui/input";
@@ -8,15 +8,30 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "./ui/label";
 import { Plus, X } from "lucide-react";
 
 interface MateriasProps {
   materias: Materia[];
   onGroupSelect: (materia: Materia, group: Materia["groups"][0]) => void;
-  isGroupSelected: (materiaId: string, groupSku: string) => boolean;
+  isGroupSelected: (materiaSku: string, groupSku: string) => boolean;
 }
 
 export default function Materias({
@@ -25,6 +40,19 @@ export default function Materias({
   isGroupSelected,
 }: MateriasProps) {
   const [filterInput, setFilterInput] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const emptyMateria = {
+    name: "",
+    sku: "",
+    groups: [
+      {
+        sku: "",
+      },
+    ],
+  };
+  const [materiaNoRegistrada, setMateriaNoRegistrada] =
+    useState<Materia>(emptyMateria);
 
   const normalizeText = (text: string) => {
     return text
@@ -42,16 +70,139 @@ export default function Materias({
     return name.includes(searchTerm) || codigo.includes(searchTerm);
   });
 
+  const handleSaveMateriaNoRegistrada = async (e: FormEvent) => {
+    e.preventDefault();
+    if (
+      !materiaNoRegistrada.name ||
+      !materiaNoRegistrada.sku ||
+      !materiaNoRegistrada.groups[0].sku
+    ) {
+      return;
+    }
+
+    //verificar que no exista la materia en la lista de materias
+    const materiaExistente = materias.find(
+      (m) => m.sku === materiaNoRegistrada.sku && m.groups.length > 0
+    );
+
+    if (materiaExistente) {
+      toast({
+        variant: "destructive",
+        title: "Materia existente",
+        description: `La materia ${materiaExistente.sku} - ${materiaExistente?.name} ya se encuentra registrada en el sistema.`,
+      });
+      return;
+    }
+
+    onGroupSelect(materiaNoRegistrada, materiaNoRegistrada.groups[0]);
+    setMateriaNoRegistrada(emptyMateria);
+    setDialogOpen(false);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="!pb-2 !px-2">
         <CardTitle className="pb-2">Asignaturas disponibles</CardTitle>
-        <Input
-          type="search"
-          placeholder="Buscar asignatura"
-          value={filterInput}
-          onChange={(e) => setFilterInput(e.target.value)}
-        />
+        <div className="flex items-center justify-between gap-x-2">
+          <Input
+            type="search"
+            placeholder="Buscar asignatura"
+            value={filterInput}
+            onChange={(e) => setFilterInput(e.target.value)}
+          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button size="sm" onClick={() => setDialogOpen(true)}>
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Agregar asignatura no existente.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          {/* Modal materia no registrada */}
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ingresar asignatura no encontrada</DialogTitle>
+                <DialogDescription>
+                  Registre a continuación los datos de la asignatura que no se
+                  encuentra en el sistema.
+                  <form
+                    className="flex flex-col gap-4 mt-4"
+                    onSubmit={handleSaveMateriaNoRegistrada}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-normal" htmlFor="name">
+                        Nombre de la asignatura
+                      </Label>
+                      <Input
+                        required
+                        id="name"
+                        autoComplete="name"
+                        type="text"
+                        value={materiaNoRegistrada.name}
+                        onChange={(e) =>
+                          setMateriaNoRegistrada({
+                            ...materiaNoRegistrada,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-normal" htmlFor="sku">
+                        Codigo de la asignatura
+                      </Label>
+                      <Input
+                        required
+                        id="sku"
+                        autoComplete="sku"
+                        type="number"
+                        value={materiaNoRegistrada.sku}
+                        onChange={(e) =>
+                          setMateriaNoRegistrada({
+                            ...materiaNoRegistrada,
+                            sku: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-normal" htmlFor="group">
+                        Grupo de la asignatura
+                      </Label>
+                      <Input
+                        required
+                        id="group"
+                        autoComplete="group"
+                        type="text"
+                        value={materiaNoRegistrada.groups[0].sku}
+                        onChange={(e) =>
+                          setMateriaNoRegistrada({
+                            ...materiaNoRegistrada,
+                            groups: [
+                              {
+                                ...materiaNoRegistrada.groups[0],
+                                sku: e.target.value,
+                              },
+                            ],
+                          })
+                        }
+                      />
+                    </div>
+                    <Button type="submit">
+                      <Plus />
+                      Agregar
+                    </Button>
+                  </form>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent className="!pr-0 !pl-3">
         <ScrollArea className="flex flex-col h-[calc(100vh-11.5rem)] gap-y-4 pr-3">
@@ -92,7 +243,7 @@ export default function Materias({
                     {materia.groups && materia.groups?.length > 0 ? (
                       materia.groups?.map((group) => {
                         const isSelected = isGroupSelected(
-                          materia._id,
+                          materia.sku,
                           group.sku
                         );
                         return (
@@ -107,13 +258,16 @@ export default function Materias({
                                 Grupo {group.sku}
                               </span>
                               <div className="text-xs opacity-50 px-2">
-                                <ul className="list-disc list-inside">
-                                  {group.schedule.map((s, idx) => (
+                                <ul className="flex flex-col gap-y-1 list-disc list-inside">
+                                  {group.schedule?.map((s, idx) => (
                                     <li key={idx}>
                                       {s.day}, {s.time}
-                                      {s.building &&
-                                        s.room &&
-                                        ` (${s.building} - ${s.room})`}
+                                      <br />
+                                      <span className="text-xs font-thin">
+                                        {s.professor
+                                          ? `${s.professor}`
+                                          : "No registrado"}
+                                      </span>
                                     </li>
                                   ))}
                                 </ul>
