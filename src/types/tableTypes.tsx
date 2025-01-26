@@ -58,6 +58,15 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     },
   },
   {
+    header: "Atendido por",
+    accessorKey: "logs",
+    cell: ({ row }) => {
+      const logs = row.original.logs || [];
+      const lastLog = logs[logs.length - 1];
+      return lastLog ? `${lastLog.user.name} ${lastLog.user.lastname}` : "";
+    },
+  },
+  {
     header: "Tiempo Total",
     accessorKey: "createdAt",
     cell: ({ row }) =>

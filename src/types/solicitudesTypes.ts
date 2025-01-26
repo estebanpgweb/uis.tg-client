@@ -36,6 +36,13 @@ export interface Solicitud {
     lastname: string;
     _id: string;
   };
+  logs?: {
+    message: string;
+    user: {
+      name: string;
+      lastname: string;
+    };
+  }[];
   createdAt?: string;
   updatedAt?: string;
 }

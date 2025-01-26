@@ -299,7 +299,10 @@ const SolicitudDetalleRoute = () => {
       {/* Información de la solicitud */}
       <div className="flex flex-col md:flex-row gap-y-2 items-center justify-between md:mx-8">
         <Label className="opacity-50 mx-4">
-          ID de la solicitud: {solicitud._id}
+          Atendida por:{" "}
+          {`${solicitud.logs?.[solicitud.logs?.length - 1]?.user?.name ?? ""} ${
+            solicitud.logs?.[solicitud.logs?.length - 1]?.user?.lastname ?? ""
+          }`}
         </Label>
         <Label className="opacity-50 mx-4">
           Estado de la solicitud:{" "}

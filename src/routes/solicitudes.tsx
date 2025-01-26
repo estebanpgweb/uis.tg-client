@@ -51,7 +51,13 @@ const SolicitudRoute = () => {
 
   const pageLimit = 10;
   const paramsFilter = useMemo(
-    () => ["student.identification", "student.name", "student.lastname"],
+    () => [
+      "student.identification",
+      "student.name",
+      "student.lastname",
+      "logs.user.name",
+      "logs.user.lastname",
+    ],
     []
   );
 
