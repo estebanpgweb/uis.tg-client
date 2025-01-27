@@ -34,7 +34,14 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
-import { X, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import {
+  X,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  RefreshCcw,
+} from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
 import { SortingState } from "@/types/tableTypes";
 
@@ -50,6 +57,7 @@ interface DataTableProps<TData, TValue> {
   setSelectedStatuses?: (statuses: string[]) => void;
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
+  setRefresh?: (prevRefresh: boolean) => void;
 }
 
 export function DataTable<TData extends { status?: string }, TValue>({
@@ -64,6 +72,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
   setSelectedStatuses,
   sorting,
   setSorting,
+  setRefresh,
 }: DataTableProps<TData, TValue>) {
   const [filterInput, setFilterInput] = useState<string>(filter || "");
   const statusOptions = ["REJECTED", "PENDING", "PARTIAL_REJECTED", "APPROVED"];
@@ -96,9 +105,9 @@ export function DataTable<TData extends { status?: string }, TValue>({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between py-4 sm:py-6 gap-4 sm:gap-0">
-        <div className="relative w-full sm:min-w-[250px] sm:w-auto">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-6 gap-4 md:gap-0">
+        <div className="relative w-full md:min-w-[250px] md:w-auto">
           <Input
             id="buscar"
             placeholder="Buscar"
@@ -118,7 +127,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
         {/* Filtro de estados */}
         {selectedStatuses && (
           <Select onValueChange={handleStatusChange} name="estados">
-            <SelectTrigger className="w-full sm:max-w-sm">
+            <SelectTrigger className="w-full md:max-w-sm">
               <SelectValue placeholder="Seleccionar Estados" />
             </SelectTrigger>
             <SelectContent>
@@ -134,9 +143,16 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
-        <p className="hidden sm:block opacity-50 text-sm">
-          Mostrando {data.length} de {rows} resultados
-        </p>
+        <div className="hidden md:flex gap-x-2 items-center ">
+          <p className="opacity-50 text-sm">
+            Mostrando {data.length} de {rows} resultados
+          </p>
+          {setRefresh && (
+            <Button size={"sm"} onClick={() => setRefresh && setRefresh(true)}>
+              <RefreshCcw />
+            </Button>
+          )}
+        </div>
       </div>
 
       {selectedStatuses && selectedStatuses.length > 0 && (
@@ -145,12 +161,12 @@ export function DataTable<TData extends { status?: string }, TValue>({
             <Badge
               key={status}
               variant="secondary"
-              className="px-2 py-1 text-xs sm:px-3 sm:py-1"
+              className="px-2 py-1 text-xs md:px-3 md:py-1"
             >
               {getStatusLabel(status)}
               <button
                 onClick={() => removeStatus(status)}
-                className="ml-1 sm:ml-2 hover:text-red-500"
+                className="ml-1 md:ml-2 hover:text-red-500"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -163,7 +179,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
               setSelectedStatuses?.([]);
               setPage(0);
             }}
-            className="h-6 sm:h-7 text-xs sm:text-sm"
+            className="h-6 md:h-7 text-xs md:text-sm"
           >
             Limpiar filtros
           </Button>
@@ -176,7 +192,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-xs sm:text-base">
+                  <TableHead key={header.id} className="text-xs md:text-base">
                     {header.isPlaceholder ? null : (
                       <Button
                         variant={
@@ -184,7 +200,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                         }
                         className={`${
                           header.id === sorting.field ? "font-semibold" : ""
-                        } text-xs sm:text-base`}
+                        } text-xs md:text-base`}
                         onClick={() => {
                           if (header.id === "accion") return;
                           setSorting({
@@ -218,10 +234,10 @@ export function DataTable<TData extends { status?: string }, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="text-xs sm:text-base"
+                  className="text-xs md:text-base"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-xs sm:text-base">
+                    <TableCell key={cell.id} className="text-xs md:text-base">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -234,7 +250,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-xs sm:text-base"
+                  className="h-24 text-center text-xs md:text-base"
                 >
                   No hay resultados.
                 </TableCell>
@@ -254,7 +270,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                   onClick={() => setPage(page - 1)}
                   className={`${
                     page === 0 ? "hidden" : ""
-                  } text-xs sm:text-base`}
+                  } text-xs md:text-base`}
                 />
               </PaginationItem>
               {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
@@ -263,7 +279,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                     href="#"
                     onClick={() => setPage(index)}
                     isActive={index === page}
-                    className="text-xs sm:text-base"
+                    className="text-xs md:text-base"
                   >
                     {index + 1}
                   </PaginationLink>
@@ -275,7 +291,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                   onClick={() => setPage(page + 1)}
                   className={`${
                     page === Math.ceil(rows / 10) - 1 ? "hidden" : ""
-                  } text-xs sm:text-base`}
+                  } text-xs md:text-base`}
                 />
               </PaginationItem>
             </PaginationContent>

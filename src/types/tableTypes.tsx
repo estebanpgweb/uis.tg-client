@@ -62,7 +62,7 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     accessorKey: "logs",
     cell: ({ row }) => {
       const logs = row.original.logs || [];
-      const lastLog = logs[logs.length - 1];
+      const lastLog = logs.length > 1 ? logs[logs.length - 1] : null;
       const user = lastLog?.user;
       return lastLog && user && user.name && user.lastname
         ? `${user.name} ${user.lastname}`

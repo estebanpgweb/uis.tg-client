@@ -36,6 +36,7 @@ const SolicitudRoute = () => {
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
     field: null,
     sort: "asc",
@@ -51,13 +52,7 @@ const SolicitudRoute = () => {
 
   const pageLimit = 10;
   const paramsFilter = useMemo(
-    () => [
-      "student.identification",
-      "student.name",
-      "student.lastname",
-      "logs.user.name",
-      "logs.user.lastname",
-    ],
+    () => ["logs.user.name", "logs.user.lastname", "logs.user.identification"],
     []
   );
 
@@ -109,7 +104,13 @@ const SolicitudRoute = () => {
 
     const fetchData = async () => {
       // Si hay un filtro o estados seleccionados, siempre consultar la API
-      if (filter !== "" || selectedStatuses.length > 0 || sorting.field) {
+      if (
+        filter !== "" ||
+        selectedStatuses.length > 0 ||
+        sorting.field ||
+        refresh === true
+      ) {
+        await auth?.me();
         const data = await fetchSolicitudes(
           page,
           filter,
@@ -117,6 +118,7 @@ const SolicitudRoute = () => {
           sorting
         );
         setSolicitudes(data);
+        setRefresh(false);
         return;
       }
 
@@ -139,7 +141,7 @@ const SolicitudRoute = () => {
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting, userId, user]);
+  }, [page, filter, selectedStatuses, sorting, userId, user, refresh]);
 
   useEffect(() => {
     if (!userId || !kind) return;
@@ -290,6 +292,7 @@ const SolicitudRoute = () => {
         setSelectedStatuses={setSelectedStatuses}
         sorting={sorting}
         setSorting={setSorting}
+        setRefresh={setRefresh}
       />
     </div>
   );

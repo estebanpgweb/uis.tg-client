@@ -56,6 +56,7 @@ const SolicitudDetalleRoute = () => {
   const [completed, setCompleted] = useState<boolean>(false);
   const [observaciones, setObservaciones] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [attended, setAttended] = useState<string>("");
   const { toast } = useToast();
   const auth = useAuth();
   const kind = auth?.user?.kind;
@@ -107,6 +108,17 @@ const SolicitudDetalleRoute = () => {
       setDisabled(false);
     }
   }, [solicitud, kind, userId]);
+
+  useEffect(() => {
+    const logs = solicitud?.logs || [];
+    const lastLog = logs.length > 1 ? logs[logs.length - 1] : null;
+    const user = lastLog?.user;
+    if (user && user.name && user.lastname) {
+      setAttended(user.name + " " + user.lastname);
+    } else {
+      setAttended("");
+    }
+  }, [solicitud]);
 
   const handlePeticion = async (index: number, status: RequestStatus) => {
     const newSolicitud: Solicitud = {
@@ -298,12 +310,7 @@ const SolicitudDetalleRoute = () => {
       </div>
       {/* Información de la solicitud */}
       <div className="flex flex-col md:flex-row gap-y-2 items-center justify-between md:mx-8">
-        <Label className="opacity-50 mx-4">
-          Atendida por:{" "}
-          {`${solicitud.logs?.[solicitud.logs?.length - 1]?.user?.name ?? ""} ${
-            solicitud.logs?.[solicitud.logs?.length - 1]?.user?.lastname ?? ""
-          }`}
-        </Label>
+        <Label className="opacity-50 mx-4">Atendida por: {attended}</Label>
         <Label className="opacity-50 mx-4">
           Estado de la solicitud:{" "}
           <Badge

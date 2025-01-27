@@ -32,6 +32,7 @@ import Loader from "@/components/loader";
 
 export default function UsuariosRoute() {
   const [usuarios, setUsuarios] = useState<UserType[]>([]);
+  const [refresh, setRefresh] = useState(false);
   const [cachedUsuarios, setCachedUsuarios] = useState<
     Record<number, UserType[]>
   >({});
@@ -108,17 +109,8 @@ export default function UsuariosRoute() {
         title: "Usuario creado",
         description: "El usuario ha sido creado exitosamente",
       });
-      setUsuarios((prev) => [usuario, ...prev]);
-      setFormData({
-        name: "",
-        lastname: "",
-        identification: "",
-        username: "",
-        kind: "STUDENT",
-        permissions: [],
-        verified: false,
-        password: "",
-      }); // Reinicia el formulario
+      setFormData(emptyUser); // Reinicia el formulario
+      setRefresh(!refresh);
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -144,10 +136,8 @@ export default function UsuariosRoute() {
         title: "Usuario editado",
         description: "El usuario ha sido editado exitosamente",
       });
-      setUsuarios((prev) =>
-        prev.map((u) => (u._id === usuario._id ? usuario : u))
-      );
       setFormData(emptyUser); // Reinicia el formulario
+      setRefresh(!refresh);
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -174,7 +164,7 @@ export default function UsuariosRoute() {
         title: "Usuario eliminado",
         description: "El usuario ha sido eliminado exitosamente",
       });
-      setUsuarios((prev) => prev.filter((u) => u._id !== usuario._id));
+      setRefresh(!refresh);
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -194,7 +184,7 @@ export default function UsuariosRoute() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (filter !== "" || sorting.field) {
+      if (filter !== "" || sorting.field || refresh) {
         const data = await fetchUsuarios(page, filter, sorting);
         setUsuarios(data);
         return;
@@ -211,7 +201,7 @@ export default function UsuariosRoute() {
     };
 
     fetchData();
-  }, [page, filter, sorting]);
+  }, [page, filter, sorting, refresh]);
 
   useEffect(() => {
     const getUsuariosCount = async () => {
