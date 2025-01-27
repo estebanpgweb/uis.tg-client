@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button.tsx";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, CircleHelp } from "lucide-react";
 import UIS from "./assets/UIS.avif";
 
 const Template = ({ children }: PropsWithChildren) => {
@@ -64,7 +64,17 @@ const Template = ({ children }: PropsWithChildren) => {
           <img src={UIS} alt="logo uis" className=" w-1/4 md:w-1/12" />
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden ml-auto">
+          <div className="flex gap-x-6 md:hidden ml-auto">
+            {kind === "STUDENT" && (
+              <Link
+                className={`${buttonVariants({ variant: "link" })} !text-lg`}
+                to={import.meta.env.VITE_HELP_URL as string}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CircleHelp className="hover:cursor-pointer" size={24} />
+              </Link>
+            )}
             <Button
               variant="secondary"
               size="icon"
@@ -90,6 +100,18 @@ const Template = ({ children }: PropsWithChildren) => {
                   </Link>
                 </li>
               ))}
+            {kind === "STUDENT" && (
+              <li>
+                <Link
+                  className={`${buttonVariants({ variant: "link" })} !text-lg`}
+                  to="https://www.youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CircleHelp className="hover:cursor-pointer" size={24} />
+                </Link>
+              </li>
+            )}
             <li>
               <Popover>
                 <PopoverTrigger asChild>
@@ -116,13 +138,27 @@ const Template = ({ children }: PropsWithChildren) => {
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-center p-4 border-b">
               <img src={UIS} alt="logo uis" className="w-1/4" />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <X />
-              </Button>
+              <div className="flex gap-x-6">
+                {kind === "STUDENT" && (
+                  <Link
+                    className={`${buttonVariants({
+                      variant: "link",
+                    })} !text-lg`}
+                    to="https://www.youtube.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <CircleHelp className="hover:cursor-pointer" size={24} />
+                  </Link>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <X />
+                </Button>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto">
               <ul className="flex flex-col">

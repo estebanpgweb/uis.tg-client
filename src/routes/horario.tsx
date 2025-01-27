@@ -419,7 +419,11 @@ const HorarioRoute = () => {
             <DialogTitle>Selección de Franja Horaria</DialogTitle>
             <DialogDescription>
               Elige el día y la franja horaria que te fue asignada en el sistema
-              de estudiantes UIS.
+              de estudiantes UIS.{" "}
+              <span className="block text-lg font-semibold">
+                En caso de que su franja horaria sea jueves y viernes todo el
+                día seleccione jueves en la mañana
+              </span>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-4 mt-4">
                 {daysAndShifts.map(({ day, label }) => (
                   <Card key={day}>
