@@ -372,7 +372,7 @@ const SolicitudDetalleRoute = () => {
                       }
                       name="motivo"
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs w-52 md:w-full md:text-sm">
                         <SelectValue placeholder="Selecciona un motivo de rechazo" />
                       </SelectTrigger>
                       <SelectContent>
@@ -417,7 +417,7 @@ const SolicitudDetalleRoute = () => {
                       }
                       name="grupoAprobado"
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs w-52 md:w-full md:text-sm">
                         <SelectValue placeholder="Selecciona el grupo aprobado" />
                       </SelectTrigger>
                       <SelectContent>
