@@ -17,10 +17,12 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import Loader from "./components/loader";
+import { buildFilterQuery } from "./utils/filterQuery";
 
 function App() {
   const [horario, setHorario] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [solicitud, setSolicitud] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const axios: AxiosInstance = useAxios();
@@ -55,6 +57,41 @@ function App() {
     };
 
     fetchHorario();
+  }, [axios, toast, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchSolicitud = async () => {
+      try {
+        setIsLoading(true);
+        const params = new URLSearchParams({
+          filter: JSON.stringify(
+            buildFilterQuery("", [], ["PENDING", "REVIEW"])
+          ),
+        }).toString();
+        const { data } = await axios.get(`/api/appeal?${params}`, {
+          headers: { "x-resource-id": userId },
+        });
+        setSolicitud(data.length);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Solicitud fallida",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSolicitud();
   }, [axios, toast, userId]);
 
   return (
@@ -122,13 +159,13 @@ function App() {
           <Button
             className={"w-fit mx-auto"}
             onClick={() =>
-              horario && horario > 0
+              horario && horario > 0 && (!solicitud || solicitud === 0)
                 ? navigate("/solicitud/crear")
                 : toast({
                     variant: "destructive",
-                    title: "¡Horario no registrado!",
+                    title: "¡Horario no registrado o solicitud pendiente!",
                     description:
-                      "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+                      "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
                   })
             }
           >
