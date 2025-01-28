@@ -68,7 +68,7 @@ const Template = ({ children }: PropsWithChildren) => {
             {kind === "STUDENT" && (
               <Link
                 className={`${buttonVariants({ variant: "link" })} !text-lg`}
-                to="https://youtu.be/jKfmqstXOIs"
+                to="https://youtu.be/A2i_13bcRB0"
                 target="_blank"
                 rel="noopener noreferrer"
               >
