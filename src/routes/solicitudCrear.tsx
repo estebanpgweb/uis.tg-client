@@ -420,6 +420,10 @@ const SolicitudCrearRoute = () => {
     }
   };
 
+  const saveAsk = async (ask: string) => {
+    setSolicitud({ ...solicitud, ask });
+  };
+
   return (
     <div className="w-full">
       <Loader isLoading={isLoading} />
@@ -433,6 +437,7 @@ const SolicitudCrearRoute = () => {
             horarioInicial={horarioInicial}
             solicitudes={solicitud.requests}
             modalOpen={true}
+            setAsk={saveAsk}
           />
         </div>
         <div className="md:w-1/5">

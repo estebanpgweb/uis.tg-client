@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "./ui/textarea";
 import { Materia } from "@/types/materiaTypes";
 import { Solicitud } from "@/types/solicitudesTypes";
 import { Trash2, Save, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
@@ -35,6 +36,7 @@ interface CalendarioProps {
   horarioInicial?: Materia[];
   solicitudes?: Solicitud["requests"];
   modalOpen?: boolean;
+  setAsk?: (ask: string) => void;
 }
 
 export default function Calendario({
@@ -44,6 +46,7 @@ export default function Calendario({
   horarioInicial = [],
   solicitudes,
   modalOpen,
+  setAsk,
 }: CalendarioProps) {
   const timeSlots = [
     "6-7",
@@ -416,6 +419,13 @@ export default function Calendario({
                             )
                           )
                         )}
+                      {setAsk && (
+                        <Textarea
+                          className="w-full mt-4"
+                          onChange={(e) => setAsk(e.target.value)}
+                          placeholder="Ingrese indicaciones adicionales para el administrador."
+                        />
+                      )}
                     </div>
                   ) : (
                     horario.length > 0 && (

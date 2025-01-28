@@ -30,6 +30,7 @@ export interface Solicitud {
     reason?: string | null;
   }[];
   status?: "PENDING" | "REVIEW" | "PARTIAL_REJECTED" | "REJECTED" | "APPROVED";
+  ask?: string;
   observation?: string;
   attended?: {
     name: string;

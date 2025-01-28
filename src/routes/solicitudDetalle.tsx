@@ -17,6 +17,7 @@ import {
   Check,
   X,
   FileText,
+  Logs,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -463,9 +464,17 @@ const SolicitudDetalleRoute = () => {
             ))}
         </Card>
       </div>
+      {/* Indicaciones estudiante */}
+      <Card className="flex flex-col gap-2 md:gap-4 flex-1 px-3 py-2 md:px-6 md:py-4 md:mx-8 my-4">
+        <div className="flex items-center gap-x-4">
+          <Logs />
+          <h2 className="text-xl font-medium">Indicaciones estudiante</h2>
+        </div>
+        <p>{solicitud?.ask || "No hay indicaciones del estudiante."}</p>
+      </Card>
       {/* Observaciones adicionales */}
-      <Card className="flex flex-col gap-2 md:gap-6 flex-1 px-3 py-2 md:px-6 md:py-4 md:mx-8 my-4">
-        <div className="flex items-center gap-x-4 mb-2">
+      <Card className="flex flex-col gap-2 md:gap-4 flex-1 px-3 py-2 md:px-6 md:py-4 md:mx-8 my-4">
+        <div className="flex items-center gap-x-4">
           <FileText />
           <h2 className="text-xl font-medium">Observaciones adicionales</h2>
         </div>
