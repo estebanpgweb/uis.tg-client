@@ -45,7 +45,6 @@ const SolicitudRoute = () => {
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
   const kind = auth?.user?.kind;
-  const user = auth?.user;
   const userId = auth?.user?.id;
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -63,6 +62,7 @@ const SolicitudRoute = () => {
     sorting: SortingState
   ) => {
     try {
+      setRefresh(false);
       setIsLoading(true);
       const params = new URLSearchParams({
         filter: JSON.stringify(
@@ -104,12 +104,7 @@ const SolicitudRoute = () => {
 
     const fetchData = async () => {
       // Si hay un filtro o estados seleccionados, siempre consultar la API
-      if (
-        filter !== "" ||
-        selectedStatuses.length > 0 ||
-        sorting.field ||
-        refresh === true
-      ) {
+      if (filter !== "" || selectedStatuses.length > 0 || sorting.field) {
         await auth?.me();
         const data = await fetchSolicitudes(
           page,
@@ -118,7 +113,6 @@ const SolicitudRoute = () => {
           sorting
         );
         setSolicitudes(data);
-        setRefresh(false);
         return;
       }
 
@@ -129,6 +123,7 @@ const SolicitudRoute = () => {
       }
 
       // Consultar la API si no hay filtros ni caché
+      await auth?.me();
       const data = await fetchSolicitudes(page, "", [], sorting);
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
@@ -141,7 +136,7 @@ const SolicitudRoute = () => {
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting, userId, user, refresh]);
+  }, [page, filter, selectedStatuses, sorting, userId]);
 
   useEffect(() => {
     if (!userId || !kind) return;
@@ -186,7 +181,7 @@ const SolicitudRoute = () => {
     };
 
     getSolicitudesCount();
-  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter, user]);
+  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
 
   useEffect(() => {
     if (!userId) return;
@@ -217,6 +212,43 @@ const SolicitudRoute = () => {
 
     fetchHorario();
   }, [axios, toast, userId]);
+
+  useEffect(() => {
+    if (refresh === false) return;
+
+    const rechargeSolicitudes = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchSolicitudes(
+          page,
+          filter,
+          selectedStatuses,
+          sorting
+        );
+        setSolicitudes(data);
+      } catch (error) {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } }).response
+            ?.data?.message ||
+          (error as Error).message ||
+          "Ha ocurrido un error inesperado";
+
+        toast({
+          variant: "destructive",
+          title: "Solicitud fallida",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    rechargeSolicitudes();
+  }, [refresh]);
+
+  const handleRefresh = () => {
+    setRefresh((prev) => !prev);
+  };
 
   return (
     <div className="container mx-auto">
@@ -292,7 +324,7 @@ const SolicitudRoute = () => {
         setSelectedStatuses={setSelectedStatuses}
         sorting={sorting}
         setSorting={setSorting}
-        setRefresh={setRefresh}
+        onRefresh={handleRefresh}
       />
     </div>
   );

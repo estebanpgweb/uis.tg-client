@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -34,14 +34,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
-import {
-  X,
-  Search,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-  RefreshCcw,
-} from "lucide-react";
+import { X, ArrowUp, ArrowDown, ArrowUpDown, RefreshCcw } from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
 import { SortingState } from "@/types/tableTypes";
 
@@ -57,7 +50,7 @@ interface DataTableProps<TData, TValue> {
   setSelectedStatuses?: (statuses: string[]) => void;
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
-  setRefresh?: (prevRefresh: boolean) => void;
+  onRefresh?: () => void;
 }
 
 export function DataTable<TData extends { status?: string }, TValue>({
@@ -72,7 +65,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
   setSelectedStatuses,
   sorting,
   setSorting,
-  setRefresh,
+  onRefresh,
 }: DataTableProps<TData, TValue>) {
   const [filterInput, setFilterInput] = useState<string>(filter || "");
   const statusOptions = ["REJECTED", "PENDING", "PARTIAL_REJECTED", "APPROVED"];
@@ -99,35 +92,63 @@ export function DataTable<TData extends { status?: string }, TValue>({
     );
   };
 
+  // Hook de debounce
+  const useDebounce = (value: string, delay: number = 1000) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [value, delay]);
+
+    return debouncedValue;
+  };
+
+  const debouncedFilter = useDebounce(filterInput, 800);
+
+  // Manejadores de búsqueda
   const handleSearch = () => {
     setFilter(filterInput);
-    setPage(0); // Reset to first page when searching
+    setPage(0);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  // Efecto para el debounce
+  useEffect(() => {
+    setFilter(debouncedFilter);
+    setPage(0);
+  }, [debouncedFilter]);
 
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-6 gap-4 md:gap-0">
-        <div className="relative w-full md:min-w-[250px] md:w-auto">
-          <Input
-            id="buscar"
-            placeholder="Buscar"
-            value={filterInput}
-            onChange={(e) => setFilterInput(e.target.value)}
-            onClick={() => {
-              handleSearch();
-            }}
-            className="pr-10"
-          />
-          <Search
-            size={20}
-            onClick={handleSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 hover:cursor-pointer"
-          />
-        </div>
+        <Input
+          type="search"
+          id="buscar"
+          placeholder="Buscar"
+          value={filterInput}
+          onChange={(e) => setFilterInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="md:w-2/6"
+        />
         {/* Filtro de estados */}
         {selectedStatuses && (
-          <Select onValueChange={handleStatusChange} name="estados">
-            <SelectTrigger className="w-full md:max-w-sm">
+          <Select
+            onValueChange={handleStatusChange}
+            value={selectedStatuses.length > 0 ? selectedStatuses[0] : ""}
+            name="estados"
+          >
+            <SelectTrigger className="w-full md:w-2/6">
               <SelectValue placeholder="Seleccionar Estados" />
             </SelectTrigger>
             <SelectContent>
@@ -143,12 +164,12 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
-        <div className="hidden md:flex gap-x-2 items-center ">
-          <p className="opacity-50 text-sm">
+        <div className="flex gap-x-2 items-center ">
+          <p className="hidden md:inline-block opacity-50 text-sm">
             Mostrando {data.length} de {rows} resultados
           </p>
-          {setRefresh && (
-            <Button size={"sm"} onClick={() => setRefresh && setRefresh(true)}>
+          {onRefresh && (
+            <Button size={"sm"} onClick={() => onRefresh()}>
               <RefreshCcw />
             </Button>
           )}
