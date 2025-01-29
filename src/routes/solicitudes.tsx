@@ -243,7 +243,31 @@ const SolicitudRoute = () => {
       }
     };
 
+    const rechargeSolicitudesCount = async () => {
+      try {
+        const filterQuery = buildFilterQuery(
+          filter,
+          paramsFilter,
+          selectedStatuses
+        );
+
+        const { data } =
+          kind === "STUDENT"
+            ? await axios.get(`/api/appeal/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+                headers: { "x-resource-id": userId },
+              })
+            : await axios.get(`/api/appeal/count`, {
+                params: { filter: JSON.stringify(filterQuery) },
+              });
+        setTotalSolicitudes(data);
+      } catch (error) {
+        console.error("Error fetching solicitudes count", error);
+      }
+    };
+
     rechargeSolicitudes();
+    rechargeSolicitudesCount();
   }, [refresh]);
 
   const handleRefresh = () => {

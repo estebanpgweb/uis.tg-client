@@ -38,6 +38,10 @@ const RegisterRoute = () => {
       if (!email.includes("@correo.uis.edu.co")) {
         throw new Error("El correo debe ser de la universidad UIS");
       }
+      //validamos que el codigo de estudiante este dentro del texto del correo
+      if (!email.includes(identification)) {
+        throw new Error("El código de estudiante no coincide con el correo");
+      }
       //validamos si las contraseñas tiene una may,min y un numero
       if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(password)) {
         throw new Error(
