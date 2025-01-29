@@ -40,7 +40,7 @@ export default function UsuariosRoute() {
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>({
-    field: null,
+    sortBy: null,
     sort: "asc",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function UsuariosRoute() {
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
-        sortBy: sorting.field || "createdAt",
+        sortBy: sorting.sortBy || "createdAt",
       }).toString();
 
       const { data } = await axios.get(`/api/users?${params}`);
@@ -184,7 +184,7 @@ export default function UsuariosRoute() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (filter !== "" || sorting.field || refresh) {
+      if (filter !== "" || sorting.sortBy || refresh) {
         const data = await fetchUsuarios(page, filter, sorting);
         setUsuarios(data);
         return;
