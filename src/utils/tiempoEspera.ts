@@ -1,21 +1,51 @@
-const SolicitudTiempoEspera = ({ createdAt }: { createdAt: string }) => {
-  const calcularTiempoTranscurrido = (fechaInicial: string) => {
+const SolicitudTiempoEspera = ({
+  createdAt,
+  updatedAt,
+}: {
+  createdAt: string;
+  updatedAt: string;
+}) => {
+  const calcularTiempoTranscurrido = (
+    fechaInicial: string,
+    fechaFinal: string
+  ) => {
     const ahora = new Date();
     const fecha = new Date(fechaInicial);
-    const diferencia = ahora.getTime() - fecha.getTime(); // Diferencia en milisegundos
+    const fechaActualizacion = new Date(fechaFinal);
 
-    const segundos = Math.floor(diferencia / 1000);
-    const minutos = Math.floor(segundos / 60);
-    const horas = Math.floor(minutos / 60);
-    const días = Math.floor(horas / 24);
+    // Usamos una función auxiliar para comparar fechas ignorando milisegundos
+    const sonFechasIguales = (fecha1: Date, fecha2: Date) => {
+      return Math.abs(fecha1.getTime() - fecha2.getTime()) < 60000; // Tolerancia de 60 segundos
+    };
 
-    if (días > 0) return `${días}d ${horas % 24}h`;
-    if (horas > 0) return `${horas}h ${minutos % 60}m`;
-    if (minutos > 0) return `${minutos}m ${segundos % 60}s`;
-    return `${segundos}s`;
+    if (sonFechasIguales(fechaActualizacion, fecha)) {
+      const diferencia = ahora.getTime() - fecha.getTime();
+
+      const segundos = Math.floor(diferencia / 1000);
+      const minutos = Math.floor(segundos / 60);
+      const horas = Math.floor(minutos / 60);
+      const días = Math.floor(horas / 24);
+
+      if (días > 0) return `${días}d ${horas % 24}h`;
+      if (horas > 0) return `${horas}h ${minutos % 60}m`;
+      if (minutos > 0) return `${minutos}m ${segundos % 60}s`;
+      return `${segundos}s`;
+    } else if (fechaActualizacion > fecha) {
+      const diferencia = fechaActualizacion.getTime() - fecha.getTime();
+
+      const segundos = Math.floor(diferencia / 1000);
+      const minutos = Math.floor(segundos / 60);
+      const horas = Math.floor(minutos / 60);
+      const días = Math.floor(horas / 24);
+
+      if (días > 0) return `${días}d ${horas % 24}h`;
+      if (horas > 0) return `${horas}h ${minutos % 60}m`;
+      if (minutos > 0) return `${minutos}m ${segundos % 60}s`;
+      return `${segundos}s`;
+    }
   };
 
-  return calcularTiempoTranscurrido(createdAt);
+  return calcularTiempoTranscurrido(createdAt, updatedAt);
 };
 
 // Función auxiliar para convertir el formato de hora a minutos

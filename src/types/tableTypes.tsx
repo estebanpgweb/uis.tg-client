@@ -73,7 +73,10 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     header: "Tiempo Total",
     accessorKey: "createdAt",
     cell: ({ row }) =>
-      SolicitudTiempoEspera({ createdAt: row.original.createdAt ?? "" }),
+      SolicitudTiempoEspera({
+        createdAt: row.original.createdAt ?? "",
+        updatedAt: row.original.updatedAt ?? "",
+      }),
   },
   {
     header: "Acciones",

@@ -52,6 +52,22 @@ type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
 
 export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+//Funcion para obtener el dia y jornada del shift
+export const getShiftLabel = (shift: {
+  day: dayType;
+  time: "AM" | "PM";
+}): string => {
+  const days: Record<dayType, string> = {
+    MONDAY: "Lunes",
+    TUESDAY: "Martes",
+    WEDNESDAY: "Miércoles",
+    THURSDAY: "Jueves",
+    FRIDAY: "Viernes",
+  };
+
+  return `${days[shift.day]} - ${shift.time === "AM" ? "Mañana" : "Tarde"}`;
+};
+
 // Función para obtener el texto del estado
 export const getStatusLabel = (status: string): string => {
   const statusLabels: Record<string, string> = {

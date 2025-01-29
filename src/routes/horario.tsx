@@ -184,14 +184,14 @@ const HorarioRoute = () => {
     }
 
     //validamos que no sea una materia ya vista mirando los requisitos de las materias que ya estan en el horario
-    const requisitosMateriaEnHorario = materias
-      .filter((m) => {
-        return horario.some((h) => h.sku === m.sku);
-      })
-      .flatMap((m) => m.requirements || []);
-    if (requisitosMateriaEnHorario.includes(materia.sku)) {
-      return `Materia ${materia.name} ya fue vista, no se puede agregar`;
-    }
+    // const requisitosMateriaEnHorario = materias
+    //   .filter((m) => {
+    //     return horario.some((h) => h.sku === m.sku);
+    //   })
+    //   .flatMap((m) => m.requirements || []);
+    // if (requisitosMateriaEnHorario.includes(materia.sku)) {
+    //   return `Materia ${materia.name} ya fue vista, no se puede agregar`;
+    // }
 
     // Si no tiene requisitos, se puede agregar
     if (!requisitos?.length) {
