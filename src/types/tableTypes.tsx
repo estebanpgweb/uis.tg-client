@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Solicitud, getBadgeColor, getStatusLabel } from "./solicitudesTypes";
+import {
+  Solicitud,
+  getBadgeColor,
+  getStatusLabel,
+  getShiftLabel,
+} from "./solicitudesTypes";
 import { UserType, getUserColor } from "./userTypes";
 import { Link } from "react-router-dom";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -44,6 +49,14 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
     header: "Código Estudiante",
     accessorKey: "student.identification",
     id: "student.identification",
+  },
+  {
+    header: "Franja Horaria",
+    accessorKey: "student.shift.day",
+    cell: ({ row }) =>
+      getShiftLabel(
+        row.original?.student?.shift || { day: "THURSDAY", time: "AM" }
+      ),
   },
   {
     header: "Estado",
