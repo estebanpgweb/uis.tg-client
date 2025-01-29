@@ -346,7 +346,10 @@ const SolicitudDetalleRoute = () => {
             </Label>
             <Label className="font-medium text-lg">
               {solicitud.createdAt &&
-                SolicitudTiempoEspera({ createdAt: solicitud.createdAt })}
+                SolicitudTiempoEspera({
+                  createdAt: solicitud.createdAt,
+                  updatedAt: solicitud.updatedAt,
+                })}
             </Label>
           </div>
         </Card>
