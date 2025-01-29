@@ -38,8 +38,8 @@ const SolicitudRoute = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
-    field: null,
-    sort: "asc",
+    sortBy: "createdAt",
+    sort: "desc",
   });
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
@@ -71,7 +71,7 @@ const SolicitudRoute = () => {
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
-        sortBy: sorting.field || "createdAt",
+        sortBy: sorting.sortBy || "createdAt",
       }).toString();
 
       const { data } =
@@ -104,7 +104,7 @@ const SolicitudRoute = () => {
 
     const fetchData = async () => {
       // Si hay un filtro o estados seleccionados, siempre consultar la API
-      if (filter !== "" || selectedStatuses.length > 0 || sorting.field) {
+      if (filter !== "" || selectedStatuses.length > 0 || sorting.sortBy) {
         await auth?.me();
         const data = await fetchSolicitudes(
           page,
