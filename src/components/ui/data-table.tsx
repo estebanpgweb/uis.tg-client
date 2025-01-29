@@ -217,15 +217,15 @@ export function DataTable<TData extends { status?: string }, TValue>({
                     {header.isPlaceholder ? null : (
                       <Button
                         variant={
-                          header.id === sorting.field ? "secondary" : "ghost"
+                          header.id === sorting.sortBy ? "secondary" : "ghost"
                         }
                         className={`${
-                          header.id === sorting.field ? "font-semibold" : ""
+                          header.id === sorting.sortBy ? "font-semibold" : ""
                         } text-xs md:text-base`}
                         onClick={() => {
                           if (header.id === "accion") return;
                           setSorting({
-                            field: header.id,
+                            sortBy: header.id,
                             sort: sorting.sort === "asc" ? "desc" : "asc",
                           });
                         }}
@@ -235,7 +235,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
                           header.getContext()
                         )}
                         {header.id === "accion" ? null : header.id !==
-                          sorting.field ? (
+                          sorting.sortBy ? (
                           <ArrowUpDown size={16} />
                         ) : sorting.sort === "asc" ? (
                           <ArrowUp size={16} />
