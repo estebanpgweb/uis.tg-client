@@ -106,7 +106,7 @@ function App() {
           <AlertCircle />
           <AlertTitle>¡Horario no registrado!</AlertTitle>
           <AlertDescription>
-            Debe cargar el horario antes de crear una solicitud de ajuste de
+            Debe cargar el horario y la franja de atención antes de crear una solicitud de ajuste de
             matrícula.
           </AlertDescription>
         </Alert>
@@ -116,7 +116,7 @@ function App() {
           <AlertTitle>¡Importante!</AlertTitle>
           <AlertDescription>
             El éxito de su solicitud de ajuste de matrícula depende de que su
-            horario esté registrado correctamente. Asegúrese de revisar y
+            horario y franja de atención estén registrados correctamente. Asegúrese de revisar y
             confirmar su horario antes de crear una solicitud de ajuste.
           </AlertDescription>
         </Alert>
