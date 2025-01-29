@@ -53,6 +53,14 @@ export default function EstadisticasRoute() {
   >([]);
   const axios: AxiosInstance = useAxios();
   const { toast } = useToast();
+  const franjasTotales = [
+    { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
+    { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
+    { day: "THURSDAY", time: "AM", label: "Jue AM" },
+    { day: "THURSDAY", time: "PM", label: "Jue PM" },
+    { day: "FRIDAY", time: "AM", label: "Vie AM" },
+    { day: "FRIDAY", time: "PM", label: "Vie PM" },
+  ];
 
   useEffect(() => {
     const fetchSolicitudes = async () => {
@@ -183,15 +191,6 @@ export default function EstadisticasRoute() {
     );
 
     // Calculamos el tiempo de respuesta promedio por franja o shift
-    const franjasTotales = [
-      { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
-      { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
-      { day: "THURSDAY", time: "AM", label: "Jue AM" },
-      { day: "THURSDAY", time: "PM", label: "Jue PM" },
-      { day: "FRIDAY", time: "AM", label: "Vie AM" },
-      { day: "FRIDAY", time: "PM", label: "Vie PM" },
-    ];
-
     const conteoPorFranjasTotales: solicitudesChart[] = franjasTotales.map(
       (franja, index) => {
         const solicitudesFranja = solicitudesAtendidas.filter(
@@ -263,6 +262,9 @@ export default function EstadisticasRoute() {
           <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Solicitudes totales</h3>
             <p className="text-2xl font-semibold ml-4">{solicitudes.length}</p>
+            <span className="opacity-50">
+              solicitudes registradas en el sistema
+            </span>
           </Card>
           <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Tiempo promedio de respuesta</h3>
