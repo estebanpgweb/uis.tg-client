@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert.tsx";
+import { UserPlus, Eye, EyeOff, CircleHelpIcon } from "lucide-react";
 import Loader from "@/components/loader";
 
 const RegisterRoute = () => {
@@ -87,9 +88,16 @@ const RegisterRoute = () => {
         <h4 className="text-xs text-center">
           Crea una cuenta para acceder al sistema de ajuste de matricula
         </h4>
+        <Alert>
+          <CircleHelpIcon />
+          <AlertTitle>Sistema de Ajuste de Matrícula (SAM)</AlertTitle>
+          <AlertDescription>
+            Sistema exclusivo para estudiantes de Ingeniería de Sistemas.
+          </AlertDescription>
+        </Alert>
         <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col w-full md:flex-row gap-4">
+            <div className="flex w-full flex-col gap-2">
               <Label className="font-normal" htmlFor="email">
                 Nombre
               </Label>
@@ -102,7 +110,7 @@ const RegisterRoute = () => {
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex w-full flex-col gap-2">
               <Label className="font-normal" htmlFor="email">
                 Apellido
               </Label>
@@ -131,7 +139,7 @@ const RegisterRoute = () => {
           </div>
           <div className="flex flex-col gap-2">
             <Label className="font-normal" htmlFor="email">
-              Correo electrónico
+              Correo institucional
             </Label>
             <Input
               required

@@ -4,7 +4,16 @@ import { AxiosInstance } from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Solicitud } from "@/types/solicitudesTypes";
-import { Pie, PieChart, Legend } from "recharts";
+import {
+  Pie,
+  PieChart,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -34,6 +43,12 @@ export default function EstadisticasRoute() {
     solicitudesChart[]
   >([]);
   const [solicitudesPorIntentos, setSolicitudesPorIntentos] = useState<
+    solicitudesChart[]
+  >([]);
+  const [solicitudesPorFranja, setSolicitudesPorFranja] = useState<
+    solicitudesChart[]
+  >([]);
+  const [tiempoRespuestaFranja, setTiempoRespuestaFranja] = useState<
     solicitudesChart[]
   >([]);
   const axios: AxiosInstance = useAxios();
@@ -166,7 +181,76 @@ export default function EstadisticasRoute() {
         }, [] as solicitudesChart[])
         .sort((a, b) => parseInt(a.status) - parseInt(b.status))
     );
+
+    // Calculamos el tiempo de respuesta promedio por franja o shift
+    const franjasTotales = [
+      { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
+      { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
+      { day: "THURSDAY", time: "AM", label: "Jue AM" },
+      { day: "THURSDAY", time: "PM", label: "Jue PM" },
+      { day: "FRIDAY", time: "AM", label: "Vie AM" },
+      { day: "FRIDAY", time: "PM", label: "Vie PM" },
+    ];
+
+    const conteoPorFranjasTotales: solicitudesChart[] = franjasTotales.map(
+      (franja, index) => {
+        const solicitudesFranja = solicitudesAtendidas.filter(
+          (solicitud) =>
+            solicitud.student?.shift?.day === franja.day &&
+            solicitud.student?.shift?.time === franja.time &&
+            solicitud.createdAt &&
+            solicitud.updatedAt // Solo consideramos solicitudes con fechas válidas
+        );
+
+        const tiempoTotal = solicitudesFranja.reduce((acc, solicitud) => {
+          const tiempoDiferencia =
+            new Date(solicitud.updatedAt!).getTime() -
+            new Date(solicitud.createdAt!).getTime();
+          return acc + tiempoDiferencia;
+        }, 0);
+
+        // Solo calculamos el promedio si hay solicitudes válidas
+        const tiempoPromedio = solicitudesFranja.length
+          ? tiempoTotal / solicitudesFranja.length / 1000 / 60 / 60 // convertimos a horas
+          : 0;
+
+        return {
+          status: franja.label,
+          count: solicitudesFranja.length,
+          fill: `hsl(var(--chart-${index + 1}))`,
+          tiempoPromedio: parseFloat(tiempoPromedio.toFixed(2)), // Redondeamos a 2 decimales
+        };
+      }
+    );
+
+    setTiempoRespuestaFranja(conteoPorFranjasTotales);
+
+    // calculamos el total de solicitudes por franja
+    const conteoPorFranjas: solicitudesChart[] = franjasTotales.map(
+      (franja, index) => {
+        const solicitudesFranja = solicitudesAtendidas.filter(
+          (solicitud) =>
+            solicitud.student?.shift?.day === franja.day &&
+            solicitud.student?.shift?.time === franja.time
+        );
+
+        return {
+          status: franja.label,
+          count: solicitudesFranja.length,
+          fill: `hsl(var(--chart-${index + 1}))`,
+        };
+      }
+    );
+
+    setSolicitudesPorFranja(conteoPorFranjas);
   }, [solicitudes]);
+
+  const formatTiempo = (horas: number): string => {
+    if (horas === 0) return "0 min";
+    if (horas < 1) return `${Math.round(horas * 60)} min`;
+    if (Number.isInteger(horas)) return `${horas}h`;
+    return `${Math.floor(horas)}h ${Math.round((horas % 1) * 60)}min`;
+  };
 
   return (
     <div className="container mx-auto">
@@ -227,6 +311,53 @@ export default function EstadisticasRoute() {
                   " sin atender"
               }
             </span>
+          </Card>
+        </div>
+        <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
+            <h3>Tiempo promedio de respuesta por franja horaria</h3>
+            <ChartContainer
+              config={{}}
+              className="mx-auto w-full min-h-[80px] h-80"
+            >
+              <BarChart
+                data={tiempoRespuestaFranja}
+                margin={{ top: 15 }}
+                height={80}
+              >
+                <CartesianGrid strokeDasharray="2 2" />
+                <XAxis dataKey="status" />
+                <YAxis
+                  tickFormatter={(value) => formatTiempo(value)}
+                  label={{
+                    value: "Tiempo promedio",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: { textAnchor: "middle" },
+                  }}
+                />{" "}
+                <ChartTooltip
+                  content={({ payload }) => {
+                    if (payload && payload[0]) {
+                      const value = payload[0].value as number;
+                      return (
+                        <div className="bg-background border p-2 rounded-md">
+                          <p>{payload[0].payload.status}</p>
+                          <p className="font-semibold">{formatTiempo(value)}</p>
+                          <p className="text-sm opacity-70">{`${payload[0].payload.count} solicitudes`}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar
+                  dataKey="tiempoPromedio"
+                  fill="hsl(var(--primary))"
+                  label={({ value }) => <text>{formatTiempo(value)}</text>}
+                />
+              </BarChart>
+            </ChartContainer>
           </Card>
         </div>
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
@@ -298,6 +429,35 @@ export default function EstadisticasRoute() {
                   align="center"
                 />
               </PieChart>
+            </ChartContainer>
+          </Card>
+        </div>
+        <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
+            <h3>Solicitudes por franja horaria</h3>
+            <ChartContainer
+              config={{}}
+              className="mx-auto w-full min-h-[80px] h-80"
+            >
+              <BarChart data={solicitudesPorFranja} margin={{ top: 15 }}>
+                <CartesianGrid strokeDasharray="2 2" />
+                <XAxis dataKey="status" />
+                <YAxis />
+                <ChartTooltip
+                  content={({ payload }) => {
+                    if (payload && payload[0]) {
+                      return (
+                        <div className="bg-background border p-2 rounded-md">
+                          <p>{payload[0].payload.status}</p>
+                          <p className="font-semibold">{payload[0].value}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="count" fill="hsl(var(--primary))" />
+              </BarChart>
             </ChartContainer>
           </Card>
         </div>
