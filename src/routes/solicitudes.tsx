@@ -39,7 +39,7 @@ const SolicitudRoute = () => {
   const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
     sortBy: "createdAt",
-    sort: "asc",
+    sort: "desc",
   });
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
