@@ -435,7 +435,6 @@ export default function EstadisticasRoute() {
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
           <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Solicitudes por franja horaria</h3>
-            <span className="opacity-50">Solicitudes por franja horaria</span>
             <ChartContainer
               config={{}}
               className="mx-auto w-full min-h-[80px] h-80"
