@@ -8,6 +8,7 @@ import {
   RequestStatus,
   getBadgeColor,
   getStatusLabel,
+  getShiftLabel,
 } from "../types/solicitudesTypes";
 import {
   ArrowLeft,
@@ -341,6 +342,14 @@ const SolicitudDetalleRoute = () => {
             </Label>
           </div>
           <div className="flex flex-col gap-2 mx-4">
+            <Label className="opacity-50">Franja de atención</Label>
+            <Label className="font-medium text-lg">
+              {getShiftLabel(
+                solicitud.student?.shift || { day: "THURSDAY", time: "AM" }
+              )}
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 mx-4">
             <Label className="opacity-50">
               Tiempo en espera de la solicitud
             </Label>
@@ -348,7 +357,7 @@ const SolicitudDetalleRoute = () => {
               {solicitud.createdAt &&
                 SolicitudTiempoEspera({
                   createdAt: solicitud.createdAt,
-                  updatedAt: solicitud.updatedAt,
+                  updatedAt: solicitud.updatedAt || "",
                 })}
             </Label>
           </div>
