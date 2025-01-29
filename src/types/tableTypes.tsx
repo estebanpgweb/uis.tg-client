@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 
 // Estado de ordenamiento de la tabla
-export type SortingState = { field: string | null; sort: "asc" | "desc" };
+export type SortingState = { sortBy: string | null; sort: "asc" | "desc" };
 
 // Columnas de la tabla de solicitudes
 export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
