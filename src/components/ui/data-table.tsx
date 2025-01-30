@@ -68,7 +68,13 @@ export function DataTable<TData extends { status?: string }, TValue>({
   onRefresh,
 }: DataTableProps<TData, TValue>) {
   const [filterInput, setFilterInput] = useState<string>(filter || "");
-  const statusOptions = ["REJECTED", "PENDING", "PARTIAL_REJECTED", "APPROVED"];
+  const statusOptions = [
+    "REJECTED",
+    "PENDING",
+    "PARTIAL_REJECTED",
+    "APPROVED",
+    "REVIEW",
+  ];
 
   const table = useReactTable({
     data,

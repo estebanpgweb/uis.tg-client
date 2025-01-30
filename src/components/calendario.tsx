@@ -23,7 +23,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { Materia } from "@/types/materiaTypes";
 import { Solicitud } from "@/types/solicitudesTypes";
-import { Trash2, Save, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
+import { Trash2, Send, X, PlusCircle, MinusCircle, Repeat } from "lucide-react";
 
 interface CalendarioProps {
   horario: Materia[];
@@ -301,8 +301,8 @@ export default function Calendario({
           >
             <AlertDialogTrigger className="w-full" asChild>
               <Button className="w-[600px] md:w-full text-xs md:text-base">
-                <Save className="h-4 w-4 mr-2" />
-                Guardar
+                <Send className="h-4 w-4 mr-2" />
+                Enviar
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -464,8 +464,10 @@ export default function Calendario({
                       </div>
                     )
                   )}
-                  ¿Estás seguro de que deseas guardar? Por favor, revisa el
-                  resumen de los movimientos realizados.
+                  ¿Estás seguro de que deseas enviar la solicitud?, Hasta no
+                  aprobarse esta no podras enviar mas solicitudes, debes crear
+                  todas las peticiones en una misma solicitud. Por favor, revisa
+                  el resumen de los movimientos realizados.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
