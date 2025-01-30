@@ -52,6 +52,14 @@ type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
 
 export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+// Función para convertir UTC a hora colombiana
+export const convertToColombianTime = (utcDate: string): number => {
+  const date = new Date(utcDate);
+  // Convertir a hora colombiana (UTC-5)
+  const colombianHour = (date.getUTCHours() - 5 + 24) % 24;
+  return colombianHour;
+};
+
 //Funcion para obtener el dia y jornada del shift
 export const getShiftLabel = (shift: {
   day: dayType;
