@@ -2,25 +2,23 @@ import { useState, useEffect } from "react";
 import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
-import { Solicitud } from "@/types/solicitudesTypes";
-import {
-  Pie,
-  PieChart,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
+import { Solicitud, validateShiftTiming } from "@/types/solicitudesTypes";
+import { Pie, PieChart, Legend } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Sun, Moon } from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
 import Loader from "@/components/loader";
+
+const daysAndShifts = [
+  { day: "WEDNESDAY", label: "Miércoles" },
+  { day: "THURSDAY", label: "Jueves" },
+  { day: "FRIDAY", label: "Viernes" },
+];
 
 export default function EstadisticasRoute() {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +33,7 @@ export default function EstadisticasRoute() {
     status: string;
     count: number;
     fill: string;
+    tiempoPromedio?: string;
   };
   const [solicitudesPorGrupo, setSolicitudesPorGrupo] = useState<
     solicitudesChart[]
@@ -217,7 +216,9 @@ export default function EstadisticasRoute() {
           status: franja.label,
           count: solicitudesFranja.length,
           fill: `hsl(var(--chart-${index + 1}))`,
-          tiempoPromedio: parseFloat(tiempoPromedio.toFixed(2)), // Redondeamos a 2 decimales
+          tiempoPromedio: tiempoPromedio
+            ? tiempoPromedio.toFixed(2) + " h"
+            : "n/a", // Redondeamos a 2 decimales
         };
       }
     );
@@ -244,13 +245,6 @@ export default function EstadisticasRoute() {
     setSolicitudesPorFranja(conteoPorFranjas);
   }, [solicitudes]);
 
-  const formatTiempo = (horas: number): string => {
-    if (horas === 0) return "0 min";
-    if (horas < 1) return `${Math.round(horas * 60)} min`;
-    if (Number.isInteger(horas)) return `${horas}h`;
-    return `${Math.floor(horas)}h ${Math.round((horas % 1) * 60)}min`;
-  };
-
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
@@ -274,19 +268,27 @@ export default function EstadisticasRoute() {
                 (solicitudesAtendidas.length === 0
                   ? 0
                   : solicitudesAtendidas.reduce((acc, solicitud) => {
-                      const createdAt = solicitud.createdAt
-                        ? new Date(solicitud.createdAt)
-                        : new Date();
+                      const hora = validateShiftTiming(solicitud);
+
+                      const createdAt = hora ? new Date(hora) : new Date();
                       const updatedAt = solicitud.updatedAt
                         ? new Date(solicitud.updatedAt)
                         : new Date();
+                      // console.log(
+                      //   `time: ${hora}`,
+                      //   (updatedAt.getTime() - createdAt.getTime()) /
+                      //     1000 /
+                      //     60 /
+                      //     60
+                      // );
+
                       return acc + (updatedAt.getTime() - createdAt.getTime());
                     }, 0) /
                     solicitudesAtendidas.length /
                     1000 /
                     60 /
                     60
-                ).toFixed(1) + " horas"
+                ).toFixed(1) + " h"
               }
             </p>
             <span className="opacity-50">
@@ -318,48 +320,34 @@ export default function EstadisticasRoute() {
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
           <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Tiempo promedio de respuesta por franja horaria</h3>
-            <ChartContainer
-              config={{}}
-              className="mx-auto w-full min-h-[80px] h-80"
-            >
-              <BarChart
-                data={tiempoRespuestaFranja}
-                margin={{ top: 15 }}
-                height={80}
-              >
-                <CartesianGrid strokeDasharray="2 2" />
-                <XAxis dataKey="status" />
-                <YAxis
-                  tickFormatter={(value) => formatTiempo(value)}
-                  label={{
-                    value: "Tiempo promedio",
-                    angle: -90,
-                    position: "insideLeft",
-                    style: { textAnchor: "middle" },
-                  }}
-                />{" "}
-                <ChartTooltip
-                  content={({ payload }) => {
-                    if (payload && payload[0]) {
-                      const value = payload[0].value as number;
-                      return (
-                        <div className="bg-background border p-2 rounded-md">
-                          <p>{payload[0].payload.status}</p>
-                          <p className="font-semibold">{formatTiempo(value)}</p>
-                          <p className="text-sm opacity-70">{`${payload[0].payload.count} solicitudes`}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar
-                  dataKey="tiempoPromedio"
-                  fill="hsl(var(--primary))"
-                  label={({ value }) => <text>{formatTiempo(value)}</text>}
-                />
-              </BarChart>
-            </ChartContainer>
+            <div className="flex flex-col md:flex-row gap-4 w-full justify-between items-center">
+              {daysAndShifts.map(({ day, label }) => (
+                <Card key={day} className="w-full">
+                  <CardHeader className="text-center !py-2 md:!py-4">
+                    <CardTitle>{label}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-y-2">
+                    {franjasTotales
+                      .filter((franja) => franja.day === day)
+                      .map((franja) => {
+                        const franjaData = tiempoRespuestaFranja.find(
+                          (f) => f.status === franja.label
+                        );
+                        return (
+                          <div
+                            key={franja.label}
+                            className="flex justify-between items-center bg-template rounded-md px-4 py-2"
+                          >
+                            {franja.time == "AM" ? <Sun /> : <Moon />}
+                            <span>{franja.time}</span>
+                            <span>{franjaData?.tiempoPromedio || 0}</span>
+                          </div>
+                        );
+                      })}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </Card>
         </div>
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
@@ -437,30 +425,37 @@ export default function EstadisticasRoute() {
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
           <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Solicitudes por franja horaria</h3>
-            <ChartContainer
-              config={{}}
-              className="mx-auto w-full min-h-[80px] h-80"
-            >
-              <BarChart data={solicitudesPorFranja} margin={{ top: 15 }}>
-                <CartesianGrid strokeDasharray="2 2" />
-                <XAxis dataKey="status" />
-                <YAxis />
-                <ChartTooltip
-                  content={({ payload }) => {
-                    if (payload && payload[0]) {
-                      return (
-                        <div className="bg-background border p-2 rounded-md">
-                          <p>{payload[0].payload.status}</p>
-                          <p className="font-semibold">{payload[0].value}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="count" fill="hsl(var(--primary))" />
-              </BarChart>
-            </ChartContainer>
+            <div className="flex flex-col md:flex-row gap-4 w-full justify-between items-center">
+              {
+                //mostramos el conteo de solicitudes por franja horaria
+                daysAndShifts.map(({ day, label }) => (
+                  <Card key={day} className="w-full">
+                    <CardHeader className="text-center !py-2 md:!py-4">
+                      <CardTitle>{label}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-y-2">
+                      {franjasTotales
+                        .filter((franja) => franja.day === day)
+                        .map((franja) => {
+                          const franjaData = solicitudesPorFranja.find(
+                            (f) => f.status === franja.label
+                          );
+                          return (
+                            <div
+                              key={franja.label}
+                              className="flex justify-between items-center bg-template rounded-md px-4 py-2"
+                            >
+                              {franja.time == "AM" ? <Sun /> : <Moon />}
+                              <span>{franja.time}</span>
+                              <span>{franjaData?.count || 0}</span>
+                            </div>
+                          );
+                        })}
+                    </CardContent>
+                  </Card>
+                ))
+              }
+            </div>
           </Card>
         </div>
       </div>
