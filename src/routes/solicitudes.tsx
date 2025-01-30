@@ -38,8 +38,8 @@ const SolicitudRoute = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
-    sortBy: "createdAt",
-    sort: "desc",
+    sortBy: "",
+    sort: "asc",
   });
   const [isLoading, setIsLoading] = useState(true);
   const axios: AxiosInstance = useAxios();
@@ -54,6 +54,15 @@ const SolicitudRoute = () => {
     () => ["logs.user.name", "logs.user.lastname", "logs.user.identification"],
     []
   );
+
+  useEffect(() => {
+    if (!kind) return;
+    if (kind === "ADMIN") {
+      setSorting({ sortBy: "status", sort: "desc" });
+    } else {
+      setSorting({ sortBy: "createdAt", sort: "desc" });
+    }
+  }, [kind]);
 
   const fetchSolicitudes = async (
     page: number,
@@ -71,7 +80,7 @@ const SolicitudRoute = () => {
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
         sort: sorting.sort,
-        sortBy: sorting.sortBy || "createdAt",
+        sortBy: sorting.sortBy || "status",
       }).toString();
 
       const { data } =

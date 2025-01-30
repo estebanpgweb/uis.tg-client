@@ -53,6 +53,7 @@ export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
   {
     header: "Franja Horaria",
     accessorKey: "student.shift.day",
+    id: "logs.user.shift.day",
     cell: ({ row }) =>
       getShiftLabel(
         row.original?.student?.shift || { day: "THURSDAY", time: "AM" }
