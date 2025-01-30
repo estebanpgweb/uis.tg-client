@@ -243,7 +243,7 @@ export default function EstadisticasRoute() {
     );
 
     setSolicitudesPorFranja(conteoPorFranjas);
-  }, [solicitudes]);
+  }, [solicitudes, franjasTotales]);
 
   return (
     <div className="container mx-auto">
