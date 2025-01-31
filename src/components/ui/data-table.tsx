@@ -194,8 +194,8 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
-        <div className="flex gap-x-2 items-center ">
-          <p className="hidden md:inline-block opacity-50 text-sm">
+        <div className="flex flex-col md:flex-row gap-x-2 gap-y-2 items-center ">
+          <p className="opacity-50 text-sm">
             Mostrando {data.length} de {rows} resultados
           </p>
           {onRefresh && (
