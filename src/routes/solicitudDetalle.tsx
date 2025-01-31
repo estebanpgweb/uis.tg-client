@@ -482,7 +482,9 @@ const SolicitudDetalleRoute = () => {
           <Logs />
           <h2 className="text-xl font-medium">Indicaciones estudiante</h2>
         </div>
-        <p>{solicitud?.ask || "No hay indicaciones del estudiante."}</p>
+        {(solicitud?.ask && <p>{solicitud.ask}</p>) || (
+          <p className="opacity-50">No hay indicaciones del estudiante.</p>
+        )}
       </Card>
       {/* Observaciones adicionales */}
       <Card className="flex flex-col gap-2 md:gap-4 flex-1 px-3 py-2 md:px-6 md:py-4 md:mx-8 my-4">

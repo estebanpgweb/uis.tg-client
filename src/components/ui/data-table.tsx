@@ -288,7 +288,10 @@ export function DataTable<TData extends { status?: string }, TValue>({
                   className="text-xs md:text-base"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-xs md:text-base">
+                    <TableCell
+                      key={cell.id}
+                      className="text-xs p-0 md:p-1 md:text-base"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
