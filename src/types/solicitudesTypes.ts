@@ -82,19 +82,24 @@ export const getShiftDate = (shift: {
 }): string => {
   const dateMap: Record<dayType, string> = {
     MONDAY: "2025-01-27",
-    TUESDAY: "2025-01-28", // Corregido el "38" a "28"
+    TUESDAY: "2025-01-28",
     WEDNESDAY: "2025-01-29",
     THURSDAY: "2025-01-30",
     FRIDAY: "2025-01-31",
   };
 
-  const targetDate = new Date(dateMap[shift.day]);
+  // Crear la fecha usando la zona horaria local
+  const [year, month, day] = dateMap[shift.day].split("-").map(Number);
+  const targetDate = new Date(year, month - 1, day);
+
+  // Establecer las horas manteniendo la zona horaria local
   if (shift.time === "AM") {
     targetDate.setHours(8, 0, 0, 0);
   } else {
     targetDate.setHours(14, 0, 0, 0);
   }
 
+  // Convertir a ISO string considerando el offset de la zona horaria
   return targetDate.toISOString();
 };
 

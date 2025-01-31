@@ -5,8 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import {
   Solicitud,
-  validateShiftTiming,
   convertToColombianTime,
+  getShiftDate,
 } from "@/types/solicitudesTypes";
 import {
   Pie,
@@ -247,10 +247,25 @@ export default function EstadisticasRoute() {
         );
 
         const tiempoTotal = solicitudesFranja.reduce((acc, solicitud) => {
-          const tiempoDiferencia =
-            new Date(solicitud.updatedAt!).getTime() -
-            new Date(solicitud.createdAt!).getTime();
-          return acc + tiempoDiferencia;
+          if (
+            !solicitud.createdAt ||
+            !solicitud.updatedAt ||
+            !solicitud.student?.shift
+          ) {
+            return acc; // Omitimos si falta algún dato necesario
+          }
+
+          const shiftDate = new Date(getShiftDate(solicitud.student.shift)); // Fecha esperada del shift
+          const createdAt = new Date(solicitud.createdAt);
+          const updatedAt = new Date(solicitud.updatedAt);
+
+          // Solo consideramos solicitudes creadas el mismo día o después del turno
+          if (createdAt.getTime() >= shiftDate.getTime()) {
+            return acc + (updatedAt.getTime() - createdAt.getTime());
+          } else {
+            console.log("shiftDate", shiftDate);
+            return acc + (updatedAt.getTime() - shiftDate.getTime());
+          }
         }, 0);
 
         // Solo calculamos el promedio si hay solicitudes válidas
@@ -341,26 +356,35 @@ export default function EstadisticasRoute() {
           <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Tiempo promedio de respuesta</h3>
             <p className="text-2xl font-semibold ml-4">
-              {
-                //calculamos un tiempo de respuesta promedio comparando el tiempo de creacion con el tiempo de ultima actualizacion cuando son status estas completadas
-                (solicitudesAtendidas.length === 0
-                  ? 0
-                  : solicitudesAtendidas.reduce((acc, solicitud) => {
-                      const hora = validateShiftTiming(solicitud);
+              {(solicitudesAtendidas.length === 0
+                ? 0
+                : solicitudesAtendidas.reduce((acc, solicitud) => {
+                    if (
+                      !solicitud.createdAt ||
+                      !solicitud.updatedAt ||
+                      !solicitud.student?.shift
+                    ) {
+                      return acc; // Omitimos si falta algún dato necesario
+                    }
 
-                      const createdAt = hora ? new Date(hora) : new Date();
-                      const updatedAt = solicitud.updatedAt
-                        ? new Date(solicitud.updatedAt)
-                        : new Date();
+                    const shiftDate = new Date(
+                      getShiftDate(solicitud.student.shift)
+                    ); // Fecha esperada del shift
+                    const createdAt = new Date(solicitud.createdAt);
+                    const updatedAt = new Date(solicitud.updatedAt);
 
+                    // Solo consideramos solicitudes creadas el mismo día o después del turno
+                    if (createdAt.getTime() >= shiftDate.getTime()) {
                       return acc + (updatedAt.getTime() - createdAt.getTime());
-                    }, 0) /
-                    solicitudesAtendidas.length /
-                    1000 /
-                    60 /
-                    60
-                ).toFixed(1) + " h"
-              }
+                    } else {
+                      return acc + (updatedAt.getTime() - shiftDate.getTime());
+                    }
+                  }, 0) /
+                  solicitudesAtendidas.length /
+                  1000 /
+                  60 /
+                  60
+              ).toFixed(1) + " h"}
             </p>
             <span className="opacity-50">
               en {solicitudesAtendidas.length} solicitudes atendidas
@@ -391,13 +415,8 @@ export default function EstadisticasRoute() {
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
           <Card className="w-full flex flex-col gap-y-2 flex-1 py-2 md:px-6 md:py-4">
             <h3>Tráfico de creación de solicitudes</h3>
-            <ChartContainer
-              config={{}}
-              className="w-full min-h-[80px] h-80"
-            >
-              <AreaChart
-                data={horaCreacionSolicitud}
-              >
+            <ChartContainer config={{}} className="w-full min-h-[80px] h-80">
+              <AreaChart data={horaCreacionSolicitud}>
                 <CartesianGrid vertical={false} />
                 <XAxis dataKey="status" tickMargin={8} />
                 <YAxis tickLine={false} tickMargin={8} />
