@@ -5,8 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import {
   Solicitud,
-  validateShiftTiming,
+ // validateShiftTiming,
   convertToColombianTime,
+  getShiftDate,
 } from "@/types/solicitudesTypes";
 import {
   Pie,
@@ -342,23 +343,26 @@ export default function EstadisticasRoute() {
             <h3>Tiempo promedio de respuesta</h3>
             <p className="text-2xl font-semibold ml-4">
               {
-                //calculamos un tiempo de respuesta promedio comparando el tiempo de creacion con el tiempo de ultima actualizacion cuando son status estas completadas
                 (solicitudesAtendidas.length === 0
                   ? 0
                   : solicitudesAtendidas.reduce((acc, solicitud) => {
-                      const hora = validateShiftTiming(solicitud);
+                      if (!solicitud.createdAt || !solicitud.updatedAt || !solicitud.student?.shift) {
+                        return acc; // Omitimos si falta algún dato necesario
+                      }
 
-                      const createdAt = hora ? new Date(hora) : new Date();
-                      const updatedAt = solicitud.updatedAt
-                        ? new Date(solicitud.updatedAt)
-                        : new Date();
+                      const shiftDate = new Date(getShiftDate(solicitud.student.shift)); // Fecha esperada del shift
+                      const createdAt = new Date(solicitud.createdAt);
+                      const updatedAt = new Date(solicitud.updatedAt);
 
-                      return acc + (updatedAt.getTime() - createdAt.getTime());
-                    }, 0) /
-                    solicitudesAtendidas.length /
-                    1000 /
-                    60 /
-                    60
+                      // Solo consideramos solicitudes creadas el mismo día o después del turno
+                      if (createdAt.getTime() >= shiftDate.getTime()) {
+                        return acc + (updatedAt.getTime() - createdAt.getTime());
+                      }
+
+                      return acc;
+                    }, 0) / 
+                    solicitudesAtendidas.length / 
+                    1000 / 60 / 60
                 ).toFixed(1) + " h"
               }
             </p>
@@ -366,6 +370,7 @@ export default function EstadisticasRoute() {
               en {solicitudesAtendidas.length} solicitudes atendidas
             </span>
           </Card>
+
           <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
             <h3>Atendidas VS sin atender</h3>
             <p className="text-2xl font-semibold ml-4">
