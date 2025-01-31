@@ -389,18 +389,14 @@ export default function EstadisticasRoute() {
           </Card>
         </div>
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
-          <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
+          <Card className="w-full flex flex-col gap-y-2 flex-1 py-2 md:px-6 md:py-4">
             <h3>Tráfico de creación de solicitudes</h3>
             <ChartContainer
               config={{}}
-              className="mx-auto w-full min-h-[80px] h-80"
+              className="w-full min-h-[80px] h-80"
             >
               <AreaChart
                 data={horaCreacionSolicitud}
-                margin={{
-                  left: 12,
-                  right: 12,
-                }}
               >
                 <CartesianGrid vertical={false} />
                 <XAxis dataKey="status" tickMargin={8} />
@@ -541,7 +537,7 @@ export default function EstadisticasRoute() {
         </div>
         <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
           <div className="flex flex-col md:flex-row w-full justify-between gap-y-2 gap-x-6">
-            <Card className="w-full flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
+            <Card className="w-full flex flex-col gap-y-2 flex-1 py-2 md:px-6 md:py-4">
               <h3>Solicitudes completadas por franja horaria del estudiante</h3>
               <span className="opacity-50">Solicitudes por franja horaria</span>
               <ChartContainer

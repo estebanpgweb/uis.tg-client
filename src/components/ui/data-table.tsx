@@ -135,6 +135,30 @@ export function DataTable<TData extends { status?: string }, TValue>({
     setPage(0);
   }, [debouncedFilter]);
 
+  // Responsive paginacion
+  interface GetSiblingPages {
+    (current: number, max: number): number[];
+  }
+
+  const getSiblingPages: GetSiblingPages = (current, max) => {
+    if (max <= 7) {
+      return Array.from({ length: max }, (_, i) => i);
+    }
+
+    if (current <= 3) {
+      return [0, 1, 2, 3, 4, -1, max - 1];
+    }
+
+    if (current >= max - 4) {
+      return [0, -1, max - 4, max - 3, max - 2, max - 1];
+    }
+
+    return [0, -1, current - 1, current, current + 1, -1, max - 1];
+  };
+
+  const totalPages = Math.ceil(rows / 10);
+  const pages = getSiblingPages(page, totalPages);
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-6 gap-4 md:gap-0">
@@ -264,7 +288,10 @@ export function DataTable<TData extends { status?: string }, TValue>({
                   className="text-xs md:text-base"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-xs md:text-base">
+                    <TableCell
+                      key={cell.id}
+                      className="text-xs p-0 md:p-1 md:text-base"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -287,38 +314,58 @@ export function DataTable<TData extends { status?: string }, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        {rows > 0 && (
+      <div className="flex items-center justify-end space-x-2 py-4 overflow-x-auto">
+        {rows / 10 > 0 && (
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="gap-1 sm:gap-2">
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  onClick={() => setPage(page - 1)}
-                  className={`${
-                    page === 0 ? "hidden" : ""
-                  } text-xs md:text-base`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(Math.max(0, page - 1));
+                  }}
+                  className={`${page === 0 ? "hidden" : ""} text-xs sm:text-sm`}
                 />
               </PaginationItem>
-              {Array.from({ length: Math.ceil(rows / 10) }).map((_, index) => (
-                <PaginationItem key={index}>
-                  <PaginationLink
-                    href="#"
-                    onClick={() => setPage(index)}
-                    isActive={index === page}
-                    className="text-xs md:text-base"
-                  >
-                    {index + 1}
-                  </PaginationLink>
+
+              {pages.map((pageNum, idx) => (
+                <PaginationItem key={idx} className="hidden sm:block">
+                  {pageNum === -1 ? (
+                    <span className="px-3 py-2">...</span>
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(pageNum);
+                      }}
+                      isActive={pageNum === page}
+                      className="text-xs sm:text-sm"
+                    >
+                      {pageNum + 1}
+                    </PaginationLink>
+                  )}
                 </PaginationItem>
               ))}
+
+              {/* Versión móvil simplificada */}
+              <PaginationItem className="block sm:hidden">
+                <span className="text-xs">
+                  {page + 1} / {totalPages}
+                </span>
+              </PaginationItem>
+
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={() => setPage(page + 1)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(Math.min(totalPages - 1, page + 1));
+                  }}
                   className={`${
-                    page === Math.ceil(rows / 10) - 1 ? "hidden" : ""
-                  } text-xs md:text-base`}
+                    page === totalPages - 1 ? "hidden" : ""
+                  } text-xs sm:text-sm`}
                 />
               </PaginationItem>
             </PaginationContent>
