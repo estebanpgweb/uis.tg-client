@@ -263,7 +263,6 @@ export default function EstadisticasRoute() {
           if (createdAt.getTime() >= shiftDate.getTime()) {
             return acc + (updatedAt.getTime() - createdAt.getTime());
           } else {
-            console.log("shiftDate", shiftDate);
             return acc + (updatedAt.getTime() - shiftDate.getTime());
           }
         }, 0);
