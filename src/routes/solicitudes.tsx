@@ -226,6 +226,11 @@ const SolicitudRoute = () => {
     if (refresh === false) return;
 
     const rechargeSolicitudes = async () => {
+      // Ensure user is authenticated before fetching
+      if (auth?.me) {
+        await auth.me();
+      }
+
       setIsLoading(true);
       try {
         const data = await fetchSolicitudes(
