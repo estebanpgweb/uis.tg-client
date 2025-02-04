@@ -3,7 +3,7 @@ import { useAxios } from "./providers/AxiosContext";
 import { useAuth } from "./providers/AuthContext";
 import { AxiosInstance } from "axios";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "./components/ui/button";
 import { buttonVariants } from "./components/ui/button";
 import { Card } from "./components/ui/card";
@@ -22,8 +22,8 @@ import { buildFilterQuery } from "./utils/filterQuery";
 function App() {
   const [horario, setHorario] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [solicitud, setSolicitud] = useState(0);
-  const navigate = useNavigate();
+  const [, setSolicitud] = useState(0);
+  // const navigate = useNavigate();
   const { toast } = useToast();
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
@@ -106,8 +106,8 @@ function App() {
           <AlertCircle />
           <AlertTitle>¡Horario no registrado!</AlertTitle>
           <AlertDescription>
-            Debe cargar el horario y la franja de atención antes de crear una solicitud de ajuste de
-            matrícula.
+            Debe cargar el horario y la franja de atención antes de crear una
+            solicitud de ajuste de matrícula.
           </AlertDescription>
         </Alert>
       ) : (
@@ -116,8 +116,9 @@ function App() {
           <AlertTitle>¡Importante!</AlertTitle>
           <AlertDescription>
             El éxito de su solicitud de ajuste de matrícula depende de que su
-            horario y franja de atención estén registrados correctamente. Asegúrese de revisar y
-            confirmar su horario antes de crear una solicitud de ajuste.
+            horario y franja de atención estén registrados correctamente.
+            Asegúrese de revisar y confirmar su horario antes de crear una
+            solicitud de ajuste.
           </AlertDescription>
         </Alert>
       )}
@@ -159,14 +160,19 @@ function App() {
           <Button
             className={"w-fit mx-auto"}
             onClick={() =>
-              horario && horario > 0 && (!solicitud || solicitud === 0)
-                ? navigate("/solicitud/crear")
-                : toast({
-                    variant: "destructive",
-                    title: "¡Horario no registrado o solicitud pendiente!",
-                    description:
-                      "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
-                  })
+              // horario && horario > 0 && (!solicitud || solicitud === 0)
+              //   ? navigate("/solicitud/crear")
+              //   : toast({
+              //       variant: "destructive",
+              //       title: "¡Horario no registrado o solicitud pendiente!",
+              //       description:
+              //         "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
+              //     })
+              toast({
+                variant: "destructive",
+                title: "¡Funcionalidad no disponible!",
+                description: "Se acabo el periodo de creación de solicitudes.",
+              })
             }
           >
             Crear solicitud
