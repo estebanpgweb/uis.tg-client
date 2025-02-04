@@ -106,8 +106,8 @@ function App() {
           <AlertCircle />
           <AlertTitle>¡Horario no registrado!</AlertTitle>
           <AlertDescription>
-            Debe cargar el horario y la franja de atención antes de crear una solicitud de ajuste de
-            matrícula.
+            Debe cargar el horario y la franja de atención antes de crear una
+            solicitud de ajuste de matrícula.
           </AlertDescription>
         </Alert>
       ) : (
@@ -116,8 +116,9 @@ function App() {
           <AlertTitle>¡Importante!</AlertTitle>
           <AlertDescription>
             El éxito de su solicitud de ajuste de matrícula depende de que su
-            horario y franja de atención estén registrados correctamente. Asegúrese de revisar y
-            confirmar su horario antes de crear una solicitud de ajuste.
+            horario y franja de atención estén registrados correctamente.
+            Asegúrese de revisar y confirmar su horario antes de crear una
+            solicitud de ajuste.
           </AlertDescription>
         </Alert>
       )}
@@ -159,14 +160,19 @@ function App() {
           <Button
             className={"w-fit mx-auto"}
             onClick={() =>
-              horario && horario > 0 && (!solicitud || solicitud === 0)
-                ? navigate("/solicitud/crear")
-                : toast({
-                    variant: "destructive",
-                    title: "¡Horario no registrado o solicitud pendiente!",
-                    description:
-                      "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
-                  })
+              // horario && horario > 0 && (!solicitud || solicitud === 0)
+              //   ? navigate("/solicitud/crear")
+              //   : toast({
+              //       variant: "destructive",
+              //       title: "¡Horario no registrado o solicitud pendiente!",
+              //       description:
+              //         "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
+              //     })
+              toast({
+                variant: "destructive",
+                title: "¡Funcionalidad no disponible!",
+                description: "Se acabo el periodo de creación de solicitudes.",
+              })
             }
           >
             Crear solicitud

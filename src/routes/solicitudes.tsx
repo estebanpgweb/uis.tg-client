@@ -320,29 +320,34 @@ const SolicitudRoute = () => {
         {kind === "STUDENT" && (
           <Button
             onClick={() => {
-              if (horario === 0) {
-                toast({
-                  variant: "destructive",
-                  title: "Horario no registrado",
-                  description:
-                    "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
-                });
-              } else if (
-                solicitudes.filter(
-                  (solicitud) =>
-                    solicitud.status === "PENDING" ||
-                    solicitud.status === "REVIEW"
-                ).length > 0
-              ) {
-                toast({
-                  variant: "destructive",
-                  title: "Solicitud pendiente",
-                  description:
-                    "Ya tiene una solicitud de ajuste de matrícula pendiente.",
-                });
-              } else {
-                navigate("/solicitud/crear");
-              }
+              // if (horario === 0) {
+              //   toast({
+              //     variant: "destructive",
+              //     title: "Horario no registrado",
+              //     description:
+              //       "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+              //   });
+              // } else if (
+              //   solicitudes.filter(
+              //     (solicitud) =>
+              //       solicitud.status === "PENDING" ||
+              //       solicitud.status === "REVIEW"
+              //   ).length > 0
+              // ) {
+              //   toast({
+              //     variant: "destructive",
+              //     title: "Solicitud pendiente",
+              //     description:
+              //       "Ya tiene una solicitud de ajuste de matrícula pendiente.",
+              //   });
+              // } else {
+              //   navigate("/solicitud/crear");
+              // }
+              toast({
+                variant: "destructive",
+                title: "¡Funcionalidad no disponible!",
+                description: "Se acabo el periodo de creación de solicitudes.",
+              });
             }}
           >
             <Plus size={24} />
