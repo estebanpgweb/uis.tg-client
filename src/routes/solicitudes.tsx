@@ -28,7 +28,7 @@ const SolicitudRoute = () => {
   const [lastReviewSolicitud, setLastReviewSolicitud] =
     useState<Solicitud["_id"]>();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [horario, setHorario] = useState(0);
+  const [, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
   >({});
