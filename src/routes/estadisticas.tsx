@@ -73,7 +73,7 @@ export default function EstadisticasRoute() {
   const axios: AxiosInstance = useAxios();
   const { toast } = useToast();
 
-  const franjasTotales = [
+  const franjasTotales: { day: dayType; time: "AM" | "PM"; label: string }[] = [
     { day: "MONDAY", time: "AM", label: "Extemporánea" },
     { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
     { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
@@ -237,35 +237,112 @@ export default function EstadisticasRoute() {
         .sort((a, b) => parseInt(a.status) - parseInt(b.status))
     );
 
-    // Calculamos el tiempo de respuesta promedio por franja o shift
     const conteoPorFranjasTotales: solicitudesChart[] = franjasTotales.map(
       (franja, index) => {
-        const solicitudesFranja = solicitudesAtendidas.filter(
-          (solicitud) =>
-            solicitud.student?.shift?.day === franja.day &&
-            solicitud.student?.shift?.time === franja.time &&
-            solicitud.createdAt &&
-            solicitud.updatedAt // Solo consideramos solicitudes con fechas válidas
-        );
+        // Fechas de referencia para cada franja
+        let fechaInicioFranja, fechaFinFranja;
 
-        const tiempoTotal = solicitudesFranja.reduce((acc, solicitud) => {
-          if (
-            !solicitud.createdAt ||
-            !solicitud.updatedAt ||
-            !solicitud.student?.shift
-          ) {
-            return acc; // Omitimos si falta algún dato necesario
+        if (franja.day === "MONDAY" && franja.time === "AM") {
+          // Para la franja extemporánea, usamos una fecha posterior al viernes
+          const fechaViernes = new Date(
+            getShiftDate({ day: "FRIDAY", time: "PM" })
+          );
+          fechaInicioFranja = new Date(fechaViernes);
+          fechaInicioFranja.setDate(fechaInicioFranja.getDate() + 1); // Día después del viernes
+          fechaFinFranja = new Date(2099, 11, 31); // Fecha muy lejana en el futuro
+        } else {
+          fechaInicioFranja = new Date(
+            getShiftDate({ day: franja.day, time: franja.time })
+          );
+          fechaFinFranja = new Date(fechaInicioFranja);
+
+          // Si es AM, el fin es a las 12:00, si es PM, el fin es a las 24:00
+          if (franja.time === "AM") {
+            fechaFinFranja.setHours(12, 0, 0, 0);
+          } else {
+            fechaFinFranja.setHours(24, 0, 0, 0);
+          }
+        }
+
+        // Para la siguiente franja (excepto para extemporánea y viernes PM)
+        let fechaInicioSiguienteFranja;
+        if (franja.day === "MONDAY" && franja.time === "AM") {
+          fechaInicioSiguienteFranja = fechaFinFranja; // No se usa para extemporánea
+        } else if (franja.day === "WEDNESDAY" && franja.time === "AM") {
+          fechaInicioSiguienteFranja = new Date(
+            getShiftDate({ day: "WEDNESDAY", time: "PM" })
+          );
+        } else if (franja.day === "WEDNESDAY" && franja.time === "PM") {
+          fechaInicioSiguienteFranja = new Date(
+            getShiftDate({ day: "THURSDAY", time: "AM" })
+          );
+        } else if (franja.day === "THURSDAY" && franja.time === "AM") {
+          fechaInicioSiguienteFranja = new Date(
+            getShiftDate({ day: "THURSDAY", time: "PM" })
+          );
+        } else if (franja.day === "THURSDAY" && franja.time === "PM") {
+          fechaInicioSiguienteFranja = new Date(
+            getShiftDate({ day: "FRIDAY", time: "AM" })
+          );
+        } else if (franja.day === "FRIDAY" && franja.time === "AM") {
+          fechaInicioSiguienteFranja = new Date(
+            getShiftDate({ day: "FRIDAY", time: "PM" })
+          );
+        } else {
+          // Para viernes PM
+          fechaInicioSiguienteFranja = new Date(fechaFinFranja);
+          fechaInicioSiguienteFranja.setDate(
+            fechaInicioSiguienteFranja.getDate() + 1
+          );
+        }
+
+        const solicitudesFranja = solicitudesAtendidas.filter((solicitud) => {
+          if (!solicitud.updatedAt || !solicitud.createdAt) return false;
+
+          const fechaUpdate = new Date(solicitud.updatedAt);
+          const fechaMiercoles = new Date(
+            getShiftDate({ day: "WEDNESDAY", time: "AM" })
+          );
+          const fechaViernes = new Date(
+            getShiftDate({ day: "FRIDAY", time: "PM" })
+          );
+          const fechaSabado = new Date(fechaViernes);
+          fechaSabado.setDate(fechaSabado.getDate() + 1);
+
+          // Caso especial: solicitudes extemporáneas (después del viernes)
+          if (franja.day === "MONDAY" && franja.time === "AM") {
+            return fechaUpdate >= fechaSabado;
           }
 
-          const shiftDate = new Date(getShiftDate(solicitud.student.shift)); // Fecha esperada del shift
+          // Caso especial: solicitudes anteriores al miércoles
+          if (
+            franja.day === "WEDNESDAY" &&
+            franja.time === "AM" &&
+            fechaUpdate < fechaMiercoles
+          ) {
+            return true;
+          }
+
+          // Caso normal: solicitud dentro de su franja correspondiente
+          return (
+            fechaUpdate >= fechaInicioFranja &&
+            fechaUpdate < fechaInicioSiguienteFranja
+          );
+        });
+
+        const tiempoTotal = solicitudesFranja.reduce((acc, solicitud) => {
+          if (!solicitud.createdAt || !solicitud.updatedAt) {
+            return acc;
+          }
+
           const createdAt = new Date(solicitud.createdAt);
           const updatedAt = new Date(solicitud.updatedAt);
 
-          // Solo consideramos solicitudes creadas el mismo día o después del turno
-          if (createdAt.getTime() >= shiftDate.getTime()) {
-            return acc + (updatedAt.getTime() - createdAt.getTime());
+          // Si la solicitud se creó antes del inicio de la franja
+          if (createdAt < fechaInicioFranja) {
+            return acc + (updatedAt.getTime() - fechaInicioFranja.getTime());
           } else {
-            return acc + (updatedAt.getTime() - shiftDate.getTime());
+            return acc + (updatedAt.getTime() - createdAt.getTime());
           }
         }, 0);
 
@@ -286,7 +363,7 @@ export default function EstadisticasRoute() {
     );
 
     setTiempoRespuestaFranja(conteoPorFranjasTotales);
-
+    
     // calculamos el total de solicitudes por franja según updatedAt
     const conteoPorFranjas: solicitudesChart[] = franjasTotales.map(
       (franja, index) => {
