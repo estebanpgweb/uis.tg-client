@@ -48,7 +48,7 @@ export interface Solicitud {
   updatedAt?: string;
 }
 
-type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
+export type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
 
 export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 

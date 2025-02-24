@@ -4,11 +4,6 @@ import { AxiosInstance } from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import {
-  Solicitud,
-  convertToColombianTime,
-  getShiftDate,
-} from "@/types/solicitudesTypes";
-import {
   Pie,
   PieChart,
   Legend,
@@ -26,7 +21,13 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Sun, Moon } from "lucide-react";
-import { getStatusLabel } from "@/types/solicitudesTypes";
+import {
+  getStatusLabel,
+  Solicitud,
+  convertToColombianTime,
+  getShiftDate,
+  dayType,
+} from "@/types/solicitudesTypes";
 import Loader from "@/components/loader";
 
 const daysAndShifts = [
@@ -73,6 +74,7 @@ export default function EstadisticasRoute() {
   const { toast } = useToast();
 
   const franjasTotales = [
+    { day: "MONDAY", time: "AM", label: "Extemporánea" },
     { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
     { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
     { day: "THURSDAY", time: "AM", label: "Jue AM" },
@@ -285,14 +287,47 @@ export default function EstadisticasRoute() {
 
     setTiempoRespuestaFranja(conteoPorFranjasTotales);
 
-    // calculamos el total de solicitudes por franja
+    // calculamos el total de solicitudes por franja según updatedAt
     const conteoPorFranjas: solicitudesChart[] = franjasTotales.map(
       (franja, index) => {
-        const solicitudesFranja = solicitudesAtendidas.filter(
-          (solicitud) =>
-            solicitud.student?.shift?.day === franja.day &&
-            solicitud.student?.shift?.time === franja.time
-        );
+        const solicitudesFranja = solicitudesAtendidas.filter((solicitud) => {
+          if (!solicitud.updatedAt) return false;
+
+          // Fechas de referencia para cada día de la semana
+          const fechaMiercoles = new Date(
+            getShiftDate({ day: "WEDNESDAY", time: "AM" })
+          );
+          const fechaJueves = new Date(
+            getShiftDate({ day: "THURSDAY", time: "AM" })
+          );
+          const fechaViernes = new Date(
+            getShiftDate({ day: "FRIDAY", time: "AM" })
+          );
+          const fechaSabado = new Date(fechaViernes);
+          fechaSabado.setDate(fechaSabado.getDate() + 1);
+
+          const fechaUpdate = new Date(solicitud.updatedAt);
+          // Determinar el día
+          let dia: dayType;
+          if (fechaUpdate < fechaMiercoles) {
+            // Antes del miércoles, asignar a miércoles AM
+            return franja.day === "WEDNESDAY" && franja.time === "AM";
+          } else if (fechaUpdate < fechaJueves) {
+            dia = "WEDNESDAY";
+          } else if (fechaUpdate < fechaViernes) {
+            dia = "THURSDAY";
+          } else if (fechaUpdate < fechaSabado) {
+            dia = "FRIDAY";
+          } else {
+            dia = "MONDAY";
+          }
+
+          // Determinar AM o PM usando la función convertToColombianTime
+          const hora = convertToColombianTime(solicitud.updatedAt);
+          const turno = hora >= 14 && dia != "MONDAY" ? "PM" : "AM";
+
+          return franja.day === dia && franja.time === turno;
+        });
 
         return {
           status: franja.label,
