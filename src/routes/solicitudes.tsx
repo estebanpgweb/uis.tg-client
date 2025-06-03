@@ -28,7 +28,7 @@ const SolicitudRoute = () => {
   const [lastReviewSolicitud, setLastReviewSolicitud] =
     useState<Solicitud["_id"]>();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [, setHorario] = useState(0);
+  const [horario, setHorario] = useState(0);
   const [cachedSolicitudes, setCachedSolicitudes] = useState<
     Record<number, Solicitud[]>
   >({});
@@ -320,34 +320,34 @@ const SolicitudRoute = () => {
         {kind === "STUDENT" && (
           <Button
             onClick={() => {
-              // if (horario === 0) {
-              //   toast({
-              //     variant: "destructive",
-              //     title: "Horario no registrado",
-              //     description:
-              //       "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
-              //   });
-              // } else if (
-              //   solicitudes.filter(
-              //     (solicitud) =>
-              //       solicitud.status === "PENDING" ||
-              //       solicitud.status === "REVIEW"
-              //   ).length > 0
-              // ) {
-              //   toast({
-              //     variant: "destructive",
-              //     title: "Solicitud pendiente",
-              //     description:
-              //       "Ya tiene una solicitud de ajuste de matrícula pendiente.",
-              //   });
-              // } else {
-              //   navigate("/solicitud/crear");
-              // }
-              toast({
-                variant: "destructive",
-                title: "¡Funcionalidad no disponible!",
-                description: "Se acabo el periodo de creación de solicitudes.",
-              });
+              if (horario === 0) {
+                toast({
+                  variant: "destructive",
+                  title: "Horario no registrado",
+                  description:
+                    "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula.",
+                });
+              } else if (
+                solicitudes.filter(
+                  (solicitud) =>
+                    solicitud.status === "PENDING" ||
+                    solicitud.status === "REVIEW"
+                ).length > 0
+              ) {
+                toast({
+                  variant: "destructive",
+                  title: "Solicitud pendiente",
+                  description:
+                    "Ya tiene una solicitud de ajuste de matrícula pendiente.",
+                });
+              } else {
+                navigate("/solicitud/crear");
+              }
+              // toast({
+              //   variant: "destructive",
+              //   title: "¡Funcionalidad no disponible!",
+              //   description: "Se acabo el periodo de creación de solicitudes.",
+              // });
             }}
           >
             <Plus size={24} />

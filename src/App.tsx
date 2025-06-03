@@ -18,12 +18,13 @@ import {
 } from "lucide-react";
 import Loader from "./components/loader";
 import { buildFilterQuery } from "./utils/filterQuery";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const [horario, setHorario] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [, setSolicitud] = useState(0);
-  // const navigate = useNavigate();
+  const [solicitud, setSolicitud] = useState(0);
+  const navigate = useNavigate();
   const { toast } = useToast();
   const axios: AxiosInstance = useAxios();
   const auth = useAuth();
@@ -159,20 +160,21 @@ function App() {
           </ul>
           <Button
             className={"w-fit mx-auto"}
-            onClick={() =>
-              // horario && horario > 0 && (!solicitud || solicitud === 0)
-              //   ? navigate("/solicitud/crear")
-              //   : toast({
-              //       variant: "destructive",
-              //       title: "¡Horario no registrado o solicitud pendiente!",
-              //       description:
-              //         "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
-              //     })
-              toast({
-                variant: "destructive",
-                title: "¡Funcionalidad no disponible!",
-                description: "Se acabo el periodo de creación de solicitudes.",
-              })
+            onClick={
+              () =>
+                horario && horario > 0 && (!solicitud || solicitud === 0)
+                  ? navigate("/solicitud/crear")
+                  : toast({
+                      variant: "destructive",
+                      title: "¡Horario no registrado o solicitud pendiente!",
+                      description:
+                        "Debe cargar el horario antes de crear una solicitud de ajuste de matrícula y no tener ninguna solciitud pendiente o en revisión.",
+                    })
+              // toast({
+              //   variant: "destructive",
+              //   title: "¡Funcionalidad no disponible!",
+              //   description: "Se acabo el periodo de creación de solicitudes.",
+              // })
             }
           >
             Crear solicitud
