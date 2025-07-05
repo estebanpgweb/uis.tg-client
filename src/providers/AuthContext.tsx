@@ -24,6 +24,7 @@ type AuthContextType = {
   login: (username: string, password: string) => Promise<UserType>;
   logout: () => void;
   me: () => Promise<UserType>;
+  verifyEmail: (email: string) => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -117,6 +118,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("access_token");
   };
 
+  const verifyEmail = async (email: string): Promise<boolean> => {
+    try {
+      const { data } = await axios.get("/api/auth/validate-email", {
+        params: { email },
+      });
+      return data;
+    } catch (error) {
+      console.error("Error validating email:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
@@ -141,6 +154,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         me,
+        verifyEmail,
       }}
     >
       {children}
