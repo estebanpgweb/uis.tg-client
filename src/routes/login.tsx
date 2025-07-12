@@ -44,22 +44,13 @@ const LoginRoute = () => {
       setIsValidatingUsername(true);
       const emailValidate = await auth.verifyEmail(usernameToValidate);
       setValidEmail(emailValidate);
-
-      if (!emailValidate) {
-        toast({
-          variant: "destructive",
-          title: "Correo institucional no registrado",
-          description:
-            "El correo institucional ingresado no está registrado en el sistema, por favor verifique o registrese.",
-        });
-        return;
-      }
     } catch (error) {
       console.error("Error validating email:", error);
       toast({
         variant: "destructive",
-        title: "Error de validación",
-        description: "No se pudo validar el correo institucional",
+        title: "Correo institucional no registrado",
+        description:
+          "El correo institucional ingresado no está registrado en el sistema, por favor verifique o registrese.",
       });
       return;
     } finally {
