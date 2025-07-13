@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/loader";
+import { UserType } from "../types/userTypes.ts";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +32,7 @@ const LoginRoute = () => {
   const [isValidatingUsername, setIsValidatingUsername] =
     useState<boolean>(false);
   const navigate = useNavigate();
-  const [validEmail, setValidEmail] = useState<boolean>(false);
+  const [validEmail, setValidEmail] = useState<UserType | null>(null);
 
   const { toast } = useToast();
   const auth = useAuth();
