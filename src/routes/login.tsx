@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useAuth } from "../providers/AuthContext.tsx";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input.tsx";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/loader";
+import { UserType } from "../types/userTypes.ts";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,10 +29,46 @@ const LoginRoute = () => {
   const [email, setEmail] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
+  const [isValidatingUsername, setIsValidatingUsername] =
+    useState<boolean>(false);
   const navigate = useNavigate();
+  const [validEmail, setValidEmail] = useState<UserType | null>(null);
 
   const { toast } = useToast();
   const auth = useAuth();
+
+  // Función para validar el nombre de usuario
+  const validateUsername = async (usernameToValidate: string) => {
+    if (!usernameToValidate) return;
+
+    try {
+      setIsValidatingUsername(true);
+      const emailValidate = await auth.verifyEmail(usernameToValidate);
+      setValidEmail(emailValidate);
+    } catch (error) {
+      console.error("Error validating email:", error);
+      toast({
+        variant: "destructive",
+        title: "Correo institucional no registrado",
+        description:
+          "El correo institucional ingresado no está registrado en el sistema, por favor verifique o registrese.",
+      });
+      return;
+    } finally {
+      setIsValidatingUsername(false);
+    }
+  };
+
+  // useEffect para validar email cuando termine de escribir
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (username.trim()) {
+        validateUsername(username);
+      }
+    }, 500); // Espera .5 segundo después de que termine de escribir
+
+    return () => clearTimeout(timeoutId);
+  }, [username]);
 
   const onSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -70,9 +107,6 @@ const LoginRoute = () => {
   const sendForgotPassword = async () => {
     try {
       setIsLoading(true);
-      // if (!email.includes("@correo.uis.edu.co")) {
-      //   throw new Error("El correo debe ser de la universidad UIS");
-      // }
       await auth.forgotPassword(email);
 
       toast({
@@ -147,7 +181,10 @@ const LoginRoute = () => {
               </button>
             </div>
           </div>
-          <Button type="submit">
+          <Button
+            type="submit"
+            disabled={isLoading || !username || !password || !validEmail}
+          >
             <LogIn className="mr-2" size={20} />
             Iniciar sesión
           </Button>
@@ -173,14 +210,22 @@ const LoginRoute = () => {
                   <Label className="font-normal" htmlFor="email">
                     Correo electrónico
                   </Label>
-                  <Input
-                    required
-                    id="email"
-                    autoComplete="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      required
+                      id="email"
+                      autoComplete="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isValidatingUsername}
+                    />
+                    {isValidatingUsername && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </AlertDialogDescription>
               <AlertDialogFooter>
