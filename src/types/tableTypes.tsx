@@ -39,6 +39,13 @@ export type SortingState = { sortBy: string | null; sort: "asc" | "desc" };
 // Columnas de la tabla de solicitudes
 export const SolicitudesColumns: ColumnDef<Solicitud>[] = [
   {
+    accessorKey: "period",
+    header: "Periodo",
+    id: "period",
+    cell: ({ row }) =>
+      `${row.original.period.year} - ${row.original.period.term}`,
+  },
+  {
     accessorKey: "student.name",
     header: "Nombre Estudiante",
     id: "student.name",
