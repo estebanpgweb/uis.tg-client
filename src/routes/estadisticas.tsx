@@ -30,6 +30,16 @@ import {
   dayType,
 } from "@/types/solicitudesTypes";
 import Loader from "@/components/loader";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 const daysAndShifts = [
   { day: "WEDNESDAY", label: "Miércoles" },
@@ -37,9 +47,57 @@ const daysAndShifts = [
   { day: "FRIDAY", label: "Viernes" },
 ];
 
+const franjasTotales: { day: dayType; time: "AM" | "PM"; label: string }[] = [
+  { day: "MONDAY", time: "AM", label: "Extemporánea" },
+  { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
+  { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
+  { day: "THURSDAY", time: "AM", label: "Jue AM" },
+  { day: "THURSDAY", time: "PM", label: "Jue PM" },
+  { day: "FRIDAY", time: "AM", label: "Vie AM" },
+  { day: "FRIDAY", time: "PM", label: "Vie PM" },
+];
+
+const horasTotales = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "22",
+  "23",
+];
+
+interface Period {
+  year: number;
+  term: number;
+}
+const periodOptions: Period[] = [
+  { year: 2025, term: 1 },
+  { year: 2025, term: 2 },
+];
+
 export default function EstadisticasRoute() {
   const [isLoading, setIsLoading] = useState(true);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [selectedPeriods, setSelectedPeriods] = useState<Period[]>([
+    { year: 2025, term: 2 },
+  ]);
   const [solicitudesAtendidas, setSolicitudesAtendidas] = useState<Solicitud[]>(
     []
   );
@@ -74,51 +132,13 @@ export default function EstadisticasRoute() {
   const axios: AxiosInstance = useAxios();
   const { toast } = useToast();
 
-  const franjasTotales: { day: dayType; time: "AM" | "PM"; label: string }[] = [
-    { day: "MONDAY", time: "AM", label: "Extemporánea" },
-    { day: "WEDNESDAY", time: "AM", label: "Mie AM" },
-    { day: "WEDNESDAY", time: "PM", label: "Mie PM" },
-    { day: "THURSDAY", time: "AM", label: "Jue AM" },
-    { day: "THURSDAY", time: "PM", label: "Jue PM" },
-    { day: "FRIDAY", time: "AM", label: "Vie AM" },
-    { day: "FRIDAY", time: "PM", label: "Vie PM" },
-  ];
-
-  const horasTotales = [
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-    "19",
-    "20",
-    "22",
-    "23",
-  ];
-
   useEffect(() => {
     const fetchSolicitudes = async () => {
       try {
         setIsLoading(true);
 
         const params = new URLSearchParams({
-          filter: JSON.stringify(
-            buildFilterQuery("", [], [], [{ year: 2025, term: 2 }])
-          ),
+          filter: JSON.stringify(buildFilterQuery("", [], [], selectedPeriods)),
         });
         const { data } = await axios.get(`/api/appeal`, { params });
         setSolicitudes(data);
@@ -141,7 +161,7 @@ export default function EstadisticasRoute() {
     };
 
     fetchSolicitudes();
-  }, [axios, toast]);
+  }, [axios, toast, selectedPeriods]);
 
   useEffect(() => {
     setSolicitudesAtendidas(
@@ -455,12 +475,92 @@ export default function EstadisticasRoute() {
     setHoraCreacionSolicitud(conteoPorHoras);
   }, [solicitudes, franjasTotales]);
 
+  const handlePeriodChange = (period: Period) => {
+    if (selectedPeriods && !selectedPeriods.includes(period)) {
+      setSelectedPeriods?.([...selectedPeriods, period]);
+    }
+  };
+
+  const removePeriod = (periodToRemove: Period) => {
+    setSelectedPeriods?.(
+      selectedPeriods?.filter((period) => period !== periodToRemove) || []
+    );
+  };
+
   return (
     <div className="container mx-auto">
       <Loader isLoading={isLoading} />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Estadísticas de solicitudes</h1>
       </div>
+      <div className="flex flex-col md:flex-row items-center gap-4 my-4">
+        {selectedPeriods && (
+          <Select
+            onValueChange={(value) => {
+              const [year, term] = value.split("-");
+              handlePeriodChange({
+                year: parseInt(year),
+                term: parseInt(term),
+              });
+            }}
+            value={
+              selectedPeriods.length > 0
+                ? `${selectedPeriods[0].year}-${selectedPeriods[0].term}`
+                : ""
+            }
+            name="periodo"
+          >
+            <SelectTrigger className="w-full md:w-2/6">
+              <SelectValue placeholder="Seleccionar Periodos" />
+            </SelectTrigger>
+            <SelectContent>
+              {periodOptions.map((period) => (
+                <SelectItem
+                  key={`${period.year}-${period.term}`}
+                  value={`${period.year}-${period.term}`}
+                  disabled={selectedPeriods.some(
+                    (p) => p.year === period.year && p.term === period.term
+                  )}
+                >
+                  {`${period.year} - ${period.term}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        {selectedPeriods && selectedPeriods.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selectedPeriods.map((period) => (
+              <Badge
+                key={`${period.year}-${period.term}`}
+                variant="secondary"
+                className="px-2 py-1 text-xs md:px-3 md:py-1"
+              >
+                {`${period.year} - ${period.term}`}
+                <button
+                  onClick={() => removePeriod(period)}
+                  className="ml-1 md:ml-2 hover:text-red-500"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedPeriods?.([]);
+              }}
+              className="h-6 md:h-7 text-xs md:text-sm"
+            >
+              Limpiar periodos
+            </Button>
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col gap-y-6">
         <div className="flex flex-col md:flex-row justify-between gap-y-2 gap-x-6 pt-2 md:pt-6">
           <Card className="flex flex-col gap-y-2 flex-1 px-3 py-2 md:px-6 md:py-4">
