@@ -23,6 +23,11 @@ import { buildFilterQuery } from "@/utils/filterQuery";
 import { Plus } from "lucide-react";
 import Loader from "@/components/loader";
 
+interface Period {
+  year: number;
+  term: number;
+}
+
 const SolicitudRoute = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [lastReviewSolicitud, setLastReviewSolicitud] =
@@ -36,6 +41,7 @@ const SolicitudRoute = () => {
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedPeriods, setSelectedPeriods] = useState<Period[]>([]);
   const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
     sortBy: "",
@@ -57,8 +63,9 @@ const SolicitudRoute = () => {
 
   useEffect(() => {
     if (!kind) return;
-    if (kind === "ADMIN") {
+    if (kind === "ADMIN" || kind === "STUDENT") {
       setSorting({ sortBy: "status", sort: "desc" });
+      setSelectedPeriods([{ year: 2025, term: 2 }]);
     } else {
       setSorting({ sortBy: "createdAt", sort: "desc" });
     }
@@ -68,14 +75,15 @@ const SolicitudRoute = () => {
     page: number,
     filter: string,
     statuses: string[],
-    sorting: SortingState
+    sorting: SortingState,
+    periods: Period[]
   ) => {
     try {
       setRefresh(false);
       setIsLoading(true);
       const params = new URLSearchParams({
         filter: JSON.stringify(
-          buildFilterQuery(filter, paramsFilter, statuses)
+          buildFilterQuery(filter, paramsFilter, statuses, periods)
         ),
         limit: pageLimit.toString(),
         skip: (page * pageLimit).toString(),
@@ -113,13 +121,19 @@ const SolicitudRoute = () => {
 
     const fetchData = async () => {
       // Si hay un filtro o estados seleccionados, siempre consultar la API
-      if (filter !== "" || selectedStatuses.length > 0 || sorting.sortBy) {
+      if (
+        filter !== "" ||
+        selectedStatuses.length > 0 ||
+        sorting.sortBy ||
+        selectedPeriods.length > 0
+      ) {
         await auth?.me();
         const data = await fetchSolicitudes(
           page,
           filter,
           selectedStatuses,
-          sorting
+          sorting,
+          selectedPeriods
         );
         setSolicitudes(data);
         return;
@@ -133,7 +147,7 @@ const SolicitudRoute = () => {
 
       // Consultar la API si no hay filtros ni caché
       await auth?.me();
-      const data = await fetchSolicitudes(page, "", [], sorting);
+      const data = await fetchSolicitudes(page, "", [], sorting, []);
       setCachedSolicitudes((prev) => ({ ...prev, [page]: data }));
       setSolicitudes(data);
       setLastReviewSolicitud(
@@ -145,7 +159,7 @@ const SolicitudRoute = () => {
     };
 
     fetchData();
-  }, [page, filter, selectedStatuses, sorting, userId]);
+  }, [page, filter, selectedStatuses, selectedPeriods, sorting, userId]);
 
   useEffect(() => {
     if (!userId || !kind) return;
@@ -171,7 +185,8 @@ const SolicitudRoute = () => {
         const filterQuery = buildFilterQuery(
           filter,
           paramsFilter,
-          selectedStatuses
+          selectedStatuses,
+          selectedPeriods
         );
 
         const { data } =
@@ -190,7 +205,15 @@ const SolicitudRoute = () => {
     };
 
     getSolicitudesCount();
-  }, [axios, filter, selectedStatuses, kind, userId, paramsFilter]);
+  }, [
+    axios,
+    filter,
+    selectedStatuses,
+    selectedPeriods,
+    kind,
+    userId,
+    paramsFilter,
+  ]);
 
   useEffect(() => {
     if (!userId) return;
@@ -237,7 +260,8 @@ const SolicitudRoute = () => {
           page,
           filter,
           selectedStatuses,
-          sorting
+          sorting,
+          selectedPeriods
         );
         setSolicitudes(data);
       } catch (error) {
@@ -262,7 +286,8 @@ const SolicitudRoute = () => {
         const filterQuery = buildFilterQuery(
           filter,
           paramsFilter,
-          selectedStatuses
+          selectedStatuses,
+          selectedPeriods
         );
 
         const { data } =
@@ -365,6 +390,8 @@ const SolicitudRoute = () => {
         setFilter={setFilter}
         selectedStatuses={selectedStatuses}
         setSelectedStatuses={setSelectedStatuses}
+        selectedPeriods={selectedPeriods}
+        setSelectedPeriods={setSelectedPeriods}
         sorting={sorting}
         setSorting={setSorting}
         onRefresh={handleRefresh}

@@ -37,6 +37,12 @@ import { Badge } from "@/components/ui/badge";
 import { X, ArrowUp, ArrowDown, ArrowUpDown, RefreshCcw } from "lucide-react";
 import { getStatusLabel } from "@/types/solicitudesTypes";
 import { SortingState } from "@/types/tableTypes";
+import { useAuth } from "@/providers/AuthContext.tsx";
+
+interface Period {
+  year: number;
+  term: number;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,6 +54,8 @@ interface DataTableProps<TData, TValue> {
   setFilter: (filter: string) => void;
   selectedStatuses?: string[];
   setSelectedStatuses?: (statuses: string[]) => void;
+  selectedPeriods?: Period[];
+  setSelectedPeriods?: (period: Period[]) => void;
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
   onRefresh?: () => void;
@@ -63,17 +71,25 @@ export function DataTable<TData extends { status?: string }, TValue>({
   setFilter,
   selectedStatuses,
   setSelectedStatuses,
+  selectedPeriods,
+  setSelectedPeriods,
   sorting,
   setSorting,
   onRefresh,
 }: DataTableProps<TData, TValue>) {
   const [filterInput, setFilterInput] = useState<string>(filter || "");
+  const auth = useAuth();
+  const kind = auth?.user?.kind;
   const statusOptions = [
     "REJECTED",
     "PENDING",
     "PARTIAL_REJECTED",
     "APPROVED",
     "REVIEW",
+  ];
+  const periodOptions: Period[] = [
+    { year: 2025, term: 1 },
+    { year: 2025, term: 2 },
   ];
 
   const table = useReactTable({
@@ -95,6 +111,18 @@ export function DataTable<TData extends { status?: string }, TValue>({
   const removeStatus = (statusToRemove: string) => {
     setSelectedStatuses?.(
       selectedStatuses?.filter((status) => status !== statusToRemove) || []
+    );
+  };
+
+  const handlePeriodChange = (period: Period) => {
+    if (selectedPeriods && !selectedPeriods.includes(period)) {
+      setSelectedPeriods?.([...selectedPeriods, period]);
+    }
+  };
+
+  const removePeriod = (periodToRemove: Period) => {
+    setSelectedPeriods?.(
+      selectedPeriods?.filter((period) => period !== periodToRemove) || []
     );
   };
 
@@ -161,7 +189,7 @@ export function DataTable<TData extends { status?: string }, TValue>({
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-6 gap-4 md:gap-0">
+      <div className="flex flex-col md:flex-row items-center justify-between py-2 md:py-4 gap-4 md:gap-y-0 md:gap-x-4">
         <Input
           type="search"
           id="buscar"
@@ -194,6 +222,42 @@ export function DataTable<TData extends { status?: string }, TValue>({
             </SelectContent>
           </Select>
         )}
+        {/* Filtro de periodo academico */}
+        {selectedPeriods && kind === "ROOT" && (
+          <Select
+            onValueChange={(value) => {
+              const [year, term] = value.split("-");
+              handlePeriodChange({
+                year: parseInt(year),
+                term: parseInt(term),
+              });
+            }}
+            value={
+              selectedPeriods.length > 0
+                ? `${selectedPeriods[0].year}-${selectedPeriods[0].term}`
+                : ""
+            }
+            name="periodo"
+          >
+            <SelectTrigger className="w-full md:w-2/6">
+              <SelectValue placeholder="Seleccionar Periodos" />
+            </SelectTrigger>
+            <SelectContent>
+              {periodOptions.map((period) => (
+                <SelectItem
+                  key={`${period.year}-${period.term}`}
+                  value={`${period.year}-${period.term}`}
+                  disabled={selectedPeriods.some(
+                    (p) => p.year === period.year && p.term === period.term
+                  )}
+                >
+                  {`${period.year} - ${period.term}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
         <div className="flex flex-col md:flex-row gap-x-2 gap-y-2 items-center ">
           <p className="opacity-50 text-sm">
             Mostrando {data.length} de {rows} resultados
@@ -206,36 +270,69 @@ export function DataTable<TData extends { status?: string }, TValue>({
         </div>
       </div>
 
-      {selectedStatuses && selectedStatuses.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {selectedStatuses.map((status) => (
-            <Badge
-              key={status}
-              variant="secondary"
-              className="px-2 py-1 text-xs md:px-3 md:py-1"
-            >
-              {getStatusLabel(status)}
-              <button
-                onClick={() => removeStatus(status)}
-                className="ml-1 md:ml-2 hover:text-red-500"
+      <div className="flex items-center justify-between mb-4">
+        {selectedStatuses && selectedStatuses.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selectedStatuses.map((status) => (
+              <Badge
+                key={status}
+                variant="secondary"
+                className="px-2 py-1 text-xs md:px-3 md:py-1"
               >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedStatuses?.([]);
-              setPage(0);
-            }}
-            className="h-6 md:h-7 text-xs md:text-sm"
-          >
-            Limpiar filtros
-          </Button>
-        </div>
-      )}
+                {getStatusLabel(status)}
+                <button
+                  onClick={() => removeStatus(status)}
+                  className="ml-1 md:ml-2 hover:text-red-500"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedStatuses?.([]);
+                setPage(0);
+              }}
+              className="h-6 md:h-7 text-xs md:text-sm"
+            >
+              Limpiar filtros
+            </Button>
+          </div>
+        )}
+
+        {selectedPeriods && selectedPeriods.length > 0 && kind === "ROOT" && (
+          <div className="flex flex-wrap gap-2">
+            {selectedPeriods.map((period) => (
+              <Badge
+                key={`${period.year}-${period.term}`}
+                variant="secondary"
+                className="px-2 py-1 text-xs md:px-3 md:py-1"
+              >
+                {`${period.year} - ${period.term}`}
+                <button
+                  onClick={() => removePeriod(period)}
+                  className="ml-1 md:ml-2 hover:text-red-500"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedPeriods?.([]);
+                setPage(0);
+              }}
+              className="h-6 md:h-7 text-xs md:text-sm"
+            >
+              Limpiar periodos
+            </Button>
+          </div>
+        )}
+      </div>
 
       <div className="overflow-x-auto">
         <Table className="min-w-full">

@@ -3,6 +3,7 @@ import { useAxios } from "../providers/AxiosContext";
 import { AxiosInstance } from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
+import { buildFilterQuery } from "@/utils/filterQuery";
 import {
   Pie,
   PieChart,
@@ -114,7 +115,12 @@ export default function EstadisticasRoute() {
       try {
         setIsLoading(true);
 
-        const { data } = await axios.get(`/api/appeal`);
+        const params = new URLSearchParams({
+          filter: JSON.stringify(
+            buildFilterQuery("", [], [], [{ year: 2025, term: 2 }])
+          ),
+        });
+        const { data } = await axios.get(`/api/appeal`, { params });
         setSolicitudes(data);
       } catch (error) {
         const errorMessage =
@@ -363,7 +369,7 @@ export default function EstadisticasRoute() {
     );
 
     setTiempoRespuestaFranja(conteoPorFranjasTotales);
-    
+
     // calculamos el total de solicitudes por franja según updatedAt
     const conteoPorFranjas: solicitudesChart[] = franjasTotales.map(
       (franja, index) => {

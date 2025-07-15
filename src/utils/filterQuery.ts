@@ -1,7 +1,8 @@
 export const buildFilterQuery = (
   search: string,
   params: string[],
-  statuses?: string[]
+  statuses?: string[],
+  periods?: { year: number; term: number }[]
 ) => {
   const conditions = [];
 
@@ -20,6 +21,18 @@ export const buildFilterQuery = (
   if (statuses && statuses.length > 0) {
     conditions.push({
       status: { $in: statuses },
+    });
+  }
+
+  // Añadir condiciones de periodo si hay periodos seleccionados
+  if (periods && periods.length > 0) {
+    const periodConditions = periods.map((period) => ({
+      year: period.year,
+      term: period.term,
+    }));
+
+    conditions.push({
+      period: { $in: periodConditions },
     });
   }
 

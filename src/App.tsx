@@ -68,7 +68,7 @@ function App() {
         setIsLoading(true);
         const params = new URLSearchParams({
           filter: JSON.stringify(
-            buildFilterQuery("", [], ["PENDING", "REVIEW"])
+            buildFilterQuery("", [], ["PENDING", "REVIEW"], [])
           ),
         }).toString();
         const { data } = await axios.get(`/api/appeal?${params}`, {
