@@ -243,6 +243,15 @@ const LoginRoute = () => {
             ¿No tiene una cuenta? Registrese aquí
           </Link>
         </div>
+        <p className="text-xs text-muted-foreground px-2">
+          ¿Tienes problemas? Escríbenos a{" "}
+          <a
+            href="mailto:dilancorr@gmail.com"
+            className="text-blue-500 underline break-all"
+          >
+            dilancorr@gmail.com
+          </a>
+        </p>
       </Card>
     </div>
   );

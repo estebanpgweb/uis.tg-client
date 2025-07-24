@@ -46,9 +46,18 @@ export interface Solicitud {
   }[];
   createdAt?: string;
   updatedAt?: string;
+  period: {
+    year: number;
+    term: number;
+  };
 }
 
-export type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
+export type dayType =
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY";
 
 export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 

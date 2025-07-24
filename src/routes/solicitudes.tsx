@@ -41,7 +41,9 @@ const SolicitudRoute = () => {
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [selectedPeriods, setSelectedPeriods] = useState<Period[]>([]);
+  const [selectedPeriods, setSelectedPeriods] = useState<Period[]>([
+    { year: 2025, term: 2 },
+  ]);
   const [refresh, setRefresh] = useState(false);
   const [sorting, setSorting] = useState<SortingState>({
     sortBy: "",

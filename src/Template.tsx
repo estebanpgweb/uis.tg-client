@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button.tsx";
-import { Menu, X, User, LogOut, CircleHelp } from "lucide-react";
+import { Menu, X, User, LogOut, CircleHelp, Youtube } from "lucide-react";
 import UIS from "./assets/UIS.avif";
 
 const Template = ({ children }: PropsWithChildren) => {
@@ -64,16 +64,38 @@ const Template = ({ children }: PropsWithChildren) => {
           <img src={UIS} alt="logo uis" className=" w-1/4 md:w-1/12" />
 
           {/* Mobile Menu Button */}
-          <div className="flex gap-x-6 md:hidden ml-auto">
+          <div className="flex gap-x-6 items-center md:hidden ml-auto">
             {kind === "STUDENT" && (
-              <Link
-                className={`${buttonVariants({ variant: "link" })} !text-lg`}
-                to="https://youtu.be/A2i_13bcRB0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <CircleHelp className="hover:cursor-pointer" size={24} />
-              </Link>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <CircleHelp size={24} className="hover:cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent className="w-60 flex flex-col items-center text-center gap-y-4">
+                  <p className="text-sm font-medium">
+                    ¿Necesitas ayuda para usar el sistema?
+                  </p>
+                  <Link
+                    className={`${buttonVariants({
+                      variant: "link",
+                    })}`}
+                    to="https://youtu.be/A2i_13bcRB0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Youtube size={24} />
+                    <span className="text-sm">Ver video explicativo</span>
+                  </Link>
+                  <p className="text-xs text-muted-foreground px-2">
+                    ¿Tienes problemas? Escríbenos a{" "}
+                    <a
+                      href="mailto:dilancorr@gmail.com"
+                      className="text-blue-500 underline break-all"
+                    >
+                      dilancorr@gmail.com
+                    </a>
+                  </p>
+                </PopoverContent>
+              </Popover>
             )}
             <Button
               variant="secondary"
@@ -102,14 +124,36 @@ const Template = ({ children }: PropsWithChildren) => {
               ))}
             {kind === "STUDENT" && (
               <li>
-                <Link
-                  className={`${buttonVariants({ variant: "link" })} !text-lg`}
-                  to="https://youtu.be/A2i_13bcRB0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <CircleHelp className="hover:cursor-pointer" size={24} />
-                </Link>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <CircleHelp size={24} className="hover:cursor-pointer" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-60 flex flex-col items-center text-center gap-y-4">
+                    <p className="text-sm font-medium">
+                      ¿Necesitas ayuda para usar el sistema?
+                    </p>
+                    <Link
+                      className={`${buttonVariants({
+                        variant: "link",
+                      })}`}
+                      to="https://youtu.be/A2i_13bcRB0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Youtube size={24} />
+                      <span className="text-sm">Ver video explicativo</span>
+                    </Link>
+                    <p className="text-xs text-muted-foreground px-2">
+                      ¿Tienes problemas? Escríbenos a{" "}
+                      <a
+                        href="mailto:dilancorr@gmail.com"
+                        className="text-blue-500 underline break-all"
+                      >
+                        dilancorr@gmail.com
+                      </a>
+                    </p>
+                  </PopoverContent>
+                </Popover>
               </li>
             )}
             <li>
@@ -138,18 +182,38 @@ const Template = ({ children }: PropsWithChildren) => {
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-center p-4 border-b">
               <img src={UIS} alt="logo uis" className="w-1/4" />
-              <div className="flex gap-x-6">
+              <div className="flex gap-x-6 items-center">
                 {kind === "STUDENT" && (
-                  <Link
-                    className={`${buttonVariants({
-                      variant: "link",
-                    })} !text-lg`}
-                    to="https://youtu.be/A2i_13bcRB0"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <CircleHelp className="hover:cursor-pointer" size={24} />
-                  </Link>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <CircleHelp size={24} className="hover:cursor-pointer" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-60 flex flex-col items-center text-center gap-y-4">
+                      <p className="text-sm font-medium">
+                        ¿Necesitas ayuda para usar el sistema?
+                      </p>
+                      <Link
+                        className={`${buttonVariants({
+                          variant: "link",
+                        })}`}
+                        to="https://youtu.be/A2i_13bcRB0"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Youtube size={24} />
+                        <span className="text-sm">Ver video explicativo</span>
+                      </Link>
+                      <p className="text-xs text-muted-foreground px-2">
+                        ¿Tienes problemas? Escríbenos a{" "}
+                        <a
+                          href="mailto:dilancorr@gmail.com"
+                          className="text-blue-500 underline break-all"
+                        >
+                          dilancorr@gmail.com
+                        </a>
+                      </p>
+                    </PopoverContent>
+                  </Popover>
                 )}
                 <Button
                   variant="ghost"

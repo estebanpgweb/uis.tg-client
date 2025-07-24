@@ -301,6 +301,15 @@ const RegisterRoute = () => {
         >
           ¿Ya tienes una cuenta? Ingresa aquí
         </Link>
+        <p className="text-xs text-muted-foreground px-2">
+          ¿Tienes problemas? Escríbenos a{" "}
+          <a
+            href="mailto:dilancorr@gmail.com"
+            className="text-blue-500 underline break-all"
+          >
+            dilancorr@gmail.com
+          </a>
+        </p>
       </Card>
     </div>
   );

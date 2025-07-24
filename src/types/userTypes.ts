@@ -15,6 +15,11 @@ export interface UserType {
   createdAt?: string;
   password?: string;
   status?: string;
+  program?: {
+    id: number;
+    name: number;
+    new_pensum?: boolean;
+  };
 }
 
 type dayType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
