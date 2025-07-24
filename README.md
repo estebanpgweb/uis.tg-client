@@ -48,3 +48,7 @@ export default tseslint.config({
   },
 })
 ```
+
+docker build -t ardilan13/saam:frontend .
+
+docker push ardilan13/saam:frontend

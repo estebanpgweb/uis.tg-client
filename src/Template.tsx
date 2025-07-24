@@ -88,10 +88,10 @@ const Template = ({ children }: PropsWithChildren) => {
                   <p className="text-xs text-muted-foreground px-2">
                     ¿Tienes problemas? Escríbenos a{" "}
                     <a
-                      href="mailto:dilancorr@gmail.com"
+                      href="mailto:eisi.laboratorios@uis.edu.co"
                       className="text-blue-500 underline break-all"
                     >
-                      dilancorr@gmail.com
+                      eisi.laboratorios@uis.edu.co
                     </a>
                   </p>
                 </PopoverContent>
@@ -146,10 +146,10 @@ const Template = ({ children }: PropsWithChildren) => {
                     <p className="text-xs text-muted-foreground px-2">
                       ¿Tienes problemas? Escríbenos a{" "}
                       <a
-                        href="mailto:dilancorr@gmail.com"
+                        href="mailto:eisi.laboratorios@uis.edu.co"
                         className="text-blue-500 underline break-all"
                       >
-                        dilancorr@gmail.com
+                        eisi.laboratorios@uis.edu.co
                       </a>
                     </p>
                   </PopoverContent>
@@ -206,10 +206,10 @@ const Template = ({ children }: PropsWithChildren) => {
                       <p className="text-xs text-muted-foreground px-2">
                         ¿Tienes problemas? Escríbenos a{" "}
                         <a
-                          href="mailto:dilancorr@gmail.com"
+                          href="mailto:eisi.laboratorios@uis.edu.co"
                           className="text-blue-500 underline break-all"
                         >
-                          dilancorr@gmail.com
+                          eisi.laboratorios@uis.edu.co
                         </a>
                       </p>
                     </PopoverContent>
