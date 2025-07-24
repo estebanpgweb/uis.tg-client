@@ -10,6 +10,48 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Eye, EyeOff, Mail } from "lucide-react";
 import Loader from "@/components/loader";
 import { UserType } from "../types/userTypes.ts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.tsx";
+
+const programOptions = [
+  {
+    id: 11,
+    name: "Ingeniería de Sistemas",
+  },
+  {
+    id: 14,
+    name: "Química",
+  },
+  {
+    id: 27,
+    name: "Diseño Industrial",
+  },
+  {
+    id: 69,
+    name: "Ingeniería Biomédica",
+  },
+  {
+    id: 50,
+    name: "Ingeniería en Ciencia de Datos",
+  },
+  {
+    id: 58,
+    name: "Microbiología",
+  },
+  {
+    id: 21,
+    name: "Ingeniería Civil",
+  },
+  {
+    id: 32,
+    name: "Ingeniería de Petróleos",
+  },
+];
 
 const RegisterRoute = () => {
   const [name, setName] = useState<string>("");
@@ -23,6 +65,7 @@ const RegisterRoute = () => {
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
   const [validEmail, setValidEmail] = useState<UserType | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<string>("");
 
   const { toast } = useToast();
   const auth = useAuth();
@@ -37,6 +80,7 @@ const RegisterRoute = () => {
       setName(emailValidate.name || "");
       setLastname(emailValidate.lastname || "");
       setIdentification(emailValidate.identification || "");
+      setSelectedProgram(emailValidate.program?.id.toString() || "");
       toast({
         title: "Correo registrado",
         description: "Continúa con el registro y verifica tu correo.",
@@ -54,6 +98,7 @@ const RegisterRoute = () => {
       setName("");
       setLastname("");
       setIdentification("");
+      setSelectedProgram("");
       return;
     }
   };
@@ -64,7 +109,7 @@ const RegisterRoute = () => {
       if (email.trim()) {
         validateUsername(email);
       }
-    }, 500); // Espera .5 segundo después de que termine de escribir
+    }, 1500); // Espera 1.5 segundos después de que termine de escribir
 
     return () => clearTimeout(timeoutId);
   }, [email]);
@@ -180,6 +225,29 @@ const RegisterRoute = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="font-normal" htmlFor="program">
+              Programa académico
+            </Label>
+            <Select
+              required
+              onValueChange={(e) => setSelectedProgram(e)}
+              value={selectedProgram}
+              name="program"
+              disabled={!!validEmail}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar Programa" />
+              </SelectTrigger>
+              <SelectContent>
+                {programOptions.map((program) => (
+                  <SelectItem key={program.id} value={program.id.toString()}>
+                    {program.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col w-full md:flex-row gap-4">
             <div className="flex w-full flex-col gap-2">
