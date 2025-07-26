@@ -39,6 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     permissions: [],
     kind: "",
     verified: false,
+    program: {
+      id: 11,
+      name: "INGENIERÍA DE SISTEMAS",
+    }
   };
 
   const [loggedIn, setLoggedIn] = useState<boolean>(() => {

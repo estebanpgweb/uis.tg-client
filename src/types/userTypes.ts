@@ -17,7 +17,7 @@ export interface UserType {
   status?: string;
   program?: {
     id: number;
-    name: number;
+    name: string;
     new_pensum?: boolean;
   };
 }

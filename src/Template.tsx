@@ -18,6 +18,7 @@ const Template = ({ children }: PropsWithChildren) => {
   const auth = useAuth();
   const location = useLocation();
   const kind = auth?.user?.kind || "";
+  const programName = auth?.user?.program?.name || "";
 
   const handleLogOut = () => {
     auth?.logout();
@@ -165,6 +166,7 @@ const Template = ({ children }: PropsWithChildren) => {
                   <p className="text-center text-xl mb-2">
                     Hola, {auth?.user?.name} {auth?.user?.lastname}
                   </p>
+                  <p className="text-center text-sm font-extralight mb-2">{programName}</p>
                   <Button variant="destructive" onClick={handleLogOut}>
                     <LogOut />
                     Cerrar sesión
@@ -249,6 +251,7 @@ const Template = ({ children }: PropsWithChildren) => {
               <p className="text-center text-xl mb-2">
                 Hola, {auth?.user?.name} {auth?.user?.lastname}
               </p>
+              <p className="text-center text-sm font-extralight mb-2">{programName}</p>
               <Button
                 variant="destructive"
                 className="w-full"
